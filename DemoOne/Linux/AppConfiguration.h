@@ -7,6 +7,9 @@
 
 
 
+#include "Platform.h"
+#include "GPIO.h"
+#include "Debug.h"
 #include "LEDController.h"
 #include "DemoOne.h"
 #include "Delegate.h"
