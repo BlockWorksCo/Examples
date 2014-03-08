@@ -6,7 +6,9 @@
 #define __APPCONFIGURATION_H__
 
 
+#include "Platform.h"
 #include "LEDController.h"
+#include "GPIO.h"
 #include "DemoOne.h"
 #include "Delegate.h"
 
