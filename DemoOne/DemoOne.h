@@ -3,7 +3,8 @@
 #define __DEMOONE_H__
 
 
-#include "Blox.h"
+#include "Platform.h"
+#include "Debug.h"
 
 
 //
