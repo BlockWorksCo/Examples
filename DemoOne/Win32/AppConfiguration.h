@@ -8,8 +8,8 @@
 
 
 #include "Platform.h"
-#include "Win32GPIO.h"
-#include "Win32Debug.h"
+#include "GPIO.h"
+#include "Debug.h"
 #include "LEDController.h"
 #include "DemoOne.h"
 #include "Delegate.h"
