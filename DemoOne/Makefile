@@ -19,7 +19,9 @@ INCLUDES+=-I$(BLOCKWORKS_PLATFORM)
 
 OBJS=\
 AppMain.o \
-PlatformMain.o 
+PlatformMain.o \
+SPI.o \
+wiring_digital.o
 
 
 include $(BLOCKWORKS_PLATFORM)/Makefile

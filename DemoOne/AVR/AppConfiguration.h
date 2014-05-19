@@ -12,6 +12,7 @@
 #include "Delegate.h"
 #include "GPIO.h"
 
+#include "SPI.h"
 
 
 
