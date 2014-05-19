@@ -19,6 +19,8 @@ INCLUDES+=-I$(BLOCKWORKS_PLATFORM)
 
 OBJS=\
 AppMain.o \
+SPITest.o \
+wiring.o \
 PlatformMain.o
 
 
