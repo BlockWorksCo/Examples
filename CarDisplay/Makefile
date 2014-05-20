@@ -23,6 +23,7 @@ SPITest.o \
 wiring.o \
 wiring_shift.o \
 MaxMatrix.o \
+Util.o \
 PlatformMain.o
 
 
