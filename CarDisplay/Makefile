@@ -21,6 +21,8 @@ OBJS=\
 AppMain.o \
 SPITest.o \
 wiring.o \
+wiring_shift.o \
+MaxMatrix.o \
 PlatformMain.o
 
 
