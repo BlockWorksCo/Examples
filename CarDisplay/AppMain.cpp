@@ -249,10 +249,16 @@ void drawFrame(uint8_t* frameBuffer)
 {
     maxAll(max7219_reg_shutdown, 0x01);    // not in shutdown mode
 
-    for(int j=0; j<8; j++)
+
+    for(int k=0; k<maxInUse; k++)
     {
-        maxAll( (MAX7219Register)(j+1), frameBuffer[j]);
+        for(int j=0; j<8; j++)
+        {
+            maxOne(k, (MAX7219Register)(j+1), frameBuffer[j+(k*8)]);
+        }
+
     }
+
 }
 
 
