@@ -274,6 +274,16 @@ void setup ()
 }  
 
 
+
+void BitBlt(uint8_t* frameBuffer, uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t* data)
+{
+    for(int i=0; i<width; i++)
+    {
+
+    }
+}
+
+
 //
 //
 //
@@ -281,7 +291,8 @@ void loop()
 {
     static  int         i           = 0;
     static  uint8_t     frameBuffer[8*NUMBER_OF_8x8_MATRICES];
-    static  uint32_t    frameCount  = 0;
+    static  int8_t      frameCount  = 0;
+    static  int         dir         = 1;
     
     //
     // Draw the frame to the display.
@@ -292,9 +303,15 @@ void loop()
     // Modify the frame for next time.
     //
 #if 1
-    frameCount++;
-    if(frameCount >= (NUMBER_OF_8x8_MATRICES*8))
+    frameCount  += dir;
+    if(frameCount >= 31)
     {
+        dir         = -1;
+        frameCount  = 31;
+    }
+    else if(frameCount<0)
+    {
+        dir         = 1;
         frameCount  = 0;
     }
     memset(&frameBuffer[0], 0x00, sizeof(frameBuffer));
