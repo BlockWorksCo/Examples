@@ -9,7 +9,7 @@ const int   load        = 3;
 const int   clock       = 4;
 const int   power       = 5;
 
-const int   maxInUse    = 5;    //change this variable to set how many MAX7219's you'll use
+
 
 #define CYCLE_DELAY     delay(0)
 
@@ -177,69 +177,24 @@ void shiftOutByte (uint8_t  data)
 
 
 
-//
-// maxSingle is the "easy"  function to use for a     //single max7219
-//
-void maxSingle( MAX7219Register  reg, uint8_t  col) 
-{    
-    digitalWrite(load, LOW);      // begin     
-    shiftOutByte (reg);           // specify register
-    shiftOutByte (col);         //((data & 0x01) * 256) + data >> 1); // put data   
-    digitalWrite(load, LOW);      // and load da shit
-    digitalWrite(load,HIGH); 
-}
 
 
-
-
-//
-// initialize  all  MAX7219's in the system
-//
-void maxAll (MAX7219Register  reg, uint8_t  col) 
-{    
-    int     c = 0;
-
-    digitalWrite(load, LOW);
-
-    for ( c =1; c<= maxInUse; c++) 
+void setAll(MAX7219Register reg, uint8_t value)
+{
+    /*
+    //
+    */
+    digitalWrite(load, LOW);    
+    for(int k=0; k<4; k++)
     {
-        shiftOutByte (reg);  // specify register
-        shiftOutByte (col);//((data & 0x01) * 256) + data >> 1); // put data
+        shiftOutByte( reg );
+        shiftOutByte( value );
     }
-
-    digitalWrite(load, LOW);
-    digitalWrite(load,HIGH);
-}
-
-
-//
-// maxOne is for adressing different MAX7219's, 
-// while having a couple of them cascaded
-//
-void maxOne(uint8_t  maxNr, uint8_t  reg, uint8_t  col) 
-{    
-    int c = 0;
-    digitalWrite(load, LOW);  // begin     
-
-    for ( c = maxInUse; c > maxNr; c--) 
-    {
-        shiftOutByte (0);    // means no operation
-        shiftOutByte (0);    // means no operation
-    }
-
-    shiftOutByte (reg);  // specify register
-    shiftOutByte (col);//((data & 0x01) * 256) + data >> 1); // put data 
-
-    for ( c =maxNr-1; c >= 1; c--) 
-    {
-        shiftOutByte (0);    // means no operation
-        shiftOutByte (0);    // means no operation
-    }
-
     digitalWrite(load, LOW); // and load da shit
+    CYCLE_DELAY;
     digitalWrite(load,HIGH); 
+    CYCLE_DELAY;
 }
-
 
 
 //
@@ -247,18 +202,29 @@ void maxOne(uint8_t  maxNr, uint8_t  reg, uint8_t  col)
 //
 void drawFrame(uint8_t* frameBuffer)
 {
-    maxAll(max7219_reg_shutdown, 0x01);    // not in shutdown mode
+    setAll(max7219_reg_displayTest, 0);
+    setAll(max7219_reg_shutdown,    1);
+    setAll(max7219_reg_scanLimit,   7);
+    setAll(max7219_reg_intensity,   0x1);
+    setAll(max7219_reg_decodeMode,  0);
 
-
-    for(int k=0; k<maxInUse; k++)
+    /*
+    //
+    */
+    for(int j=0; j<8; j++)
     {
-        for(int j=0; j<8; j++)
+        digitalWrite(load, LOW);    
+
+        for(int k=3; k>=0; k--)
         {
-            maxOne(k, (MAX7219Register)(j+1), frameBuffer[j+(k*8)]);
+            shiftOutByte( (MAX7219Register)(max7219_reg_digit0+j) );
+            shiftOutByte( frameBuffer[(k*8)+j] );
         }
 
+        digitalWrite(load, LOW);
+        CYCLE_DELAY;
+        digitalWrite(load,HIGH); 
     }
-
 }
 
 
@@ -291,19 +257,19 @@ void setup ()
     //
     // initialisation of the max 7219
     //
-    maxAll(max7219_reg_scanLimit,   0x07);      
-    maxAll(max7219_reg_decodeMode,  0x00);          // using an led matrix (not digits)
-    maxAll(max7219_reg_shutdown,    0x01);          // not in shutdown mode
-    maxAll(max7219_reg_displayTest, 0x00);          // no display test
-    maxAll(max7219_reg_intensity,   0x04 & 0x0f);   // the first 0x0f is the value you can set
-
-    //
-    // empty registers, turn all LEDs off 
-    //
-    for (int e=1; e<=8; e++) 
-    {    
-        maxAll( (MAX7219Register)e,0);
-    }
+    setAll(max7219_reg_displayTest, 0);
+    setAll(max7219_reg_shutdown,    1);
+    setAll(max7219_reg_scanLimit,   7);
+    setAll(max7219_reg_intensity,   0x2);
+    setAll(max7219_reg_decodeMode,  0);
+    setAll(max7219_reg_digit0,      0xaa);
+    setAll(max7219_reg_digit1,      0xaa);
+    setAll(max7219_reg_digit2,      0xaa);
+    setAll(max7219_reg_digit3,      0xaa);
+    setAll(max7219_reg_digit4,      0xaa);
+    setAll(max7219_reg_digit5,      0xaa);
+    setAll(max7219_reg_digit6,      0xaa);
+    setAll(max7219_reg_digit7,      0xaa);
 }  
 
 
@@ -313,7 +279,7 @@ void setup ()
 void loop() 
 {
     static  int         i           = 0;
-    static  uint8_t     frameBuffer[8*maxInUse];
+    static  uint8_t     frameBuffer[8*4];
     static  uint32_t    frameCount  = 0;
     
     //
@@ -324,18 +290,27 @@ void loop()
     //
     // Modify the frame for next time.
     //
+#if 1
     frameCount++;
-    if(frameCount >= (maxInUse*8))
+    if(frameCount >= (4*8))
     {
         frameCount  = 0;
     }
     memset(&frameBuffer[0], 0x00, sizeof(frameBuffer));
     frameBuffer[frameCount] = 0xff;
+#else
+
+    for(int i=0; i<32; i++)
+    {
+        frameBuffer[i] = i;
+    }   
+
+#endif
 
     //
     // Wait for a frame period.
     //
-    delay(15);
+    delay(0);
 }
 
 
