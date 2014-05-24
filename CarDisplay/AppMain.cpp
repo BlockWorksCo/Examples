@@ -4,16 +4,15 @@
 #include "Platform.h"
 
 
-const int   dataIn  = 2;
-const int   load    = 3;
-const int   clock   = 4;
-const int   power   = 5;
+const int   dataIn      = 2;
+const int   load        = 3;
+const int   clock       = 4;
+const int   power       = 5;
 
-#define maxInUse  (5)    //change this variable to set how many MAX7219's you'll use
+const int   maxInUse    = 5;    //change this variable to set how many MAX7219's you'll use
 
-#define CYCLE_DELAY  delay(0)
+#define CYCLE_DELAY     delay(0)
 
-                     // define max7219 registers
 
 //
 //
@@ -351,9 +350,9 @@ void loop()
 //
 extern "C" void AppMain()
 {
-    init();
     setup();
-    while(1)
+
+    while(true)
     {
         loop();
     }
