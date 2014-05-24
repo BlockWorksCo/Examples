@@ -257,7 +257,7 @@ void loop ()
     }
     memset(&frameBuffer[0], 0x00, sizeof(frameBuffer));
     frameBuffer[frameCount] = 0xff;
-    delay(25);
+    delay(15);
 
 }
 
@@ -277,8 +277,7 @@ void loop ()
 // Note2: 'Run' methods are one-shot. The loop is implicit to allow for transition
 // between threaded and non-threaded mechanisms.
 //
-//extern "C" void AppMain()
-extern "C" int main()
+extern "C" void AppMain()
 {
 	init();
 	setup();
