@@ -9,9 +9,10 @@ const int   load        = 3;
 const int   clock       = 4;
 const int   power       = 5;
 
+#define NUMBER_OF_8x8_MATRICES  (4)
 
 
-#define CYCLE_DELAY     delay(0)
+#define CYCLE_DELAY     
 
 
 //
@@ -185,7 +186,7 @@ void setAll(MAX7219Register reg, uint8_t value)
     //
     */
     digitalWrite(load, LOW);    
-    for(int k=0; k<4; k++)
+    for(int k=0; k<NUMBER_OF_8x8_MATRICES; k++)
     {
         shiftOutByte( reg );
         shiftOutByte( value );
@@ -215,7 +216,7 @@ void drawFrame(uint8_t* frameBuffer)
     {
         digitalWrite(load, LOW);    
 
-        for(int k=3; k>=0; k--)
+        for(int k=(NUMBER_OF_8x8_MATRICES-1); k>=0; k--)
         {
             shiftOutByte( (MAX7219Register)(max7219_reg_digit0+j) );
             shiftOutByte( frameBuffer[(k*8)+j] );
@@ -279,7 +280,7 @@ void setup ()
 void loop() 
 {
     static  int         i           = 0;
-    static  uint8_t     frameBuffer[8*4];
+    static  uint8_t     frameBuffer[8*NUMBER_OF_8x8_MATRICES];
     static  uint32_t    frameCount  = 0;
     
     //
@@ -292,7 +293,7 @@ void loop()
     //
 #if 1
     frameCount++;
-    if(frameCount >= (4*8))
+    if(frameCount >= (NUMBER_OF_8x8_MATRICES*8))
     {
         frameCount  = 0;
     }
