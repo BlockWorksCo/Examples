@@ -287,7 +287,8 @@ void BitBlt(uint8_t* frameBuffer, uint8_t x, uint8_t y, uint8_t width, uint8_t h
             break;
         }
 
-        dest[i]     = data[i];
+        dest[i]     = dest[i] & (0xff<<y) | (data[i]<<y);
+        //dest[i]     = data[i];
     }
 }
 
@@ -301,7 +302,7 @@ void loop()
     static  uint8_t     frameBuffer[8*NUMBER_OF_8x8_MATRICES];
     static  int8_t      frameCount  = 0;
     static  int         dir         = 1;
-    static uint8_t     sprite  = 6;
+    static  uint8_t     sprite      = 0;
     
     //
     // Draw the frame to the display.
@@ -322,7 +323,7 @@ void loop()
     {
         dir         = 1;
         frameCount  = 0;
-        sprite++;
+        sprite      = (sprite+1)%(sizeof(CH)/7);
     }
     memset(&frameBuffer[0], 0x00, sizeof(frameBuffer));
 
@@ -330,7 +331,7 @@ void loop()
     uint8_t     width   = CH[(sprite*7)+0];
     uint8_t     height  = CH[(sprite*7)+1];
     uint8_t*    data    = (uint8_t*)&CH[(sprite*7)+2];
-    BitBlt(&frameBuffer[0], frameCount,0, width,height,  data);
+    BitBlt(&frameBuffer[0], frameCount,2, width,height,  data);
 
 #else
 
