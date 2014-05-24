@@ -1,4 +1,4 @@
-
+#if 0
 
 // inslude the SPI library:
 #include <SPI.h>
@@ -56,5 +56,8 @@ void loop()
 }
 
 
+
+
+#endif
 
 
