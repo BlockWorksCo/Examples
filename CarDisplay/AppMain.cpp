@@ -277,9 +277,16 @@ void setup ()
 
 void BitBlt(uint8_t* frameBuffer, uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t* data)
 {
+    uint8_t*    dest    = &frameBuffer[x];
+
     for(int i=0; i<width; i++)
     {
-
+        if(x+i >= 32)
+        {
+            break;
+        }
+        
+        dest[i]     = data[i];
     }
 }
 
@@ -315,7 +322,10 @@ void loop()
         frameCount  = 0;
     }
     memset(&frameBuffer[0], 0x00, sizeof(frameBuffer));
-    frameBuffer[frameCount] = 0xff;
+
+    //frameBuffer[frameCount] = 0xff;
+    BitBlt(&frameBuffer[0], frameCount,0,5,8,  (uint8_t*)&CH[(6*7)+2]);
+
 #else
 
     for(int i=0; i<32; i++)
