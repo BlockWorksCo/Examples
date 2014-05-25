@@ -275,20 +275,36 @@ void setup ()
 
 
 
-void BitBlt(uint8_t* frameBuffer, uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t* data)
+void BitBlt(uint8_t* frameBuffer, int8_t x, int8_t y, uint8_t width, uint8_t height, uint8_t* data)
 {
+
+    if(x+width > 32)
+    {
+        width = 32-x;
+    }
+
+    if(x<0)
+    {
+        width   += x;
+        x       = 0;
+    }
+
     uint8_t*    dest    = &frameBuffer[x];
 
-
-    for(int i=0; i<width; i++)
+    if(y>=0)
     {
-        if(x+i >= 32)
+        for(int i=0; i<width; i++)
         {
-            break;
-        }
-
-        dest[i]     = dest[i] & (0xff<<y) | (data[i]<<y);
-        //dest[i]     = data[i];
+            dest[i]     = dest[i] & (0xff<<y) | (data[i]<<y);
+        }        
+    }
+    else
+    {
+        for(int i=0; i<width; i++)
+        {
+            uint8_t     absY = -y;
+            dest[i]     = dest[i] & (0xff>>absY) | (data[i]>>absY);
+        }                
     }
 }
 
@@ -312,7 +328,6 @@ void loop()
     //
     // Modify the frame for next time.
     //
-#if 1
     frameCount  += dir;
     if(frameCount >= 31)
     {
@@ -331,16 +346,7 @@ void loop()
     uint8_t     width   = CH[(sprite*7)+0];
     uint8_t     height  = CH[(sprite*7)+1];
     uint8_t*    data    = (uint8_t*)&CH[(sprite*7)+2];
-    BitBlt(&frameBuffer[0], frameCount,2, width,height,  data);
-
-#else
-
-    for(int i=0; i<32; i++)
-    {
-        frameBuffer[i] = i;
-    }   
-
-#endif
+    BitBlt(&frameBuffer[0], frameCount,0, width,height,  data);
 
     //
     // Wait for a frame period.
