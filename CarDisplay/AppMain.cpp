@@ -348,8 +348,16 @@ void loop()
     static  uint8_t     frameBuffer[8*NUMBER_OF_8x8_MATRICES];
     static  int8_t      frameCount  = 0;
     static  int         dir         = 1;
-    static  uint8_t     sprite      = 0;
-    
+    static  uint8_t     sprite      = 16;
+    const int           minX        = -20;
+    const int           minY        = -8;
+    const int           maxX        = 20;
+    const int           maxY        = 8;
+    static int8_t       xPos        = 0;
+    static int8_t       yPos        = 0;
+    static int8_t       xDir        = 1;
+    static int8_t       yDir        = 1;
+
     //
     // Draw the frame to the display.
     //
@@ -358,24 +366,33 @@ void loop()
     //
     // Modify the frame for next time.
     //
-    frameCount  += dir;
-    if(frameCount >= 8)
+    xPos    += xDir;
+    yPos    += yDir;
+
+    if(xPos >= maxX)
     {
-        dir         = -1;
-        frameCount  = 8;
+        xDir    = -1;
     }
-    else if(frameCount<-8)
+    if(xPos < minX)
     {
-        dir         = 1;
-        frameCount  = -8;
-        sprite      = (sprite+1)%(sizeof(CH)/7);
+        xDir    = 1;
     }
+
+    if(yPos >= maxY)
+    {
+        yDir    = -1;
+    }
+    if(yPos < minY)
+    {
+        yDir    = 1;
+    }
+
     memset(&frameBuffer[0], 0x00, sizeof(frameBuffer));
 
-    drawSprite(&frameBuffer[0], sprite+0, 0,frameCount);
-    drawSprite(&frameBuffer[0], sprite+1, 8,frameCount);
-    drawSprite(&frameBuffer[0], sprite+2, 16,frameCount);
-    drawSprite(&frameBuffer[0], sprite+3, 24,frameCount);
+    drawSprite(&frameBuffer[0], sprite+0, xPos+0, yPos);
+    drawSprite(&frameBuffer[0], sprite+1, xPos+8, yPos);
+    drawSprite(&frameBuffer[0], sprite+2, xPos+16, yPos);
+    drawSprite(&frameBuffer[0], sprite+3, xPos+24, yPos);
 
     //
     // Wait for a frame period.
