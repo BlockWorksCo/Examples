@@ -277,6 +277,25 @@ void setup ()
 
 void BitBlt(uint8_t* frameBuffer, int8_t x, int8_t y, uint8_t width, uint8_t height, uint8_t* data)
 {
+    if(x >= 32)
+    {
+        return;
+    }
+
+    if(y<-(int8_t)height)
+    {
+        return;
+    }
+
+    if(x<-(int8_t)width)
+    {
+        return;
+    }
+
+    if(y >= 8)
+    {
+        return;
+    }
 
     if(x+width > 32)
     {
@@ -295,19 +314,30 @@ void BitBlt(uint8_t* frameBuffer, int8_t x, int8_t y, uint8_t width, uint8_t hei
     {
         for(int i=0; i<width; i++)
         {
-            dest[i]     = dest[i] & (0xff<<y) | (data[i]<<y);
+            dest[i]     = (dest[i] & (0xff<<y)) | (data[i]<<y);
         }        
     }
-    else
+    else if(y<0)
     {
         for(int i=0; i<width; i++)
         {
             uint8_t     absY = -y;
-            dest[i]     = dest[i] & (0xff>>absY) | (data[i]>>absY);
+            dest[i]     = (dest[i] & (0xff>>absY)) | (data[i]>>absY);
         }                
     }
 }
 
+
+//
+//
+//
+void drawSprite(uint8_t* frameBuffer, uint8_t spriteId, int8_t x, int8_t y)
+{
+    uint8_t     width   = CH[(spriteId*7)+0];
+    uint8_t     height  = CH[(spriteId*7)+1];
+    uint8_t*    data    = (uint8_t*)&CH[(spriteId*7)+2];
+    BitBlt(&frameBuffer[0], x,y, width,height,  data);
+}
 
 //
 //
@@ -342,11 +372,10 @@ void loop()
     }
     memset(&frameBuffer[0], 0x00, sizeof(frameBuffer));
 
-    //frameBuffer[frameCount] = 0xff;
-    uint8_t     width   = CH[(sprite*7)+0];
-    uint8_t     height  = CH[(sprite*7)+1];
-    uint8_t*    data    = (uint8_t*)&CH[(sprite*7)+2];
-    BitBlt(&frameBuffer[0], frameCount,0, width,height,  data);
+    drawSprite(&frameBuffer[0], sprite+0, frameCount,0);
+    drawSprite(&frameBuffer[0], sprite+1, frameCount+8,0);
+    drawSprite(&frameBuffer[0], sprite+2, frameCount+16,0);
+    drawSprite(&frameBuffer[0], sprite+3, frameCount+24,0);
 
     //
     // Wait for a frame period.
