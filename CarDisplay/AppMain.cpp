@@ -405,6 +405,15 @@ void loop()
     drawSprite(&frameBuffer[0], sprite+3, xPos+24, yPos);
 
     //
+    //
+    //
+    if(serial0.available() != 0)
+    {
+        uint8_t     ch  = serial0.read();
+        sprite = ch;
+    }
+
+    //
     // Wait for a frame period.
     //
     delay(30);
