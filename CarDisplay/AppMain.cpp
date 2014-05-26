@@ -2,7 +2,7 @@
 
 
 #include "Platform.h"
-
+#include "SerialPort.h"
 
 const int   dataIn      = 2;
 const int   load        = 3;
@@ -230,11 +230,20 @@ void drawFrame(uint8_t* frameBuffer)
 
 
 
+extern ring_buffer rx_buffer; 
+extern ring_buffer tx_buffer; 
+SerialPort  serial0;
+
 //
 //
 //
 void setup () 
 {
+
+    serial0.attach(&rx_buffer, &tx_buffer, &UBRR0H, &UBRR0L, &UCSR0A, &UCSR0B, &UCSR0C, &UDR0, RXEN0, TXEN0, RXCIE0, UDRIE0, U2X0);
+    serial0.begin(19200);
+    serial0.println("Hello World.");
+
     //
     // Set directions of pins.
     //
@@ -261,7 +270,7 @@ void setup ()
     setAll(max7219_reg_displayTest, 0);
     setAll(max7219_reg_shutdown,    1);
     setAll(max7219_reg_scanLimit,   7);
-    setAll(max7219_reg_intensity,   0x2);
+    setAll(max7219_reg_intensity,   0xf);
     setAll(max7219_reg_decodeMode,  0);
     setAll(max7219_reg_digit0,      0xaa);
     setAll(max7219_reg_digit1,      0xaa);
@@ -362,6 +371,7 @@ void loop()
     // Draw the frame to the display.
     //
     drawFrame(&frameBuffer[0]);
+    serial0.println(".");
 
     //
     // Modify the frame for next time.

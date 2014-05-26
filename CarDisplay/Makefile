@@ -24,6 +24,8 @@ wiring.o \
 wiring_shift.o \
 MaxMatrix.o \
 Util.o \
+SerialPort.o \
+Print.o \
 PlatformMain.o
 
 
