@@ -359,28 +359,28 @@ void loop()
     // Modify the frame for next time.
     //
     frameCount  += dir;
-    if(frameCount >= 31)
+    if(frameCount >= 8)
     {
         dir         = -1;
-        frameCount  = 31;
+        frameCount  = 8;
     }
-    else if(frameCount<0)
+    else if(frameCount<-8)
     {
         dir         = 1;
-        frameCount  = 0;
+        frameCount  = -8;
         sprite      = (sprite+1)%(sizeof(CH)/7);
     }
     memset(&frameBuffer[0], 0x00, sizeof(frameBuffer));
 
-    drawSprite(&frameBuffer[0], sprite+0, frameCount,0);
-    drawSprite(&frameBuffer[0], sprite+1, frameCount+8,0);
-    drawSprite(&frameBuffer[0], sprite+2, frameCount+16,0);
-    drawSprite(&frameBuffer[0], sprite+3, frameCount+24,0);
+    drawSprite(&frameBuffer[0], sprite+0, 0,frameCount);
+    drawSprite(&frameBuffer[0], sprite+1, 8,frameCount);
+    drawSprite(&frameBuffer[0], sprite+2, 16,frameCount);
+    drawSprite(&frameBuffer[0], sprite+3, 24,frameCount);
 
     //
     // Wait for a frame period.
     //
-    delay(10);
+    delay(30);
 }
 
 
