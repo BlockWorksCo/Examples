@@ -5,7 +5,7 @@ import serial
 import time
 
 
-
+delay=0.001
 
 ser = serial.Serial(
     port=2,
@@ -17,31 +17,37 @@ ser = serial.Serial(
 def clear():
 
 	ser.write('%c'%(27))
-	time.sleep(0.1)
+	time.sleep(delay)
 	ser.write('%c'%(1))
-	time.sleep(0.1)
+	time.sleep(delay)
 
 
 def drawSprite(x,y,sprite):
 
 	ser.write('%c'%(27))
-	time.sleep(0.1)
+	time.sleep(delay)
 	ser.write('%c'%(0))
-	time.sleep(0.1)
+	time.sleep(delay)
 
 
 	ser.write( '%c'%( int(x) ) )
-	time.sleep(0.1)
+	time.sleep(delay)
 	ser.write( '%c'%( int(y) ) )
-	time.sleep(0.1)
+	time.sleep(delay)
 	ser.write( '%c'%( int(sprite) ) )
-	time.sleep(0.1)
+	time.sleep(delay)
 
-clear()
-drawSprite(255,0, '3')
-drawSprite(8,1, '3')
-drawSprite(16,2, '3')
-drawSprite(24,4, '3')
+y=0
+for x in range(-7,30):
+	clear()
+	drawSprite(x%256,y, '4')
+	y = y + 1
+
+
+#drawSprite(255,0, '4')
+#drawSprite(8,1, '4')
+#drawSprite(16,2, '3')
+#drawSprite(24,4, '3')
 ser.close() 
 
 

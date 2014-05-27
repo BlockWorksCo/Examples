@@ -388,6 +388,7 @@ void BitBlt(uint8_t* frameBuffer, int8_t x, int8_t y, uint8_t width, uint8_t hei
     if(x<0)
     {
         width   += x;
+        data    += -x;
         x       = 0;
     }
 
