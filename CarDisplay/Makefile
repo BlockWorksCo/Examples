@@ -19,11 +19,8 @@ INCLUDES+=-I$(BLOCKWORKS_PLATFORM)
 
 OBJS=\
 AppMain.o \
-SPITest.o \
 wiring.o \
 wiring_shift.o \
-MaxMatrix.o \
-Util.o \
 SerialPort.o \
 Print.o \
 PlatformMain.o
