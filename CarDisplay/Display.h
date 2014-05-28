@@ -10,6 +10,10 @@
 
 
 
+extern "C" const unsigned char SPRITES[1];
+
+
+
 //
 //
 //
@@ -148,6 +152,78 @@ public:
         return &frameBuffer[0];
     }
 
+
+    //
+    //
+    //
+    void BitBlt(int8_t x, int8_t y, uint8_t width, uint8_t height, uint8_t* data)
+    {
+        if(x >= 32)
+        {
+            return;
+        }
+
+        if(y<-(int8_t)height)
+        {
+            return;
+        }
+
+        if(x<-(int8_t)width)
+        {
+            return;
+        }
+
+        if(y >= 8)
+        {
+            return;
+        }
+
+        if(x+width > 32)
+        {
+            width = 32-x;
+        }
+
+        if(x<0)
+        {
+            width   += x;
+            data    += -x;
+            x       = 0;
+        }
+
+        uint8_t*    dest    = &frameBuffer[x];
+
+        if(y>=0)
+        {
+            for(int i=0; i<width; i++)
+            {
+                dest[i]     = (dest[i] & (0xff<<y)) | (data[i]<<y);
+            }        
+        }
+        else if(y<0)
+        {
+            for(int i=0; i<width; i++)
+            {
+                uint8_t     absY = -y;
+                dest[i]     = (dest[i] & (0xff>>absY)) | (data[i]>>absY);
+            }                
+        }
+    }
+
+
+    //
+    //
+    //
+    void drawSprite(uint8_t spriteId, int8_t x, int8_t y)
+    {
+        uint8_t     width   = SPRITES[(spriteId*7)+0];
+        uint8_t     height  = SPRITES[(spriteId*7)+1];
+        uint8_t*    data    = (uint8_t*)&SPRITES[(spriteId*7)+2];
+        BitBlt(x,y, width,height,  data);
+    }
+
+
+
+
 private:
 
 
@@ -234,8 +310,6 @@ private:
 
 
 };
-
-
 
 
 

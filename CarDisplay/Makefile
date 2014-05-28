@@ -23,6 +23,7 @@ wiring.o \
 wiring_shift.o \
 SerialPort.o \
 Print.o \
+Sprites.o \
 PlatformMain.o
 
 
