@@ -5,7 +5,7 @@ import serial
 import time
 
 
-delay=0.001
+delay=0.01
 
 ser = serial.Serial(
     port=2,
@@ -38,10 +38,9 @@ def drawSprite(x,y,sprite):
 	time.sleep(delay)
 
 y=0
-for x in range(-7,30):
+for x in range(-7,32):
 	clear()
 	drawSprite(x%256,y, '4')
-	y = y + 1
 
 
 #drawSprite(255,0, '4')
