@@ -2,8 +2,8 @@
 
 
 #include "Platform.h"
+#include "AppConfiguration.h"
 #include "SerialPort.h"
-#include "Display.h"
 
 
 
@@ -15,13 +15,6 @@
 extern ring_buffer      rx_buffer; 
 extern ring_buffer      tx_buffer; 
 SerialPort              serial0;
-
-
-Display<  2,
-            3,
-            4,
-            5,
-            4 >     display;
 
 
 
@@ -115,7 +108,6 @@ void ProcessRawByte(uint8_t byte)
 //
 void loop() 
 {
-    uint8_t*            frameBuffer = display.getFrameBuffer();
     static int         i           = 0;
     static int8_t      frameCount  = 0;
     static int         dir         = 1;

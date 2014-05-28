@@ -147,15 +147,6 @@ public:
     //
     //
     //
-    uint8_t* getFrameBuffer()
-    {
-        return &frameBuffer[0];
-    }
-
-
-    //
-    //
-    //
     void BitBlt(int8_t x, int8_t y, uint8_t width, uint8_t height, uint8_t* data)
     {
         if(x >= 32)
