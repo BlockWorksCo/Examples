@@ -6,7 +6,7 @@
 
 
 
-extern "C" const unsigned char SPRITES[] = 
+extern "C"  const unsigned char SPRITES[] = 
 {
 3, 8, B0000000, B0000000, B0000000, B0000000, B0000000, // space
 1, 8, B1011111, B0000000, B0000000, B0000000, B0000000, // !
