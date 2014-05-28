@@ -3,7 +3,6 @@
 
 #include "Platform.h"
 #include "AppConfiguration.h"
-#include "SerialPort.h"
 
 
 
@@ -12,9 +11,11 @@
 
 
 
+DisplayType      display;
 extern ring_buffer      rx_buffer; 
 extern ring_buffer      tx_buffer; 
-SerialPort              serial0;
+SerialPort       serial0;
+CarDisplayType   carDisplay(display, serial0);
 
 
 
@@ -103,84 +104,6 @@ void ProcessRawByte(uint8_t byte)
 
 
 
-//
-//
-//
-void loop() 
-{
-    static int         i           = 0;
-    static int8_t      frameCount  = 0;
-    static int         dir         = 1;
-    static uint8_t     sprite      = 16;
-    const int           minX        = -20;
-    const int           minY        = -8;
-    const int           maxX        = 20;
-    const int           maxY        = 8;
-    static int8_t       xPos        = 0;
-    static int8_t       yPos        = 0;
-    static int8_t       xDir        = 1;
-    static int8_t       yDir        = 1;
-
-    //
-    // Draw the frame to the display.
-    //
-    display.drawFrame();
-    serial0.println(".");
-
-#if 0    
-    //
-    // Modify the frame for next time.
-    //
-    xPos    += xDir;
-    yPos    += yDir;
-
-    if(xPos >= maxX)
-    {
-        xDir    = -1;
-    }
-    if(xPos < minX)
-    {
-        xDir    = 1;
-    }
-
-    if(yPos >= maxY)
-    {
-        yDir    = -1;
-    }
-    if(yPos < minY)
-    {
-        yDir    = 1;
-    }
-
-    display.clear();
-
-    drawSprite(&frameBuffer[0], sprite+0, xPos+0, yPos);
-    drawSprite(&frameBuffer[0], sprite+1, xPos+8, yPos);
-    drawSprite(&frameBuffer[0], sprite+2, xPos+16, yPos);
-    drawSprite(&frameBuffer[0], sprite+3, xPos+24, yPos);
-
-    //
-    // Wait for a frame period.
-    //
-    delay(30);
-#endif
-
-    //
-    //
-    //
-    while(serial0.available() != 0)
-    {
-        uint8_t     ch  = serial0.read();
-
-        ProcessRawByte(ch);
-    }
-
-}
-
-
-
-
-
 
 
 
@@ -204,7 +127,7 @@ extern "C" void AppMain()
 
     while(true)
     {
-        loop();
+        carDisplay.Run();
     }
 }
 

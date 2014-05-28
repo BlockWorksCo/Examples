@@ -8,6 +8,8 @@
 
 
 #include "Display.h"
+#include "CarDisplay.h"
+#include "SerialPort.h"
 
 
 
@@ -28,7 +30,7 @@ typedef Display<2,
             5,
             4 > 	DisplayType;
 
-DisplayType     display;
+typedef CarDisplay<DisplayType, SerialPort> 	CarDisplayType;
 
 
 
