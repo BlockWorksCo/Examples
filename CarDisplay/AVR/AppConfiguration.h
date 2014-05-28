@@ -10,6 +10,7 @@
 #include "Display.h"
 #include "CarDisplay.h"
 #include "SerialPort.h"
+#include "SimpleBinaryProtocol.h"
 
 
 
@@ -30,7 +31,9 @@ typedef Display<2,
             5,
             4 > 	DisplayType;
 
-typedef CarDisplay<DisplayType, SerialPort> 	CarDisplayType;
+typedef SimpleBinaryProtocol<SerialPort, DisplayType> 	ProtocolType;
+
+typedef CarDisplay<DisplayType, ProtocolType> 	CarDisplayType;
 
 
 

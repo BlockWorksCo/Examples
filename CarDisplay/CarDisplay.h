@@ -16,14 +16,14 @@ void ProcessRawByte(uint8_t byte);
 void ProcessDataByte(uint8_t byte);
 
 
-template <typename DisplayType, typename SerialPortType>
+template <typename DisplayType, typename CommsProtocolType>
 class CarDisplay
 {
 public:
 
-	CarDisplay(DisplayType _display, SerialPortType _serialPort)
-		: display(_display),
-		  serialPort(_serialPort)
+	CarDisplay(DisplayType _display, CommsProtocolType& _commsProtocol) :
+			display(_display),
+		  	commsProtocol(_commsProtocol)
 	{
 
 	}
@@ -37,18 +37,8 @@ public:
 	    // Draw the frame to the display.
 	    //
 	    display.drawFrame();
-	    serialPort.println(".");
 
-	    //
-	    //
-	    //
-	    while(serialPort.available() != 0)
-	    {
-	        uint8_t     ch  = serialPort.read();
-
-	        ProcessRawByte(ch);
-	    }
-
+	    commsProtocol.Process();
 	}
 
 
@@ -56,8 +46,8 @@ public:
 
 private:
 
-	DisplayType& 	display;
-	SerialPortType 	serialPort;
+	DisplayType& 		display;
+	CommsProtocolType& 	commsProtocol;
 
 };
 

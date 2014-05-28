@@ -11,94 +11,14 @@
 
 
 
-DisplayType      display;
-extern ring_buffer      rx_buffer; 
-extern ring_buffer      tx_buffer; 
-SerialPort       serial0;
-CarDisplayType   carDisplay(display, serial0);
+DisplayType         display;
+extern ring_buffer  rx_buffer; 
+extern ring_buffer  tx_buffer; 
+SerialPort          serial0;
+ProtocolType        protocol(serial0, display);
+CarDisplayType      carDisplay(display, protocol);
 
 
-
-
-
-
-
-uint8_t  position        = 0;
-
-
-//
-//
-//
-void ProcessDataByte(uint8_t byte)
-{
-    static uint8_t  xPos     = 0;
-    static uint8_t  yPos     = 0;
-    static uint8_t  spriteId = 0;
-
-    switch(position)
-    {
-        case 0:
-            xPos    = byte;
-            break;
-
-        case 1:
-            yPos    = byte;
-            break;
-
-        case 2:
-        {
-            spriteId = byte;
-            display.drawSprite(spriteId, xPos, yPos);
-
-            break;            
-        }
-
-        default:
-            break;
-    }
-
-    position++;
-}
-
-//
-// 0 1 2 3 27 4 5 6 7 = D0 D1 D2 D3 C4 D5 D6 D7
-// 0 1 2 3 27 27 4 5 6 7 = D0 D1 D2 D3 D27 D4 D5 D6 D7
-//
-void ProcessRawByte(uint8_t byte)
-{
-    const uint8_t   escapeByte      = 27;
-    static uint8_t  previousByte    = 0;
-
-    if(previousByte == escapeByte)
-    {
-        if(byte == escapeByte)
-        {
-            ProcessDataByte(byte);
-        }
-        else
-        {
-            switch(byte)
-            {
-                case 0:
-                    position    = 0;
-                    break;
-
-                case 1:
-                    display.clear();
-                    break;
-
-                default:
-                    break;
-            }
-        }
-    }
-    else if(byte != escapeByte) 
-    {
-        ProcessDataByte(byte);
-    }
-
-    previousByte    = byte;
-}
 
 
 
