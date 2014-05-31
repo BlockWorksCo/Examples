@@ -49,6 +49,7 @@ public:
         display.drawSprite('1', 8,0);
         display.drawSprite('2', 16,0);
         display.drawSprite('3', 24,0);
+        display.drawFrame();
         delay(1000);
         display.clear();
 
