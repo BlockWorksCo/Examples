@@ -15,4 +15,4 @@ rem %AVRDUDE% -C%AVRCONF% -v -v -v -v -patmega328p -cusbasp -Pusb -Uflash:w:%1:i
 rem
 rem Via bootloader
 rem
-%AVRDUDE% -C%AVRCONF% -v -v -v -v -patmega328p -carduino -P\\.\COM3 -b19200 -D -Uflash:w:%1:i
+%AVRDUDE% -C%AVRCONF% -patmega328p -carduino -P\\.\COM3 -b19200 -D -Uflash:w:%1:i

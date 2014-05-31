@@ -48,7 +48,8 @@ struct ring_buffer
 };
 
 
-class SerialPort : public Stream
+
+class SerialPort
 {
   private:
     ring_buffer *_rx_buffer;
@@ -80,18 +81,10 @@ class SerialPort : public Stream
       uint8_t rxen, uint8_t txen, uint8_t rxcie, uint8_t udrie, uint8_t u2x);
     void begin(unsigned long);
     void begin(unsigned long, uint8_t);
-    void end();
     virtual int available(void);
-    virtual int peek(void);
     virtual int read(void);
-    virtual void flush(void);
     virtual size_t write(uint8_t);
-    inline size_t write(unsigned long n) { return write((uint8_t)n); }
-    inline size_t write(long n) { return write((uint8_t)n); }
-    inline size_t write(unsigned int n) { return write((uint8_t)n); }
     inline size_t write(int n) { return write((uint8_t)n); }
-    using Print::write; // pull in write(str) and write(buf, size) from Print
-    operator bool();
 };
 
 // Define config for Serial.begin(baud, config);

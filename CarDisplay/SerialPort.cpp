@@ -27,8 +27,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
-#include "Arduino.h"
+#include "Platform.h"
 #include "wiring_private.h"
+
+
 
 // this next line disables the entire SerialPort.cpp, 
 // this is so I can support Attiny series and any other chip without a uart
@@ -72,6 +74,10 @@
   ring_buffer rx_buffer3  =  { { 0 }, 0, 0 };
   ring_buffer tx_buffer3  =  { { 0 }, 0, 0 };
 #endif
+
+
+
+
 
 inline void store_char(unsigned char c, ring_buffer *buffer)
 {
@@ -131,6 +137,9 @@ inline void store_char(unsigned char c, ring_buffer *buffer)
 #endif
 #endif
 
+
+
+
 #if defined(USART1_RX_vect)
   void serialEvent1() __attribute__((weak));
   void serialEvent1() {}
@@ -147,6 +156,10 @@ inline void store_char(unsigned char c, ring_buffer *buffer)
 #elif defined(SIG_USART1_RECV)
   #error SIG_USART1_RECV
 #endif
+
+
+
+
 
 #if defined(USART2_RX_vect) && defined(UDR2)
   void serialEvent2() __attribute__((weak));
@@ -165,6 +178,10 @@ inline void store_char(unsigned char c, ring_buffer *buffer)
   #error SIG_USART2_RECV
 #endif
 
+
+
+
+
 #if defined(USART3_RX_vect) && defined(UDR3)
   void serialEvent3() __attribute__((weak));
   void serialEvent3() {}
@@ -182,6 +199,10 @@ inline void store_char(unsigned char c, ring_buffer *buffer)
   #error SIG_USART3_RECV
 #endif
 
+
+
+
+
 void serialEventRun(void)
 {
 #ifdef serialEvent_implemented
@@ -197,6 +218,9 @@ void serialEventRun(void)
   if (Serial3.available()) serialEvent3();
 #endif
 }
+
+
+
 
 
 #if !defined(USART0_UDRE_vect) && defined(USART1_UDRE_vect)
@@ -240,6 +264,8 @@ ISR(USART_UDRE_vect)
 #endif
 #endif
 
+
+
 #ifdef USART1_UDRE_vect
 ISR(USART1_UDRE_vect)
 {
@@ -256,6 +282,10 @@ ISR(USART1_UDRE_vect)
   }
 }
 #endif
+
+
+
+
 
 #ifdef USART2_UDRE_vect
 ISR(USART2_UDRE_vect)
@@ -274,6 +304,9 @@ ISR(USART2_UDRE_vect)
 }
 #endif
 
+
+
+
 #ifdef USART3_UDRE_vect
 ISR(USART3_UDRE_vect)
 {
@@ -291,8 +324,6 @@ ISR(USART3_UDRE_vect)
 }
 #endif
 
-
-// Constructors ////////////////////////////////////////////////////////////////
 
 
 SerialPort::SerialPort()
@@ -321,26 +352,6 @@ void SerialPort::attach(ring_buffer *rx_buffer, ring_buffer *tx_buffer,
   _u2x = u2x;  
 }
 
-SerialPort::SerialPort(ring_buffer *rx_buffer, ring_buffer *tx_buffer,
-  volatile uint8_t *ubrrh, volatile uint8_t *ubrrl,
-  volatile uint8_t *ucsra, volatile uint8_t *ucsrb,
-  volatile uint8_t *ucsrc, volatile uint8_t *udr,
-  uint8_t rxen, uint8_t txen, uint8_t rxcie, uint8_t udrie, uint8_t u2x)
-{
-  _rx_buffer = rx_buffer;
-  _tx_buffer = tx_buffer;
-  _ubrrh = ubrrh;
-  _ubrrl = ubrrl;
-  _ucsra = ucsra;
-  _ucsrb = ucsrb;
-  _ucsrc = ucsrc;
-  _udr = udr;
-  _rxen = rxen;
-  _txen = txen;
-  _rxcie = rxcie;
-  _udrie = udrie;
-  _u2x = u2x;
-}
 
 // Public Methods //////////////////////////////////////////////////////////////
 
@@ -353,17 +364,21 @@ void SerialPort::begin(unsigned long baud)
   // hardcoded exception for compatibility with the bootloader shipped
   // with the Duemilanove and previous boards and the firmware on the 8U2
   // on the Uno and Mega 2560.
-  if (baud == 57600) {
+  if (baud == 57600) 
+  {
     use_u2x = false;
   }
 #endif
 
 try_again:
-  
-  if (use_u2x) {
+
+  if (use_u2x) 
+  {
     *_ucsra = 1 << _u2x;
     baud_setting = (F_CPU / 4 / baud - 1) / 2;
-  } else {
+  } 
+  else 
+  {
     *_ucsra = 0;
     baud_setting = (F_CPU / 8 / baud - 1) / 2;
   }
@@ -384,7 +399,13 @@ try_again:
   sbi(*_ucsrb, _txen);
   sbi(*_ucsrb, _rxcie);
   cbi(*_ucsrb, _udrie);
+
+
 }
+
+
+
+
 
 void SerialPort::begin(unsigned long baud, byte config)
 {
@@ -433,34 +454,18 @@ try_again:
   cbi(*_ucsrb, _udrie);
 }
 
-void SerialPort::end()
-{
-  // wait for transmission of outgoing data
-  while (_tx_buffer->head != _tx_buffer->tail)
-    ;
 
-  cbi(*_ucsrb, _rxen);
-  cbi(*_ucsrb, _txen);
-  cbi(*_ucsrb, _rxcie);  
-  cbi(*_ucsrb, _udrie);
-  
-  // clear any received data
-  _rx_buffer->head = _rx_buffer->tail;
-}
+
+
 
 int SerialPort::available(void)
 {
   return (unsigned int)(SERIAL_BUFFER_SIZE + _rx_buffer->head - _rx_buffer->tail) % SERIAL_BUFFER_SIZE;
 }
 
-int SerialPort::peek(void)
-{
-  if (_rx_buffer->head == _rx_buffer->tail) {
-    return -1;
-  } else {
-    return _rx_buffer->buffer[_rx_buffer->tail];
-  }
-}
+
+
+
 
 int SerialPort::read(void)
 {
@@ -474,12 +479,8 @@ int SerialPort::read(void)
   }
 }
 
-void SerialPort::flush()
-{
-  // UDR is kept full while the buffer is not empty, so TXC triggers when EMPTY && SENT
-  while (transmitting && ! (*_ucsra & _BV(TXC0)));
-  transmitting = false;
-}
+
+
 
 size_t SerialPort::write(uint8_t c)
 {
@@ -502,32 +503,6 @@ size_t SerialPort::write(uint8_t c)
   return 1;
 }
 
-SerialPort::operator bool() {
-	return true;
-}
-
-// Preinstantiate Objects //////////////////////////////////////////////////////
-#if 0
-#if defined(UBRRH) && defined(UBRRL)
-  SerialPort Serial(&rx_buffer, &tx_buffer, &UBRRH, &UBRRL, &UCSRA, &UCSRB, &UCSRC, &UDR, RXEN, TXEN, RXCIE, UDRIE, U2X);
-#elif defined(UBRR0H) && defined(UBRR0L)
-  SerialPort Serial(&rx_buffer, &tx_buffer, &UBRR0H, &UBRR0L, &UCSR0A, &UCSR0B, &UCSR0C, &UDR0, RXEN0, TXEN0, RXCIE0, UDRIE0, U2X0);
-#elif defined(USBCON)
-  // do nothing - Serial object and buffers are initialized in CDC code
-#else
-  #error no serial port defined  (port 0)
-#endif
-
-#if defined(UBRR1H)
-  SerialPort Serial1(&rx_buffer1, &tx_buffer1, &UBRR1H, &UBRR1L, &UCSR1A, &UCSR1B, &UCSR1C, &UDR1, RXEN1, TXEN1, RXCIE1, UDRIE1, U2X1);
-#endif
-#if defined(UBRR2H)
-  SerialPort Serial2(&rx_buffer2, &tx_buffer2, &UBRR2H, &UBRR2L, &UCSR2A, &UCSR2B, &UCSR2C, &UDR2, RXEN2, TXEN2, RXCIE2, UDRIE2, U2X2);
-#endif
-#if defined(UBRR3H)
-  SerialPort Serial3(&rx_buffer3, &tx_buffer3, &UBRR3H, &UBRR3L, &UCSR3A, &UCSR3B, &UCSR3C, &UDR3, RXEN3, TXEN3, RXCIE3, UDRIE3, U2X3);
-#endif
-#endif
 
 
 #endif // whole file

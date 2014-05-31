@@ -6,6 +6,8 @@
 #define __SIMPLEBINARYPROTOCOL_H__
 
 
+void Flash();
+
 template <typename TransportType, typename DisplayType>
 class SimpleBinaryProtocol
 {
@@ -26,10 +28,9 @@ public:
         //
         //
         //
-        while(transport.available() != 0)
+        if(transport.available() != 0)
         {
             uint8_t     ch  = transport.read();
-
             ProcessRawByte(ch);
         }        
     }

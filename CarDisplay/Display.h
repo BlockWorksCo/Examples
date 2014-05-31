@@ -10,9 +10,7 @@
 
 
 
-extern "C" const unsigned char SPRITES[1];
-
-
+extern "C" const unsigned char SPRITES[7];
 
 //
 //
@@ -31,45 +29,11 @@ public:
     //
     Display()
     {
-#if 0     
-        //
-        // Set directions of pins.
-        //
-        pinMode(dataIn, OUTPUT);
-        pinMode(clock,  OUTPUT);
-        pinMode(load,   OUTPUT);
-        pinMode(power,   OUTPUT);
-        pinMode(10,   OUTPUT); // SS is output so SPI knows we're master, not slave.
-
-
-        digitalWrite(13, HIGH);
-
-        //
-        // Power cycle the displays.
-        //
-        digitalWrite(power, LOW);
-        delay(500);  
-        digitalWrite(power, HIGH);  
-
-        //
-        // initialisation of the max 7219
-        //
-        setAll(max7219_reg_displayTest, 0);
-        setAll(max7219_reg_shutdown,    1);
-        setAll(max7219_reg_scanLimit,   7);
-        setAll(max7219_reg_intensity,   0xf);
-        setAll(max7219_reg_decodeMode,  0);
-        setAll(max7219_reg_digit0,      0xaa);
-        setAll(max7219_reg_digit1,      0xaa);
-        setAll(max7219_reg_digit2,      0xaa);
-        setAll(max7219_reg_digit3,      0xaa);
-        setAll(max7219_reg_digit4,      0xaa);
-        setAll(max7219_reg_digit5,      0xaa);
-        setAll(max7219_reg_digit6,      0xaa);
-        setAll(max7219_reg_digit7,      0xaa);
-#endif        
     }
 
+    //
+    //
+    //
     void setup()
     {
         //
@@ -78,11 +42,8 @@ public:
         pinMode(dataIn, OUTPUT);
         pinMode(clock,  OUTPUT);
         pinMode(load,   OUTPUT);
-        pinMode(power,   OUTPUT);
-        pinMode(10,   OUTPUT); // SS is output so SPI knows we're master, not slave.
-
-
-        digitalWrite(13, HIGH);
+        pinMode(power,  OUTPUT);
+        pinMode(10,     OUTPUT); // SS is output so SPI knows we're master, not slave.
 
         //
         // Power cycle the displays.
@@ -107,22 +68,41 @@ public:
         setAll(max7219_reg_digit5,      0xaa);
         setAll(max7219_reg_digit6,      0xaa);
         setAll(max7219_reg_digit7,      0xaa);
+        //delay(1000);
     }
+
+    void t0(uint8_t p)
+    {
+        setAll(max7219_reg_digit0,      p);
+        setAll(max7219_reg_digit1,      p);
+        setAll(max7219_reg_digit2,      p);
+        setAll(max7219_reg_digit3,      p);
+        setAll(max7219_reg_digit4,      p);
+        setAll(max7219_reg_digit5,      p);
+        setAll(max7219_reg_digit6,      p);
+        setAll(max7219_reg_digit7,      p);        
+    }
+
 
     //
     //
     //
     void drawFrame()
     {
+        /*
         setAll(max7219_reg_displayTest, 0);
         setAll(max7219_reg_shutdown,    1);
         setAll(max7219_reg_scanLimit,   7);
         setAll(max7219_reg_intensity,   0x1);
         setAll(max7219_reg_decodeMode,  0);
-
-        /*
-        //
         */
+        //
+        //
+        //
+for(int i=0; i<sizeof(frameBuffer); i++)
+{
+    f[i] = i;
+}
         for(int j=0; j<8; j++)
         {
             digitalWrite(load, LOW);    
@@ -130,7 +110,8 @@ public:
             for(int k=(NUMBER_OF_8x8_MATRICES-1); k>=0; k--)
             {
                 shiftOutByte( (MAX7219Register)(max7219_reg_digit0+j) );
-                shiftOutByte( frameBuffer[(k*8)+j] );
+                //shiftOutByte( frameBuffer[(k*8)+j] );
+                shiftOutByte( f[(k*8)+j] );
             }
 
             digitalWrite(load, LOW);
@@ -141,7 +122,7 @@ public:
 
     void clear()
     {
-            memset(&frameBuffer[0], 0x00, sizeof(frameBuffer));
+        memset(&frameBuffer[0], 0x00, sizeof(frameBuffer));
     }
 
     //
@@ -289,7 +270,7 @@ private:
             shiftOutByte( reg );
             shiftOutByte( value );
         }
-        digitalWrite(load, LOW); // and load da shit
+        digitalWrite(load, LOW);
         CYCLE_DELAY;
         digitalWrite(load,HIGH); 
         CYCLE_DELAY;
@@ -298,6 +279,7 @@ private:
 
 
     uint8_t     frameBuffer[8*NUMBER_OF_8x8_MATRICES];
+    static uint8_t f[8*NUMBER_OF_8x8_MATRICES];
 
 
 };
