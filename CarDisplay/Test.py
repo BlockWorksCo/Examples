@@ -4,6 +4,7 @@
 import serial
 import time
 import ctypes
+import datetime
 
 
 
@@ -109,6 +110,108 @@ SpriteLUT = \
 }
 
 
+SpriteWidths = \
+[
+    2,
+    1,
+    3,
+    5,
+    4,
+    5,
+    5,
+    1,
+    3,
+    3,
+    5,
+    5,
+    2,
+    4,
+    2,
+    4,
+    4,
+    3,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    2,
+    2,
+    3,
+    3,
+    3,
+    4,
+    5,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    3,
+    4,
+    4,
+    4,
+    5,
+    5,
+    4,
+    4,
+    4,
+    4,
+    4,
+    5,
+    4,
+    5,
+    5,
+    5,
+    5,
+    4,
+    2,
+    4,
+    2,
+    3,
+    4,
+    2,
+    4,
+    4,
+    4,
+    4,
+    4,
+    3,
+    4,
+    4,
+    3,
+    4,
+    4,
+    3,
+    5,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    3,
+    4,
+    5,
+    5,
+    5,
+    4,
+    3,
+    3,
+    1,
+    3,
+    4,
+]
+
+
+
+
 ser = serial.Serial(
     port=2,
     baudrate=19200)
@@ -152,7 +255,7 @@ def drawChar(x,y, char):
     """
     """
     drawSprite(x,y, SpriteLUT[char])
-    return 5
+    return SpriteWidths[ SpriteLUT[char] ]
 
 
 def drawText(x, y, text):
@@ -182,15 +285,34 @@ def VertScroll(topLine, bottomLine):
         clear()
         drawText(0,y, topLine)
         drawText(0,y+8, bottomLine)
-        time.sleep(0.05)
+        time.sleep(0.02)
 
 
 
-while True:
-    VertScroll('Hello1','World2')
-    time.sleep(1.0)
+def VertClock():
+    """
+    """
+    prevTime = ''
+    while True:
+        currentTime = datetime.datetime.now().strftime('%I %M %S')
+        print('[%s][%s]'%(prevTime,currentTime))
+        VertScroll(prevTime, currentTime)
+        time.sleep(1.0)
+        prevTime = currentTime
 
 
+
+def VertTest():
+    """
+    """
+
+    while True:
+        VertScroll('Hello1','World2')
+        time.sleep(1.0)
+
+
+
+VertClock()
 ser.close() 
 
 
