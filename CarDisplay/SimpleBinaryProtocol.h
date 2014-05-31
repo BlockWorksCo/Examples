@@ -28,7 +28,7 @@ public:
         //
         //
         //
-        if(transport.available() != 0)
+        while(transport.available() != 0)
         {
             uint8_t     ch  = transport.read();
             ProcessRawByte(ch);

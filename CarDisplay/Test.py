@@ -107,7 +107,6 @@ SpriteLUT = \
 	'~':94,
 }
 
-delay=0.01
 
 ser = serial.Serial(
     port=2,
@@ -118,26 +117,29 @@ ser = serial.Serial(
 
 def clear():
 
-	ser.write('%c'%(27))
-	time.sleep(delay)
-	ser.write('%c'%(1))
-	time.sleep(delay)
+	ser.write('%c%c'%(27,1))
+	#ser.write('%c'%(27))
+	#time.sleep(delay)
+	#ser.write('%c'%(1))
+	#time.sleep(delay)
 
 
 def drawSprite(x,y,sprite):
 
-	ser.write('%c'%(27))
-	time.sleep(delay)
-	ser.write('%c'%(0))
-	time.sleep(delay)
+	ser.write('%c%c'%(27,0))
+	#ser.write('%c'%(27))
+	#time.sleep(delay)
+	#ser.write('%c'%(0))
+	#time.sleep(delay)
 
 
-	ser.write( '%c'%( int(x) ) )
-	time.sleep(delay)
-	ser.write( '%c'%( int(y) ) )
-	time.sleep(delay)
-	ser.write( '%c'%( int(sprite) ) )
-	time.sleep(delay)
+	ser.write('%c%c%c'%( int(x),int(y),int(sprite) ))
+	#ser.write( '%c'%( int(x) ) )
+	#time.sleep(delay)
+	#ser.write( '%c'%( int(y) ) )
+	#time.sleep(delay)
+	#ser.write( '%c'%( int(sprite) ) )
+	#time.sleep(delay)
 
 
 
