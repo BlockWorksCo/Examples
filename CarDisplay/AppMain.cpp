@@ -24,7 +24,7 @@ template < uint8_t dataIn,
             uint8_t clock,
             uint8_t power,
             uint8_t NUMBER_OF_8x8_MATRICES >
-            uint8_t Display<dataIn, load, clock, power, NUMBER_OF_8x8_MATRICES>::f[8*NUMBER_OF_8x8_MATRICES];
+            uint8_t Display<dataIn, load, clock, power, NUMBER_OF_8x8_MATRICES>::frameBuffer[8*NUMBER_OF_8x8_MATRICES];
 
 
 

@@ -48,25 +48,18 @@ public:
         display.drawSprite('0', 0,0);
         display.drawSprite('1', 8,0);
         display.drawSprite('2', 16,0);
-        display.drawSprite('0', 16,0);
-        //delay(1000);
-        //display.clear();
+        display.drawSprite('3', 24,0);
+        delay(1000);
+        display.clear();
 
         //
         // Draw the frame to the display.
         //
         while(true)
         {
-//            DebugOut(':');
-/*
-            static uint8_t c = 0;
-            display.t0(c);
-            delay(10);
-            c++;
-*/
             display.drawFrame();
 
-            //commsProtocol.Process();        
+            commsProtocol.Process();        
         }
     }
 
