@@ -220,12 +220,15 @@ ser = serial.Serial(
 
 
 def clear():
-
+    """
+    """
     ser.write('%c%c'%(27,1))
-    #ser.write('%c'%(27))
-    #time.sleep(delay)
-    #ser.write('%c'%(1))
-    #time.sleep(delay)
+
+
+def drawFrame():
+    """
+    """
+    ser.write('%c%c'%(27,4))
 
 
 def int8_to_uint8(i):
@@ -233,20 +236,11 @@ def int8_to_uint8(i):
 
 
 def drawSprite(x,y,sprite):
+    """
+    """
 
     ser.write('%c%c'%(27,0))
-    #ser.write('%c'%(27))
-    #time.sleep(delay)
-    #ser.write('%c'%(0))
-    #time.sleep(delay)
-
     ser.write('%c%c%c'%( int8_to_uint8(x),int8_to_uint8(y),int(sprite) ))
-    #ser.write( '%c'%( int(x) ) )
-    #time.sleep(delay)
-    #ser.write( '%c'%( int(y) ) )
-    #time.sleep(delay)
-    #ser.write( '%c'%( int(sprite) ) )
-    #time.sleep(delay)
 
 
 
@@ -285,6 +279,7 @@ def VertScroll(topLine, bottomLine):
         clear()
         drawText(0,y, topLine)
         drawText(0,y+8, bottomLine)
+        drawFrame()
         time.sleep(0.02)
 
 

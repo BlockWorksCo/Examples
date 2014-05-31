@@ -96,6 +96,18 @@ public:
                         display.clear();
                         break;
 
+                    case 2:
+                        display.setIntensity(1);
+                        break;
+
+                    case 3:
+                        display.setIntensity(15);
+                        break;
+
+                    case 4:
+                        display.drawFrame();
+                        break;
+
                     default:
                         break;
                 }

@@ -58,8 +58,6 @@ public:
         //
         while(true)
         {
-            display.drawFrame();
-
             commsProtocol.Process();        
         }
     }

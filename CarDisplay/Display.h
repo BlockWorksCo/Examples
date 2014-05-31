@@ -62,6 +62,15 @@ public:
         setAll(max7219_reg_digit7,      0xaa);
     }
 
+
+    //
+    //
+    //
+    void setIntensity(uint8_t intensity)
+    {
+        setAll(max7219_reg_intensity,   intensity);        
+    }
+
     //
     //
     //
