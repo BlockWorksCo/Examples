@@ -112,12 +112,12 @@ public:
         {
             return;
         }
-/*
+
         if(y<-(int8_t)height)
         {
             return;
         }
-*/
+
         if(x<-(int8_t)width)
         {
             return;

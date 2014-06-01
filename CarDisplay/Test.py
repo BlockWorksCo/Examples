@@ -291,7 +291,32 @@ def VertScroll(topLine, bottomLine):
         drawText(0,y, topLine)
         drawText(0,y+8, bottomLine)
         drawFrame()
-        time.sleep(0.01)
+        #time.sleep(0.01)
+
+
+def VertDiffScroll(topLine, bottomLine):
+    """
+    """
+    for y in range(0,-9,-1):
+
+        x   = 0
+        clear()
+        for position in range( 0,len(topLine) ):
+
+            if topLine[position] != bottomLine[position]:
+                charWidth = drawChar(x,y, topLine[position])
+                charWidth = drawChar(x,y+8, bottomLine[position])
+            else:
+                charWidth = drawChar(x,0, bottomLine[position])
+
+            if topLine[position] == ' ':
+                charWidth = 3
+            else:
+                charWidth = 4
+            x   = x + charWidth
+
+        drawFrame()
+        #time.sleep(0.1)
 
 
 
@@ -302,7 +327,7 @@ def VertClock():
     while True:
         currentTime = datetime.datetime.now().strftime('%I %M %S')
         print('[%s][%s]'%(prevTime,currentTime))
-        VertScroll(prevTime, currentTime)
+        VertDiffScroll(prevTime, currentTime)
         time.sleep(1.0)
         prevTime = currentTime
 
@@ -328,7 +353,7 @@ def t0():
         drawFrame()
         time.sleep(1.0)
 
-lowIntensity()
+highIntensity()
 
 #VertTest()
 VertClock()
