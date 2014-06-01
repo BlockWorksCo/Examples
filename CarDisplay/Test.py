@@ -219,6 +219,17 @@ ser = serial.Serial(
 
 
 
+def lowIntensity():
+    """
+    """
+    ser.write('%c%c'%(27,2))
+
+def highIntensity():
+    """
+    """
+    ser.write('%c%c'%(27,3))
+
+
 def clear():
     """
     """
@@ -280,7 +291,7 @@ def VertScroll(topLine, bottomLine):
         drawText(0,y, topLine)
         drawText(0,y+8, bottomLine)
         drawFrame()
-        time.sleep(0.02)
+        time.sleep(0.01)
 
 
 
@@ -304,10 +315,23 @@ def VertTest():
     while True:
         VertScroll('Hello1','World2')
         time.sleep(1.0)
+        VertScroll('World2','Hello1')
+        time.sleep(1.0)
 
 
+def t0():
+    while True:
+        clear()
+        y = -2
+        drawText(0,y+8, 'World')
+        drawText(0,y, 'Hello')
+        drawFrame()
+        time.sleep(1.0)
 
+lowIntensity()
+
+#VertTest()
 VertClock()
-ser.close() 
+#ser.close() 
 
 

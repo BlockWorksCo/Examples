@@ -112,12 +112,12 @@ public:
         {
             return;
         }
-
+/*
         if(y<-(int8_t)height)
         {
             return;
         }
-
+*/
         if(x<-(int8_t)width)
         {
             return;
@@ -146,15 +146,22 @@ public:
         {
             for(int i=0; i<width; i++)
             {
-                dest[i]     = (dest[i] & (0xff<<y)) | (data[i]<<y);
+                //
+                // dest[i] = 10101010 data[i] = 11001100 y=6 result = 101010xx | 00000011 = 10101011
+                //
+                dest[i]     = (dest[i] & (0xff>>(8-y) )) | (data[i]<<y);
             }        
         }
         else if(y<0)
         {
             for(int i=0; i<width; i++)
             {
+                //
+                // dest[i] = 10101010  data[i] = 11001100 y = -2, result = 10xxxxxx | xx001100 = 10001100
+                //
                 uint8_t     absY = -y;
-                dest[i]     = (dest[i] & (0xff>>absY)) | (data[i]>>absY);
+                //dest[i]     = (dest[i] & (0xff<<(8-absY) )) | (data[i]>>absY );
+                dest[i]     = (dest[i] & (0xff<<(8-absY) )) | (data[i]>>absY );
             }                
         }
     }
