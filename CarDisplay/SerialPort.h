@@ -32,7 +32,6 @@
 #include <inttypes.h>
 #include "Platform.h"
 #include "wiring_private.h"
-#include "SerialPort.h"
 
 #include "Stream.h"
 
@@ -81,13 +80,14 @@ struct ring_buffer
 };
 
 
-template <uint32_t baud>
+template <  uint32_t baud, 
+            uint8_t ubrrh, uint8_t ubrrl,
+            uint8_t ucsra, uint8_t ucsrb,
+            uint8_t ucsrc, uint8_t udr
+        >
 class SerialPort
 {
   public:
-
-
-
 
     SerialPort()
     {
@@ -95,19 +95,18 @@ class SerialPort
 
 
     void attach(ring_buffer *rx_buffer, ring_buffer *tx_buffer,
-                volatile uint8_t *ubrrh, volatile uint8_t *ubrrl,
-                volatile uint8_t *ucsra, volatile uint8_t *ucsrb,
-                volatile uint8_t *ucsrc, volatile uint8_t *udr,
                 uint8_t rxen, uint8_t txen, uint8_t rxcie, uint8_t udrie, uint8_t u2x)
     {
         _rx_buffer = rx_buffer;
         _tx_buffer = tx_buffer;
-        _ubrrh = ubrrh;
-        _ubrrl = ubrrl;
-        _ucsra = ucsra;
-        _ucsrb = ucsrb;
-        _ucsrc = ucsrc;
-        _udr = udr;
+
+        _ubrrh = (uint8_t*)ubrrh;
+        _ubrrl = (uint8_t*)ubrrl;
+        _ucsra = (uint8_t*)ucsra;
+        _ucsrb = (uint8_t*)ucsrb;
+        _ucsrc = (uint8_t*)ucsrc;
+        _udr = (uint8_t*)udr;
+
         _rxen = rxen;
         _txen = txen;
         _rxcie = rxcie;

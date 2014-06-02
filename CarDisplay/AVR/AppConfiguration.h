@@ -11,7 +11,8 @@
 #include "CarDisplay.h"
 #include "SerialPort.h"
 #include "SimpleBinaryProtocol.h"
-
+#include "Platform.h"
+#include "wiring_private.h"
 
 
 //
@@ -19,24 +20,27 @@
 // Define the configuration thru the use of typedefs and where needed c++11 template aliases or
 // a substitute mechanism (inheritance).
 //
-/*
-typedef AVROutput<0, 0, 0x01>                  GreenLEDType;
-typedef AVROutput<0, 0, 0x02>                  OrangeLEDType;
-typedef AVROutput<0, 0, 0x04>                  RedLEDType;
-typedef AVROutput<0, 0, 0x08>                  BlueLEDType;
-*/
 typedef Display<2,
             3,
             4,
             5,
-            4 > 	DisplayType;
+            4 >     DisplayType;
 
 
-typedef SerialPort<19200> 	SerialPortType;
 
-typedef SimpleBinaryProtocol<SerialPortType, DisplayType> 	ProtocolType;
+#define _UBRR0H     0xC5
+#define _UBRR0L     0xC4
+#define _UCSR0A     0xC0
+#define _UCSR0B     0xC1
+#define _UCSR0C     0xC2
+#define _UDR0       0xC6
 
-typedef CarDisplay<DisplayType, ProtocolType> 	CarDisplayType;
+typedef SerialPort<19200,
+                    _UBRR0H, _UBRR0L, _UCSR0A, _UCSR0B, _UCSR0C, _UDR0 >     SerialPortType;
+
+typedef SimpleBinaryProtocol<SerialPortType, DisplayType>   ProtocolType;
+
+typedef CarDisplay<DisplayType, ProtocolType>   CarDisplayType;
 
 
 
