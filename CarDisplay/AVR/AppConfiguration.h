@@ -31,7 +31,10 @@ typedef Display<2,
             5,
             4 > 	DisplayType;
 
-typedef SimpleBinaryProtocol<SerialPort, DisplayType> 	ProtocolType;
+
+typedef SerialPort<19200> 	SerialPortType;
+
+typedef SimpleBinaryProtocol<SerialPortType, DisplayType> 	ProtocolType;
 
 typedef CarDisplay<DisplayType, ProtocolType> 	CarDisplayType;
 
