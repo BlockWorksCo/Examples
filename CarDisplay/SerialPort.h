@@ -34,11 +34,7 @@
 // using a ring buffer (I think), in which head is the index of the location
 // to which to write the next incoming character and tail is the index of the
 // location from which to read.
-#if (RAMEND < 1000)
-  #define SERIAL_BUFFER_SIZE 16
-#else
-  #define SERIAL_BUFFER_SIZE 64
-#endif
+#define SERIAL_BUFFER_SIZE 64
 
 struct ring_buffer
 {
@@ -114,23 +110,6 @@ class SerialPort
 #define SERIAL_8O2 0x3E
 
 
-#if 0
-#if defined(UBRRH) || defined(UBRR0H)
-  extern SerialPort Serial;
-#elif defined(USBCON)
-  #include "USBAPI.h"
-//  extern SerialPort Serial_;  
-#endif
-#if defined(UBRR1H)
-  extern SerialPort Serial1;
-#endif
-#if defined(UBRR2H)
-  extern SerialPort Serial2;
-#endif
-#if defined(UBRR3H)
-  extern SerialPort Serial3;
-#endif
-#endif
 
 extern void serialEventRun(void) __attribute__((weak));
 
