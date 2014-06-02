@@ -38,11 +38,6 @@ inline void store_char(unsigned char c, ring_buffer *buffer)
 
 
 
-
-void serialEvent() __attribute__((weak));
-void serialEvent() {}
-#define serialEvent_implemented
-
 SIGNAL(USART_RX_vect)
   {
     if (bit_is_clear(UCSR0A, UPE0)) {
@@ -52,17 +47,6 @@ SIGNAL(USART_RX_vect)
       unsigned char c = UDR0;
     };
   }
-
-
-
-
-
-
-
-void serialEventRun(void)
-{
-  if (Serial.available()) serialEvent();
-}
 
 
 
@@ -87,13 +71,6 @@ ISR(USART_UDRE_vect)
 
 
 
-
-
-
-SerialPort::SerialPort()
-{
-
-}
 
 void SerialPort::attach(ring_buffer *rx_buffer, ring_buffer *tx_buffer,
   volatile uint8_t *ubrrh, volatile uint8_t *ubrrl,
