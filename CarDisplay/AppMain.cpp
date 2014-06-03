@@ -14,8 +14,8 @@
 DisplayType         display;
 extern ringbuffer   rx_buffer; 
 extern ringbuffer   tx_buffer; 
-SerialPortType      serial0(&rx_buffer, &tx_buffer);
-ProtocolType        protocol(serial0, display);
+UARTType            uart0(&rx_buffer, &tx_buffer);
+ProtocolType        protocol(uart0, display);
 CarDisplayType      carDisplay(display, protocol);
 
 
