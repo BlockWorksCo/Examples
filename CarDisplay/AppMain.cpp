@@ -12,10 +12,12 @@
 
 
 
+RxQueueType         rxQueue;
+TxQueueType         txQueue;
 ringbuffer          rx_buffer  =  { { 0 }, 0, 0 };
 ringbuffer          tx_buffer  =  { { 0 }, 0, 0 };
 DisplayType         display;
-UARTType            uart0(&rx_buffer, &tx_buffer);
+UARTType            uart0(&rx_buffer, &tx_buffer, rxQueue,txQueue);
 ProtocolType        protocol(uart0, display);
 CarDisplayType      carDisplay(display, protocol);
 

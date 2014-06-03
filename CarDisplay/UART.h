@@ -39,6 +39,8 @@ struct ringbuffer
 
 
 template <  uint32_t baud, 
+            typename rxQueueType,
+            typename txQueueType,
             uint8_t _ubrrh, uint8_t _ubrrl,
             uint8_t _ucsra, uint8_t _ucsrb,
             uint8_t _ucsrc, uint8_t _udr,
@@ -50,7 +52,7 @@ class UART
 {
   public:
 
-    UART(ringbuffer* _rxbuffer, ringbuffer* _txbuffer) :
+    UART(ringbuffer* _rxbuffer, ringbuffer* _txbuffer, rxQueueType& _rxQueue, txQueueType& _txQueue) :
             rxbuffer(_rxbuffer),
             txbuffer(_txbuffer),
             ubrrh((uint8_t*)_ubrrh),
@@ -59,7 +61,9 @@ class UART
             ucsrb((uint8_t*)_ucsrb),
             ucsrc((uint8_t*)_ucsrc),
             udr((uint8_t*)_udr),
-            transmitting(false)
+            transmitting(false),
+            rxQueue(_rxQueue),
+            txQueue(_txQueue)
     {
         uint16_t baudsetting;
         bool useu2x = true;
@@ -165,62 +169,64 @@ class UART
     }
 
 
-void store_char(unsigned char c, ringbuffer *buffer)
-{
-  int i = (unsigned int)(buffer->head + 1) % SERIAL_BUFFER_SIZE;
+    void store_char(unsigned char c, ringbuffer *buffer)
+    {
+      int i = (unsigned int)(buffer->head + 1) % SERIAL_BUFFER_SIZE;
 
-  // if we should be storing the received character into the location
-  // just before the tail (meaning that the head would advance to the
-  // current location of the tail), we're about to overflow the buffer
-  // and so we don't write the character or advance the head.
-  if (i != buffer->tail) {
-    buffer->buffer[buffer->head] = c;
-    buffer->head = i;
-  }
-}
-
-
-void RxISR()
-{
-    if (bit_is_clear(UCSR0A, UPE0)) {
-      unsigned char c = UDR0;
-      store_char(c, rxbuffer);
-    } else {
-      unsigned char c = UDR0;
-    };    
-}
+      // if we should be storing the received character into the location
+      // just before the tail (meaning that the head would advance to the
+      // current location of the tail), we're about to overflow the buffer
+      // and so we don't write the character or advance the head.
+      if (i != buffer->tail) {
+        buffer->buffer[buffer->head] = c;
+        buffer->head = i;
+      }
+    }
 
 
-void TxISR()
-{
-  if (txbuffer->head == txbuffer->tail) 
-  {
-    // Buffer empty, so disable interrupts
-  cbi(UCSR0B, UDRIE0);
-  }
-  else {
-    // There is more data in the output buffer. Send the next byte
-    unsigned char c = txbuffer->buffer[txbuffer->tail];
-    txbuffer->tail = (txbuffer->tail + 1) % SERIAL_BUFFER_SIZE;
-    
-    UDR0 = c;
-  }    
-}
+    void RxISR()
+    {
+        if (bit_is_clear(UCSR0A, UPE0)) {
+          unsigned char c = UDR0;
+          store_char(c, rxbuffer);
+        } else {
+          unsigned char c = UDR0;
+        };    
+    }
+
+
+    void TxISR()
+    {
+      if (txbuffer->head == txbuffer->tail) 
+      {
+        // Buffer empty, so disable interrupts
+      cbi(UCSR0B, UDRIE0);
+      }
+      else {
+        // There is more data in the output buffer. Send the next byte
+        unsigned char c = txbuffer->buffer[txbuffer->tail];
+        txbuffer->tail = (txbuffer->tail + 1) % SERIAL_BUFFER_SIZE;
+        
+        UDR0 = c;
+      }    
+    }
 
 private:
 
     //
     //
     //
-    ringbuffer* rxbuffer;
-    ringbuffer* txbuffer;
-    bool        transmitting;
-    uint8_t*    ubrrh;
-    uint8_t*    ubrrl;
-    uint8_t*    ucsra;
-    uint8_t*    ucsrb;
-    uint8_t*    ucsrc;
-    uint8_t*    udr;
+    ringbuffer*     rxbuffer;
+    ringbuffer*     txbuffer;
+    bool            transmitting;
+    uint8_t*        ubrrh;
+    uint8_t*        ubrrl;
+    uint8_t*        ucsra;
+    uint8_t*        ucsrb;
+    uint8_t*        ucsrc;
+    uint8_t*        udr;
+    rxQueueType&    rxQueue;
+    txQueueType&    txQueue;
 
 };
 
