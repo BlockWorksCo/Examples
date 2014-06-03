@@ -21,7 +21,6 @@ OBJS=\
 AppMain.o \
 wiring.o \
 wiring_shift.o \
-SerialPort.o \
 Sprites.o \
 PlatformMain.o
 

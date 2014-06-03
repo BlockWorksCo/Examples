@@ -50,7 +50,7 @@ class UART
 {
   public:
 
-    SerialPort(ringbuffer* _rxbuffer, ringbuffer* _txbuffer) :
+    UART(ringbuffer* _rxbuffer, ringbuffer* _txbuffer) :
             rxbuffer(_rxbuffer),
             txbuffer(_txbuffer),
             ubrrh((uint8_t*)_ubrrh),
@@ -165,6 +165,47 @@ class UART
     }
 
 
+void store_char(unsigned char c, ringbuffer *buffer)
+{
+  int i = (unsigned int)(buffer->head + 1) % SERIAL_BUFFER_SIZE;
+
+  // if we should be storing the received character into the location
+  // just before the tail (meaning that the head would advance to the
+  // current location of the tail), we're about to overflow the buffer
+  // and so we don't write the character or advance the head.
+  if (i != buffer->tail) {
+    buffer->buffer[buffer->head] = c;
+    buffer->head = i;
+  }
+}
+
+
+void RxISR()
+{
+    if (bit_is_clear(UCSR0A, UPE0)) {
+      unsigned char c = UDR0;
+      store_char(c, rxbuffer);
+    } else {
+      unsigned char c = UDR0;
+    };    
+}
+
+
+void TxISR()
+{
+  if (txbuffer->head == txbuffer->tail) 
+  {
+    // Buffer empty, so disable interrupts
+  cbi(UCSR0B, UDRIE0);
+  }
+  else {
+    // There is more data in the output buffer. Send the next byte
+    unsigned char c = txbuffer->buffer[txbuffer->tail];
+    txbuffer->tail = (txbuffer->tail + 1) % SERIAL_BUFFER_SIZE;
+    
+    UDR0 = c;
+  }    
+}
 
 private:
 

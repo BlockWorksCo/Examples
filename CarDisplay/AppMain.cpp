@@ -11,9 +11,10 @@
 
 
 
+
+ringbuffer          rx_buffer  =  { { 0 }, 0, 0 };
+ringbuffer          tx_buffer  =  { { 0 }, 0, 0 };
 DisplayType         display;
-extern ringbuffer   rx_buffer; 
-extern ringbuffer   tx_buffer; 
 UARTType            uart0(&rx_buffer, &tx_buffer);
 ProtocolType        protocol(uart0, display);
 CarDisplayType      carDisplay(display, protocol);
@@ -32,9 +33,21 @@ template < uint8_t dataIn,
 
 
 
+
+
+SIGNAL(USART_RX_vect)
+{
+    uart0.RxISR();
+}
+
+
+
+
+
+
 void DebugOut(uint8_t c)
 {
-    serial0.write(c);
+    uart0.write(c);
 }
 
 
