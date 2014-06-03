@@ -46,6 +46,14 @@ SIGNAL(USART_RX_vect)
 
 
 
+ISR(USART_UDRE_vect)
+{
+    uart0.TxISR();
+}
+
+
+
+
 
 void DebugOut(uint8_t c)
 {
