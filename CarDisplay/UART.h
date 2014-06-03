@@ -61,9 +61,13 @@ class UART
             ucsrb((uint8_t*)_ucsrb),
             ucsrc((uint8_t*)_ucsrc),
             udr((uint8_t*)_udr),
-            transmitting(false),
             rxQueue(_rxQueue),
             txQueue(_txQueue)
+    {
+    }
+
+
+    void begin()
     {
         uint16_t baudsetting;
         bool useu2x = true;
@@ -73,11 +77,6 @@ class UART
         // with the Duemilanove and previous boards and the firmware on the 8U2
         // on the Uno and Mega 2560.
         //
-        if (baud == 57600) 
-        {
-            useu2x = false;
-        }
-
         tryagain:
 
         if (useu2x) 
@@ -103,8 +102,6 @@ class UART
         *ubrrh  = baudsetting >> 8;
         *ubrrl  = baudsetting;
 
-        transmitting = false;
-
         sbi(*ucsrb, rxen);
         sbi(*ucsrb, txen);
         sbi(*ucsrb, rxcie);
@@ -118,7 +115,11 @@ class UART
     //
     int available(void)
     {
-      return (unsigned int)(SERIAL_BUFFER_SIZE + rxbuffer->head - rxbuffer->tail) % SERIAL_BUFFER_SIZE;
+#if 1
+        return (unsigned int)(SERIAL_BUFFER_SIZE + rxbuffer->head - rxbuffer->tail) % SERIAL_BUFFER_SIZE;
+#else
+        return rxQueue.NumberOfElementsInQueue();
+#endif      
     }
 
 
@@ -127,6 +128,7 @@ class UART
     //
     int read(void)
     {
+#if 1
         //
         // if the head isn't ahead of the tail, we don't have any characters
         //
@@ -140,6 +142,11 @@ class UART
             rxbuffer->tail = (unsigned int)(rxbuffer->tail + 1) % SERIAL_BUFFER_SIZE;
             return c;
         }
+#else
+        bool dataAvailableFlag  = false;
+        uint8_t c = rxQueue.Get(dataAvailableFlag);
+        return c;
+#endif        
     }
 
 
@@ -148,6 +155,7 @@ class UART
     //
     size_t write(uint8_t c)
     {
+#if 1    
         int     i = (txbuffer->head + 1) % SERIAL_BUFFER_SIZE;
 
         //
@@ -162,53 +170,71 @@ class UART
 
         sbi(*ucsrb, udrie);
         // clear the TXC bit -- "can be cleared by writing a one to its bit location"
-        transmitting = true;
         sbi(*ucsra, TXC0);
-
+#else
+        bool    elementDroppedFlag  = false;
+        txQueue.Put(c, elementDroppedFlag);        
+#endif
         return 1;
     }
 
-
     void store_char(unsigned char c, ringbuffer *buffer)
     {
+        bool elementDroppedFlag     = false;
+        rxQueue.Put(c, elementDroppedFlag);
+
       int i = (unsigned int)(buffer->head + 1) % SERIAL_BUFFER_SIZE;
 
       // if we should be storing the received character into the location
       // just before the tail (meaning that the head would advance to the
       // current location of the tail), we're about to overflow the buffer
       // and so we don't write the character or advance the head.
-      if (i != buffer->tail) {
+      if (i != buffer->tail) 
+      {
         buffer->buffer[buffer->head] = c;
         buffer->head = i;
       }
     }
 
-
     void RxISR()
     {
-        if (bit_is_clear(UCSR0A, UPE0)) {
-          unsigned char c = UDR0;
-          store_char(c, rxbuffer);
-        } else {
-          unsigned char c = UDR0;
-        };    
+        unsigned char c = UDR0;
+        if (bit_is_clear(UCSR0A, UPE0)) 
+        {
+            store_char(c, rxbuffer);
+        } 
     }
 
 
     void TxISR()
     {
+#if 0
       if (txbuffer->head == txbuffer->tail) 
       {
         // Buffer empty, so disable interrupts
       cbi(UCSR0B, UDRIE0);
       }
-      else {
+      else 
+      {
         // There is more data in the output buffer. Send the next byte
         unsigned char c = txbuffer->buffer[txbuffer->tail];
         txbuffer->tail = (txbuffer->tail + 1) % SERIAL_BUFFER_SIZE;
         
         UDR0 = c;
       }    
+#else
+        if(txQueue.IsEmpty() == true)
+        {
+            // Buffer empty, so disable interrupts
+            cbi(UCSR0B, UDRIE0);
+        }
+        else
+        {
+            bool        dataAvailableFlag   = false;
+            uint8_t     ch  = txQueue.Get(dataAvailableFlag);
+            UDR0 = ch;
+        }
+#endif      
     }
 
 private:
@@ -218,7 +244,6 @@ private:
     //
     ringbuffer*     rxbuffer;
     ringbuffer*     txbuffer;
-    bool            transmitting;
     uint8_t*        ubrrh;
     uint8_t*        ubrrl;
     uint8_t*        ucsra;

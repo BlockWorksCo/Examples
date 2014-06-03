@@ -71,6 +71,7 @@ void DebugOut(uint8_t c)
 //
 extern "C" void AppMain()
 {
+    uart0.begin();
     DebugOut('>');
 
     carDisplay.Run();

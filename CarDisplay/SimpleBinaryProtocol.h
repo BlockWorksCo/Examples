@@ -6,7 +6,10 @@
 #define __SIMPLEBINARYPROTOCOL_H__
 
 
-void Flash();
+
+
+
+
 
 template <typename TransportType, typename DisplayType>
 class SimpleBinaryProtocol
