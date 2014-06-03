@@ -8,12 +8,12 @@
 
 
 
-ring_buffer rx_buffer  =  { { 0 }, 0, 0 };
-ring_buffer tx_buffer  =  { { 0 }, 0, 0 };
+ringbuffer rx_buffer  =  { { 0 }, 0, 0 };
+ringbuffer tx_buffer  =  { { 0 }, 0, 0 };
 
 
 
-inline void store_char(unsigned char c, ring_buffer *buffer)
+inline void store_char(unsigned char c, ringbuffer *buffer)
 {
   int i = (unsigned int)(buffer->head + 1) % SERIAL_BUFFER_SIZE;
 

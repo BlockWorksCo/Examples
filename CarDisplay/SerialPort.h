@@ -20,8 +20,8 @@
   Modified 14 August 2012 by Alarus
 */
 
-#ifndef SerialPort_h
-#define SerialPort_h
+#ifndef SerialPorth
+#define SerialPorth
 
 #include <inttypes.h>
 
@@ -39,30 +39,30 @@
 
 
 // Define config for Serial.begin(baud, config);
-#define SERIAL_5N1 0x00
-#define SERIAL_6N1 0x02
-#define SERIAL_7N1 0x04
-#define SERIAL_8N1 0x06
-#define SERIAL_5N2 0x08
-#define SERIAL_6N2 0x0A
-#define SERIAL_7N2 0x0C
-#define SERIAL_8N2 0x0E
-#define SERIAL_5E1 0x20
-#define SERIAL_6E1 0x22
-#define SERIAL_7E1 0x24
-#define SERIAL_8E1 0x26
-#define SERIAL_5E2 0x28
-#define SERIAL_6E2 0x2A
-#define SERIAL_7E2 0x2C
-#define SERIAL_8E2 0x2E
-#define SERIAL_5O1 0x30
-#define SERIAL_6O1 0x32
-#define SERIAL_7O1 0x34
-#define SERIAL_8O1 0x36
-#define SERIAL_5O2 0x38
-#define SERIAL_6O2 0x3A
-#define SERIAL_7O2 0x3C
-#define SERIAL_8O2 0x3E
+#define SERIAL5N1 0x00
+#define SERIAL6N1 0x02
+#define SERIAL7N1 0x04
+#define SERIAL8N1 0x06
+#define SERIAL5N2 0x08
+#define SERIAL6N2 0x0A
+#define SERIAL7N2 0x0C
+#define SERIAL8N2 0x0E
+#define SERIAL5E1 0x20
+#define SERIAL6E1 0x22
+#define SERIAL7E1 0x24
+#define SERIAL8E1 0x26
+#define SERIAL5E2 0x28
+#define SERIAL6E2 0x2A
+#define SERIAL7E2 0x2C
+#define SERIAL8E2 0x2E
+#define SERIAL5O1 0x30
+#define SERIAL6O1 0x32
+#define SERIAL7O1 0x34
+#define SERIAL8O1 0x36
+#define SERIAL5O2 0x38
+#define SERIAL6O2 0x3A
+#define SERIAL7O2 0x3C
+#define SERIAL8O2 0x3E
 
 
 
@@ -72,7 +72,7 @@
 // location from which to read.
 #define SERIAL_BUFFER_SIZE 64
 
-struct ring_buffer
+struct ringbuffer
 {
   unsigned char buffer[SERIAL_BUFFER_SIZE];
   volatile unsigned int head;
@@ -81,9 +81,9 @@ struct ring_buffer
 
 
 template <  uint32_t baud, 
-            uint8_t ubrrh, uint8_t ubrrl,
-            uint8_t ucsra, uint8_t ucsrb,
-            uint8_t ucsrc, uint8_t udr,
+            uint8_t _ubrrh, uint8_t _ubrrl,
+            uint8_t _ucsra, uint8_t _ucsrb,
+            uint8_t _ucsrc, uint8_t _udr,
             uint8_t rxen,  uint8_t txen, 
             uint8_t rxcie, uint8_t udrie, 
             uint8_t u2x
@@ -92,124 +92,59 @@ class SerialPort
 {
   public:
 
-    SerialPort()
+    SerialPort(ringbuffer* _rxbuffer, ringbuffer* _txbuffer) :
+            rxbuffer(_rxbuffer),
+            txbuffer(_txbuffer),
+            ubrrh((uint8_t*)_ubrrh),
+            ubrrl((uint8_t*)_ubrrl),
+            ucsra((uint8_t*)_ucsra),
+            ucsrb((uint8_t*)_ucsrb),
+            ucsrc((uint8_t*)_ucsrc),
+            udr((uint8_t*)_udr)
     {
-    }
-
-
-    void attach(ring_buffer *rx_buffer, ring_buffer *tx_buffer)
-    {
-        _rx_buffer = rx_buffer;
-        _tx_buffer = tx_buffer;
-
-        _ubrrh = (uint8_t*)ubrrh;
-        _ubrrl = (uint8_t*)ubrrl;
-        _ucsra = (uint8_t*)ucsra;
-        _ucsrb = (uint8_t*)ucsrb;
-        _ucsrc = (uint8_t*)ucsrc;
-        _udr = (uint8_t*)udr;
-
-        _rxen = rxen;
-        _txen = txen;
-        _rxcie = rxcie;
-        _udrie = udrie;
-        _u2x = u2x;  
-    }
-
-    
-
-
-    void begin()
-    {
-      uint16_t baud_setting;
-      bool use_u2x = true;
+      uint16_t baudsetting;
+      bool useu2x = true;
 
       // hardcoded exception for compatibility with the bootloader shipped
       // with the Duemilanove and previous boards and the firmware on the 8U2
       // on the Uno and Mega 2560.
       if (baud == 57600) 
       {
-        use_u2x = false;
+        useu2x = false;
       }
 
-    try_again:
+    tryagain:
 
-      if (use_u2x) 
+      if (useu2x) 
       {
-        *_ucsra = 1 << _u2x;
-        baud_setting = (F_CPU / 4 / baud - 1) / 2;
+        *ucsra = 1 << u2x;
+        baudsetting = (F_CPU / 4 / baud - 1) / 2;
       } 
       else 
       {
-        *_ucsra = 0;
-        baud_setting = (F_CPU / 8 / baud - 1) / 2;
+        *ucsra = 0;
+        baudsetting = (F_CPU / 8 / baud - 1) / 2;
       }
       
-      if ((baud_setting > 4095) && use_u2x)
+      if ((baudsetting > 4095) && useu2x)
       {
-        use_u2x = false;
-        goto try_again;
+        useu2x = false;
+        goto tryagain;
       }
 
-      // assign the baud_setting, a.k.a. ubbr (USART Baud Rate Register)
-      *_ubrrh = baud_setting >> 8;
-      *_ubrrl = baud_setting;
+      // assign the baudsetting, a.k.a. ubbr (USART Baud Rate Register)
+      *ubrrh = baudsetting >> 8;
+      *ubrrl = baudsetting;
 
       transmitting = false;
 
-      sbi(*_ucsrb, _rxen);
-      sbi(*_ucsrb, _txen);
-      sbi(*_ucsrb, _rxcie);
-      cbi(*_ucsrb, _udrie);
-
+      sbi(*ucsrb, rxen);
+      sbi(*ucsrb, txen);
+      sbi(*ucsrb, rxcie);
+      cbi(*ucsrb, udrie);
 
     }
 
-
-
-
-
-    void begin(byte config)
-    {
-      uint16_t baud_setting;
-      uint8_t current_config;
-      bool use_u2x = true;
-
-      // hardcoded exception for compatibility with the bootloader shipped
-      // with the Duemilanove and previous boards and the firmware on the 8U2
-      // on the Uno and Mega 2560.
-      if (baud == 57600) {
-        use_u2x = false;
-      }
-
-    try_again:
-      
-      if (use_u2x) {
-        *_ucsra = 1 << _u2x;
-        baud_setting = (F_CPU / 4 / baud - 1) / 2;
-      } else {
-        *_ucsra = 0;
-        baud_setting = (F_CPU / 8 / baud - 1) / 2;
-      }
-      
-      if ((baud_setting > 4095) && use_u2x)
-      {
-        use_u2x = false;
-        goto try_again;
-      }
-
-      // assign the baud_setting, a.k.a. ubbr (USART Baud Rate Register)
-      *_ubrrh = baud_setting >> 8;
-      *_ubrrl = baud_setting;
-
-      //set the data bits, parity, and stop bits
-      *_ucsrc = config;
-      
-      sbi(*_ucsrb, _rxen);
-      sbi(*_ucsrb, _txen);
-      sbi(*_ucsrb, _rxcie);
-      cbi(*_ucsrb, _udrie);
-    }
 
 
 
@@ -218,7 +153,7 @@ class SerialPort
 
     int available(void)
     {
-      return (unsigned int)(SERIAL_BUFFER_SIZE + _rx_buffer->head - _rx_buffer->tail) % SERIAL_BUFFER_SIZE;
+      return (unsigned int)(SERIAL_BUFFER_SIZE + rxbuffer->head - rxbuffer->tail) % SERIAL_BUFFER_SIZE;
     }
 
 
@@ -226,11 +161,11 @@ class SerialPort
     int read(void)
     {
       // if the head isn't ahead of the tail, we don't have any characters
-      if (_rx_buffer->head == _rx_buffer->tail) {
+      if (rxbuffer->head == rxbuffer->tail) {
         return -1;
       } else {
-        unsigned char c = _rx_buffer->buffer[_rx_buffer->tail];
-        _rx_buffer->tail = (unsigned int)(_rx_buffer->tail + 1) % SERIAL_BUFFER_SIZE;
+        unsigned char c = rxbuffer->buffer[rxbuffer->tail];
+        rxbuffer->tail = (unsigned int)(rxbuffer->tail + 1) % SERIAL_BUFFER_SIZE;
         return c;
       }
     }
@@ -238,21 +173,21 @@ class SerialPort
 
     size_t write(uint8_t c)
     {
-      int i = (_tx_buffer->head + 1) % SERIAL_BUFFER_SIZE;
+      int i = (txbuffer->head + 1) % SERIAL_BUFFER_SIZE;
       
       // If the output buffer is full, there's nothing for it other than to 
       // wait for the interrupt handler to empty it a bit
       // ???: return 0 here instead?
-      while (i == _tx_buffer->tail)
+      while (i == txbuffer->tail)
         ;
       
-      _tx_buffer->buffer[_tx_buffer->head] = c;
-      _tx_buffer->head = i;
+      txbuffer->buffer[txbuffer->head] = c;
+      txbuffer->head = i;
       
-      sbi(*_ucsrb, _udrie);
+      sbi(*ucsrb, udrie);
       // clear the TXC bit -- "can be cleared by writing a one to its bit location"
       transmitting = true;
-      sbi(*_ucsra, TXC0);
+      sbi(*ucsra, TXC0);
       
       return 1;
     }
@@ -260,20 +195,16 @@ class SerialPort
 
 
 private:
-    ring_buffer *_rx_buffer;
-    ring_buffer *_tx_buffer;
-    volatile uint8_t *_ubrrh;
-    volatile uint8_t *_ubrrl;
-    volatile uint8_t *_ucsra;
-    volatile uint8_t *_ucsrb;
-    volatile uint8_t *_ucsrc;
-    volatile uint8_t *_udr;
-    uint8_t _rxen;
-    uint8_t _txen;
-    uint8_t _rxcie;
-    uint8_t _udrie;
-    uint8_t _u2x;
+
+    ringbuffer *rxbuffer;
+    ringbuffer *txbuffer;
     bool transmitting;
+    uint8_t* ubrrh;
+    uint8_t* ubrrl;
+    uint8_t* ucsra;
+    uint8_t* ucsrb;
+    uint8_t* ucsrc;
+    uint8_t* udr;
 
 
 };

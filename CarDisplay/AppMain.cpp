@@ -12,9 +12,9 @@
 
 
 DisplayType         display;
-extern ring_buffer  rx_buffer; 
-extern ring_buffer  tx_buffer; 
-SerialPortType   serial0;
+extern ringbuffer   rx_buffer; 
+extern ringbuffer   tx_buffer; 
+SerialPortType      serial0(&rx_buffer, &tx_buffer);
 ProtocolType        protocol(serial0, display);
 CarDisplayType      carDisplay(display, protocol);
 
@@ -48,9 +48,6 @@ void DebugOut(uint8_t c)
 //
 extern "C" void AppMain()
 {
-    serial0.attach(&rx_buffer, &tx_buffer);
-    serial0.begin();
-  
     DebugOut('>');
 
     carDisplay.Run();
