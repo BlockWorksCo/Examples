@@ -83,7 +83,10 @@ struct ring_buffer
 template <  uint32_t baud, 
             uint8_t ubrrh, uint8_t ubrrl,
             uint8_t ucsra, uint8_t ucsrb,
-            uint8_t ucsrc, uint8_t udr
+            uint8_t ucsrc, uint8_t udr,
+            uint8_t rxen,  uint8_t txen, 
+            uint8_t rxcie, uint8_t udrie, 
+            uint8_t u2x
         >
 class SerialPort
 {
@@ -94,8 +97,7 @@ class SerialPort
     }
 
 
-    void attach(ring_buffer *rx_buffer, ring_buffer *tx_buffer,
-                uint8_t rxen, uint8_t txen, uint8_t rxcie, uint8_t udrie, uint8_t u2x)
+    void attach(ring_buffer *rx_buffer, ring_buffer *tx_buffer)
     {
         _rx_buffer = rx_buffer;
         _tx_buffer = tx_buffer;

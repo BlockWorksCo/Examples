@@ -48,7 +48,7 @@ void DebugOut(uint8_t c)
 //
 extern "C" void AppMain()
 {
-    serial0.attach(&rx_buffer, &tx_buffer, RXEN0, TXEN0, RXCIE0, UDRIE0, U2X0);
+    serial0.attach(&rx_buffer, &tx_buffer);
     serial0.begin();
   
     DebugOut('>');
