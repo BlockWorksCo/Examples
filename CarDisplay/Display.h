@@ -108,7 +108,7 @@ public:
     //
     void BitBlt(int8_t x, int8_t y, uint8_t width, uint8_t height, uint8_t* data)
     {
-        if(x >= 32)
+        if(x >= (NUMBER_OF_8x8_MATRICES*8) )
         {
             return;
         }
@@ -128,9 +128,9 @@ public:
             return;
         }
 
-        if(x+width > 32)
+        if(x+width > (NUMBER_OF_8x8_MATRICES*8) )
         {
-            width = 32-x;
+            width = (NUMBER_OF_8x8_MATRICES*8)-x;
         }
 
         if(x<0)

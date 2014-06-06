@@ -11,19 +11,33 @@
 
 
 
-template <typename TransportType, typename DisplayType>
+template <typename TransportType, typename DisplayType, typename RxQueueType, typename TxQueueType>
 class SimpleBinaryProtocol
 {
 
 public:
 
-    SimpleBinaryProtocol(TransportType& _transport, DisplayType& _display) :
+    SimpleBinaryProtocol(TransportType& _transport, DisplayType& _display, RxQueueType& _rxQ, TxQueueType& _txQ) :
             transport(_transport),
             position(0),
-            display(_display)
+            display(_display),
+            rxQ(_rxQ),
+            txQ(_txQ)
     {
-        
     }
+
+
+
+void Fn1()
+{
+    bool dataAvailableFlag  = false;
+    uint8_t ch = rxQ.Get(dataAvailableFlag);
+    if(dataAvailableFlag == true)
+    {
+        DebugOut(ch);
+    }
+}
+
 
 
     void Process()
@@ -31,10 +45,13 @@ public:
         //
         //
         //
-        while(transport.available() != 0)
+        bool dataAvailableFlag  = false;
+        uint8_t ch = rxQ.Get(dataAvailableFlag);
+        if(dataAvailableFlag == true)
         {
-            uint8_t     ch  = transport.read();
-            ProcessRawByte(ch);
+            DebugOut(ch);
+
+            //ProcessRawByte(ch);
         }        
     }
 
@@ -127,12 +144,14 @@ public:
 
 
 
-private:
+//private:
 
     TransportType&  transport;
     DisplayType&    display;
+    RxQueueType&    rxQ;
+    TxQueueType&    txQ;
 
-    uint8_t  position;
+    uint8_t         position;
 
 
 

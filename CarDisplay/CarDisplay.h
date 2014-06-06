@@ -12,22 +12,15 @@
 
 
 
-void ProcessRawByte(uint8_t byte);
-void ProcessDataByte(uint8_t byte);
-
-void DebugOut(uint8_t c);
-
-
 template <typename DisplayType, typename CommsProtocolType>
 class CarDisplay
 {
 public:
 
-    CarDisplay(DisplayType _display, CommsProtocolType& _commsProtocol) :
+    CarDisplay(DisplayType& _display, CommsProtocolType& _commsProtocol) :
             display(_display),
             commsProtocol(_commsProtocol)
     {
-
     }
 
     //
@@ -35,11 +28,11 @@ public:
     //
     void Run() 
     {
+#if 0        
         //
         //
         //
         display.setup();
-        DebugOut('*');            
 
         //
         //
@@ -52,7 +45,7 @@ public:
         display.drawFrame();
         delay(1000);
         display.clear();
-
+#endif
         //
         // Draw the frame to the display.
         //

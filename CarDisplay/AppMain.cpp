@@ -9,16 +9,11 @@
 
 
 
-
-
-
 RxQueueType         rxQueue;
 TxQueueType         txQueue;
-ringbuffer          rx_buffer  =  { { 0 }, 0, 0 };
-ringbuffer          tx_buffer  =  { { 0 }, 0, 0 };
 DisplayType         display;
-UARTType            uart0(&rx_buffer, &tx_buffer, rxQueue,txQueue);
-ProtocolType        protocol(uart0, display);
+UARTType            uart0(rxQueue,txQueue);
+ProtocolType        protocol(uart0, display, rxQueue, txQueue);
 CarDisplayType      carDisplay(display, protocol);
 
 
@@ -37,7 +32,7 @@ template < uint8_t dataIn,
 
 
 
-SIGNAL(USART_RX_vect)
+ISR(USART_RX_vect)
 {
     uart0.RxISR();
 }
@@ -55,10 +50,24 @@ ISR(USART_UDRE_vect)
 
 
 
-void DebugOut(uint8_t c)
+void DebugOut(uint8_t ch)
 {
-    uart0.write(c);
+    UDR0 = ch;
+    delay(1);
 }
+
+
+
+void Fn1()
+{
+    bool dataAvailableFlag  = false;
+    uint8_t ch = protocol.rxQ.Get(dataAvailableFlag);
+    if(dataAvailableFlag == true)
+    {
+        DebugOut(ch);
+    }
+}
+
 
 
 //
@@ -71,8 +80,23 @@ void DebugOut(uint8_t c)
 //
 extern "C" void AppMain()
 {
+    /*
+    Flash();
+    for(volatile uint32_t i=0; i<20000; i++);
+    Flash();
+    for(volatile uint32_t i=0; i<20000; i++);
+ */   
+    //init();
+
     uart0.begin();
-    DebugOut('>');
+
+    //while(&protocol.rxQ == &rxQueue) {init();Flash();DebugOut('*');}
+
+    while(true)
+    {
+        //Fn1();
+        protocol.Fn1();
+    }
 
     carDisplay.Run();
 }
