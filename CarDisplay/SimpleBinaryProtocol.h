@@ -37,9 +37,11 @@ public:
         uint8_t ch = rxQ.Get(dataAvailableFlag);
         if(dataAvailableFlag == true)
         {
-            DebugOut(ch);
+            //DebugOut(ch);
+            ProcessRawByte(ch);
         }
-        Flash();
+        delay(0);
+        //cli();
     }
 
 

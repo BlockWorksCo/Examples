@@ -38,7 +38,7 @@ typedef Display<2,
             5,
             5 >     DisplayType;
 
-typedef Queue<uint8_t, 8, uint8_t>     RxQueueType;
+typedef Queue<uint8_t, 128, uint8_t>     RxQueueType;
 typedef Queue<uint8_t, 8, uint8_t>     TxQueueType;
 
 typedef UART<19200,

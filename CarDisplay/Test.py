@@ -310,13 +310,13 @@ def VertDiffScroll(topLine, bottomLine):
                 charWidth = drawChar(x,0, bottomLine[position])
 
             if topLine[position] == ' ':
-                charWidth = 3
-            else:
                 charWidth = 4
+            else:
+                charWidth = 5
             x   = x + charWidth
 
         drawFrame()
-        #time.sleep(0.1)
+        time.sleep(0.0)
 
 
 
@@ -347,16 +347,24 @@ def VertTest():
 def t0():
     while True:
         clear()
-        y = -2
-        drawText(0,y+8, 'World')
-        drawText(0,y, 'Hello')
+        y = 0
+        #drawText(10,y+8, '>World<')
+        drawText(0,y, '>>> Hello <<<')
         drawFrame()
+        time.sleep(0.5)
+
+def t1():
+    lowIntensity()
+    time.sleep(1.0)
+    for x in range(0,30):
+        clear()
+        drawText(x,0, 'Hello World')
         time.sleep(1.0)
 
-highIntensity()
 
+t0()
 #VertTest()
-VertClock()
+#VertClock()
 #ser.close() 
 
 
