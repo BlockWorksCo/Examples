@@ -52,21 +52,15 @@ ISR(USART_UDRE_vect)
 
 void DebugOut(uint8_t ch)
 {
+/*    
     UDR0 = ch;
     delay(1);
+*/
+    bool blaa;
+    txQueue.Put(ch, blaa);
+    uart0.Process();
 }
 
-
-
-void Fn1()
-{
-    bool dataAvailableFlag  = false;
-    uint8_t ch = protocol.rxQ.Get(dataAvailableFlag);
-    if(dataAvailableFlag == true)
-    {
-        DebugOut(ch);
-    }
-}
 
 
 
@@ -80,23 +74,7 @@ void Fn1()
 //
 extern "C" void AppMain()
 {
-    /*
-    Flash();
-    for(volatile uint32_t i=0; i<20000; i++);
-    Flash();
-    for(volatile uint32_t i=0; i<20000; i++);
- */   
-    //init();
-
     uart0.begin();
-
-    //while(&protocol.rxQ == &rxQueue) {init();Flash();DebugOut('*');}
-
-    while(true)
-    {
-        //Fn1();
-        protocol.Fn1();
-    }
 
     carDisplay.Run();
 }

@@ -28,32 +28,20 @@ public:
 
 
 
-void Fn1()
-{
-    bool dataAvailableFlag  = false;
-    uint8_t ch = rxQ.Get(dataAvailableFlag);
-    if(dataAvailableFlag == true)
-    {
-        DebugOut(ch);
-    }
-}
-
-
-
+    //
+    //
+    //
     void Process()
     {
-        //
-        //
-        //
         bool dataAvailableFlag  = false;
         uint8_t ch = rxQ.Get(dataAvailableFlag);
         if(dataAvailableFlag == true)
         {
             DebugOut(ch);
-
-            //ProcessRawByte(ch);
-        }        
+        }
+        Flash();
     }
+
 
     //
     //

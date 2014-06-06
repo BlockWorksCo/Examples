@@ -28,7 +28,6 @@ public:
     //
     void Run() 
     {
-#if 0        
         //
         //
         //
@@ -45,7 +44,7 @@ public:
         display.drawFrame();
         delay(1000);
         display.clear();
-#endif
+
         //
         // Draw the frame to the display.
         //
