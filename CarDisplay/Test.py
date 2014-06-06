@@ -212,34 +212,36 @@ SpriteWidths = \
 
 
 
-ser = serial.Serial(
-    port=2,
-    baudrate=19200)
+ser = serial.Serial(port=2, baudrate=19200)
 
+def Send(data):
+    for ch in data:
+        ser.write('%c'%(ch))
+        #time.sleep(0.1)
 
 
 
 def lowIntensity():
     """
     """
-    ser.write('%c%c'%(27,2))
+    Send('%c%c'%(27,2))
 
 def highIntensity():
     """
     """
-    ser.write('%c%c'%(27,3))
+    Send('%c%c'%(27,3))
 
 
 def clear():
     """
     """
-    ser.write('%c%c'%(27,1))
+    Send('%c%c'%(27,1))
 
 
 def drawFrame():
     """
     """
-    ser.write('%c%c'%(27,4))
+    Send('%c%c'%(27,4))
 
 
 def int8_to_uint8(i):
@@ -250,10 +252,8 @@ def drawSprite(x,y,sprite):
     """
     """
 
-    ser.write('%c%c'%(27,0))
-    ser.write('%c%c%c'%( int8_to_uint8(x),int8_to_uint8(y),int(sprite) ))
-
-
+    Send('%c%c'%(27,0))
+    Send('%c%c%c'%( int8_to_uint8(x),int8_to_uint8(y),int(sprite) ))
 
 
 def drawChar(x,y, char):
@@ -269,6 +269,13 @@ def drawText(x, y, text):
     for char in text:
         charWidth = drawChar(x,y, char)
         x   = x + charWidth
+
+
+
+
+
+
+
 
 
 
@@ -347,14 +354,15 @@ def VertTest():
 def t0():
     while True:
         clear()
+        lowIntensity()
         y = 0
         #drawText(10,y+8, '>World<')
-        drawText(0,y, '>>> Hello <<<')
+        #drawText(0,y, '>>> Hello <<<')
+        drawText(0,y, 'BlockWorks')
         drawFrame()
         time.sleep(0.5)
 
 def t1():
-    lowIntensity()
     time.sleep(1.0)
     for x in range(0,30):
         clear()
@@ -362,9 +370,9 @@ def t1():
         time.sleep(1.0)
 
 
-t0()
+#t0()
 #VertTest()
-#VertClock()
+VertClock()
 #ser.close() 
 
 
