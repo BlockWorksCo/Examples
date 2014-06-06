@@ -7,12 +7,11 @@
 
 
 
+#include "Platform.h"
 #include "Display.h"
 #include "CarDisplay.h"
 #include "UART.h"
 #include "SimpleBinaryProtocol.h"
-#include "Platform.h"
-#include "wiring_private.h"
 #include "Queue.h"
 
 
