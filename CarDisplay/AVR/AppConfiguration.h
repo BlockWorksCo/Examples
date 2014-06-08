@@ -32,16 +32,15 @@
          
 
 
-typedef Display<2,
-            3,
-            4,
-            5,
-            5 >     DisplayType;
+typedef Display< 2,
+            	 3,
+                 4,
+                 5 >     DisplayType;
 
-typedef Queue<uint8_t, 128, uint8_t>     RxQueueType;
-typedef Queue<uint8_t, 8, uint8_t>     TxQueueType;
+typedef Queue<uint8_t, 128, uint8_t>     	RxQueueType;
+typedef Queue<uint8_t, 64, uint8_t>     	TxQueueType;
 
-typedef UART<19200,
+typedef UART<115200,
              RxQueueType, TxQueueType,
              _UBRR0H, _UBRR0L, _UCSR0A, _UCSR0B, _UCSR0C, _UDR0, RXEN0, TXEN0, RXCIE0, UDRIE0, U2X0>     UARTType;
 

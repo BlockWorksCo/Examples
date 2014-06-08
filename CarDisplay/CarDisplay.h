@@ -54,6 +54,7 @@ public:
         //
         while(true)
         {
+            sei();
             commsProtocol.Process();        
         }
     }

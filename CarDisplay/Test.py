@@ -212,12 +212,13 @@ SpriteWidths = \
 
 
 
-ser = serial.Serial(port=2, baudrate=19200)
+ser = serial.Serial(port=2, baudrate=115200)
 
 def Send(data):
     for ch in data:
         ser.write('%c'%(ch))
         #time.sleep(0.1)
+    #time.sleep(0.1)
 
 
 

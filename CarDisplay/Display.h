@@ -12,14 +12,15 @@
 
 extern "C" const unsigned char SPRITES[7];
 
+#define NUMBER_OF_SPRITES   (94)
+
 //
 //
 //
 template < uint8_t dataIn,
-            uint8_t load,
-            uint8_t clock,
-            uint8_t power,
-            uint8_t NUMBER_OF_8x8_MATRICES >
+           uint8_t load,
+           uint8_t clock,
+           uint8_t NUMBER_OF_8x8_MATRICES >
 class Display
 {
 public:
@@ -43,7 +44,6 @@ public:
         pinMode(dataIn, OUTPUT);
         pinMode(clock,  OUTPUT);
         pinMode(load,   OUTPUT);
-        pinMode(power,  OUTPUT);
 
         //
         // initialisation of the max 7219
@@ -173,10 +173,13 @@ public:
     //
     void drawSprite(uint8_t spriteId, int8_t x, int8_t y)
     {
-        uint8_t     width   = SPRITES[(spriteId*7)+0];
-        uint8_t     height  = SPRITES[(spriteId*7)+1];
-        uint8_t*    data    = (uint8_t*)&SPRITES[(spriteId*7)+2];
-        BitBlt(x,y, width,height,  data);
+        if(spriteId < NUMBER_OF_SPRITES)
+        {
+            uint8_t     width   = SPRITES[(spriteId*7)+0];
+            uint8_t     height  = SPRITES[(spriteId*7)+1];
+            uint8_t*    data    = (uint8_t*)&SPRITES[(spriteId*7)+2];
+            BitBlt(x,y, width,height,  data);            
+        }
     }
 
 
@@ -264,7 +267,7 @@ private:
 
 
 
-    static uint8_t      frameBuffer[8*NUMBER_OF_8x8_MATRICES];
+    uint8_t      frameBuffer[8*NUMBER_OF_8x8_MATRICES];
 };
 
 

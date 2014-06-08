@@ -5,7 +5,6 @@
 
 
 
-
 extern "C"  const unsigned char SPRITES[] = 
 {
 3, 8, B0000000, B0000000, B0000000, B0000000, B0000000, // space

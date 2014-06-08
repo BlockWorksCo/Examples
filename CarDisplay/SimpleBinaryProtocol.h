@@ -27,7 +27,6 @@ public:
     }
 
 
-
     //
     //
     //
@@ -40,8 +39,6 @@ public:
             //DebugOut(ch);
             ProcessRawByte(ch);
         }
-        delay(0);
-        //cli();
     }
 
 
@@ -134,7 +131,7 @@ public:
 
 
 
-//private:
+private:
 
     TransportType&  transport;
     DisplayType&    display;

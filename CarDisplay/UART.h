@@ -88,6 +88,8 @@ class UART
         sbi(*ucsrb, txen);
         sbi(*ucsrb, rxcie);
         cbi(*ucsrb, udrie);
+
+        sei();
     }
 
 
@@ -96,8 +98,8 @@ class UART
     //
     void Process()
     {
-        sbi(*ucsrb, udrie);
-        sbi(*ucsra, TXC0);    
+        //sbi(*ucsrb, udrie);
+        //sbi(*ucsra, TXC0);    
     }
 
 
@@ -106,22 +108,25 @@ class UART
     //
     void RxISR()
     {
-        unsigned char c = UDR0;
+        uint8_t c                   = UDR0;
         bool    elementDroppedFlag  = false;
 
-        if (bit_is_clear(UCSR0A, UPE0)) 
+        //if (bit_is_clear(UCSR0A, UPE0)) 
         {
             rxQueue.Put(c, elementDroppedFlag);        
         } 
     }
 
 
+    //
+    //
+    //
     void TxISR()
     {
         if(txQueue.IsEmpty() == true)
         {
             // Buffer empty, so disable interrupts
-            cbi(UCSR0B, UDRIE0);
+            //cbi(UCSR0B, UDRIE0);
         }
         else
         {

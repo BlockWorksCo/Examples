@@ -17,22 +17,11 @@ ProtocolType        protocol(uart0, display, rxQueue, txQueue);
 CarDisplayType      carDisplay(display, protocol);
 
 
-template < uint8_t dataIn,
-            uint8_t load,
-            uint8_t clock,
-            uint8_t power,
-            uint8_t NUMBER_OF_8x8_MATRICES >
-            uint8_t Display<dataIn, load, clock, power, NUMBER_OF_8x8_MATRICES>::frameBuffer[8*NUMBER_OF_8x8_MATRICES];
 
 
 
 
-
-
-
-
-
-ISR(USART_RX_vect)
+SIGNAL(USART_RX_vect)
 {
     uart0.RxISR();
 }
@@ -41,9 +30,9 @@ ISR(USART_RX_vect)
 
 
 
-ISR(USART_UDRE_vect)
+SIGNAL(USART_UDRE_vect)
 {
-    uart0.TxISR();
+   // uart0.TxISR();////
 }
 
 
@@ -52,13 +41,9 @@ ISR(USART_UDRE_vect)
 
 void DebugOut(uint8_t ch)
 {
-/*    
-    UDR0 = ch;
-    delay(1);
-*/
-    bool blaa;
-    txQueue.Put(ch, blaa);
-    uart0.Process();
+//    bool blaa;
+//    txQueue.Put(ch, blaa);
+//    uart0.Process();
 }
 
 
