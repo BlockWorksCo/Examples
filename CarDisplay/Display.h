@@ -78,6 +78,15 @@ public:
     void drawFrame()
     {
         //
+        // initialisation of the max 7219
+        //
+        setAll(max7219_reg_displayTest, 0);
+        setAll(max7219_reg_shutdown,    1);
+        setAll(max7219_reg_scanLimit,   7);
+        setAll(max7219_reg_intensity,   0xf);
+        setAll(max7219_reg_decodeMode,  0);
+
+        //
         //
         //
         for(int j=0; j<8; j++)

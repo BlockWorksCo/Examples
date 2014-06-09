@@ -212,7 +212,7 @@ SpriteWidths = \
 
 
 
-ser = serial.Serial(port=2, baudrate=115200)
+ser = serial.Serial(port=2, baudrate=19200)
 
 def Send(data):
     for ch in data:
@@ -346,10 +346,12 @@ def VertTest():
     """
 
     while True:
-        VertScroll('Hello1','World2')
-        time.sleep(1.0)
-        VertScroll('World2','Hello1')
-        time.sleep(1.0)
+        VertScroll('Hello     ','World     ')
+        time.sleep(0.5)
+        VertScroll('World     ','BlockWorks')
+        time.sleep(0.5)
+        VertScroll('BlockWorks','Hello     ')
+        time.sleep(0.5)
 
 
 def t0():
@@ -372,8 +374,8 @@ def t1():
 
 
 #t0()
-#VertTest()
-VertClock()
+VertTest()
+#VertClock()
 #ser.close() 
 
 

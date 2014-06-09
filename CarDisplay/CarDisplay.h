@@ -52,6 +52,7 @@ public:
         //
         // Draw the frame to the display.
         //
+        sei();
         while(true)
         {
             sei();
