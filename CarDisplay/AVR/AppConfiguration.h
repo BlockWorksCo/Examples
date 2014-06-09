@@ -32,9 +32,9 @@
          
 
 
-typedef Display< 2,
-            	 3,
-                 4,
+typedef Display< 2, //data
+            	 3, // load
+                 4, // clock
                  5 >     DisplayType;
 
 typedef Queue<uint8_t, 128, uint8_t>     	RxQueueType;
