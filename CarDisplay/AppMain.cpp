@@ -21,7 +21,7 @@ CarDisplayType      carDisplay(display, protocol);
 
 
 
-SIGNAL(USART_RX_vect)
+ISR(USART_RX_vect)
 {
     uart0.RxISR();
 }
@@ -30,9 +30,9 @@ SIGNAL(USART_RX_vect)
 
 
 
-SIGNAL(USART_UDRE_vect)
+ISR(USART_UDRE_vect)
 {
-   // uart0.TxISR();////
+   uart0.TxISR();////
 }
 
 
@@ -41,9 +41,9 @@ SIGNAL(USART_UDRE_vect)
 
 void DebugOut(uint8_t ch)
 {
-//    bool blaa;
-//    txQueue.Put(ch, blaa);
-//    uart0.Process();
+    bool blaa;
+    txQueue.Put(ch, blaa);
+    uart0.Process();
 }
 
 
