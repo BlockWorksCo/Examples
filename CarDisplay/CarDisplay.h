@@ -12,9 +12,11 @@
 
 
 
-template <typename DisplayType, typename CommsProtocolType>
+template <typename DisplayType, typename pair>
 class CarDisplay
 {
+
+    typedef typename pair::protocolType CommsProtocolType;
 public:
 
     CarDisplay(DisplayType& _display, CommsProtocolType& _commsProtocol) :

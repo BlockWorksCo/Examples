@@ -13,8 +13,8 @@ RxQueueType         rxQueue;
 TxQueueType         txQueue;
 DisplayType         display;
 UARTType            uart0(rxQueue,txQueue);
-ProtocolType        protocol(uart0, display, rxQueue, txQueue);
-CarDisplayType      carDisplay(display, protocol);
+MessageHandlingPair::protocolType        protocol(uart0, display, rxQueue, txQueue);
+MessageHandlingPair::handlerType      carDisplay(display, protocol);
 
 
 

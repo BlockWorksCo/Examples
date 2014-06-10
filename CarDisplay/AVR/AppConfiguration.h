@@ -40,13 +40,31 @@ typedef Display< 2, //data
 typedef Queue<uint8_t, 128, uint8_t>     	RxQueueType;
 typedef Queue<uint8_t, 64, uint8_t>     	TxQueueType;
 
+
+
 typedef UART<19200,
              RxQueueType, TxQueueType,
-             _UBRR0H, _UBRR0L, _UCSR0A, _UCSR0B, _UCSR0C, _UDR0, RXEN0, TXEN0, RXCIE0, UDRIE0, U2X0>     UARTType;
+             _UBRR0H, _UBRR0L, _UCSR0A, _UCSR0B, _UCSR0C, _UDR0, RXEN0, TXEN0, RXCIE0, UDRIE0, U2X0
+             >     UARTType;
 
-typedef SimpleBinaryProtocol<UARTType, DisplayType, RxQueueType, TxQueueType>   ProtocolType;
+#if 0
+typedef SimpleBinaryProtocol<UARTType, DisplayType, RxQueueType, TxQueueType, MessageHandlingPair>   ProtocolType;
 
-typedef CarDisplay<DisplayType, ProtocolType>   CarDisplayType;
+typedef CarDisplay<DisplayType, ProtocolType, MessageHandlingPair>   CarDisplayType;
+
+
+#endif
+
+
+struct MessageHandlingPair 
+{
+
+	typedef CarDisplay<DisplayType, MessageHandlingPair>   handlerType;
+
+
+	typedef SimpleBinaryProtocol<UARTType, DisplayType, RxQueueType, TxQueueType, MessageHandlingPair>   protocolType;
+
+};
 
 
 

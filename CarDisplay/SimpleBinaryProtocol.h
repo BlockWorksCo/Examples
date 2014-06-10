@@ -11,9 +11,10 @@
 
 
 
-template <typename TransportType, typename DisplayType, typename RxQueueType, typename TxQueueType>
+template <typename TransportType, typename DisplayType, typename RxQueueType, typename TxQueueType, typename pair>
 class SimpleBinaryProtocol
 {
+    typedef typename pair::handlerType HandlerType;
 
 public:
 
