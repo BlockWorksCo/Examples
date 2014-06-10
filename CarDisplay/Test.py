@@ -403,9 +403,35 @@ def t1():
         time.sleep(1.0)
 
 
+def BlockWorks():
+    """
+    """
+    while True:
+        clear()
+        drawFrame()
+
+        for x in range(-20, 1):
+            clear();
+            drawText(x,0, 'Block')
+            drawFrame()
+            time.sleep(0.01)
+
+        time.sleep(0.5)
+
+        for x in range(40, 18, -1):
+            clear();
+            drawText(0,0, 'Block')
+            drawText(x,0, 'Works')
+            drawFrame()
+            time.sleep(0.01)
+
+        time.sleep(0.5)
+
+
 #t0()
+BlockWorks()
 #VertTest()
-VertClock()
+#VertClock()
 #ser.close() 
 
 
