@@ -45,22 +45,6 @@ public:
 
 
 
-
-    //
-    //
-    //
-    void ProcessDataByte(uint8_t byte)
-    {
-
-        switch(position)
-        {
-            default:
-                break;
-        }
-
-        position++;
-    }
-
     //
     // 0 1 2 3 27 4 5 6 7 = D0 D1 D2 D3 C4 D5 D6 D7
     // 0 1 2 3 27 27 4 5 6 7 = D0 D1 D2 D3 D27 D4 D5 D6 D7
