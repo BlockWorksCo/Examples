@@ -5,7 +5,7 @@ import serial
 import time
 import ctypes
 import datetime
-
+import struct
 
 
 
@@ -214,35 +214,65 @@ SpriteWidths = \
 
 ser = serial.Serial(port=2, baudrate=19200)
 
+
+def ByteOut(value):
+    """
+    """
+    ser.write('%c'%(value))
+    #print('[%02d]'%( int(value) ) )
+
+
 def Send(data):
     for ch in data:
-        ser.write('%c'%(ch))
-        #time.sleep(0.1)
-    #time.sleep(0.1)
+        if ch == 27:
+            ByteOut(27)
+            ByteOut(27)
+        else:
+            ByteOut(ch)
+
+
+
+
+def SendMessage(type, payload):
+    """
+    """
+
+    ByteOut(27)
+    ByteOut(0)
+
+    checksum    = 0
+    length      = len(payload)
+    Send( struct.pack('BBB',length, checksum, type) )
+    Send( payload )
+
+    ser.write('%c%c'%(27,255))
+
+    ByteOut(27)
+    ByteOut(255)
 
 
 
 def lowIntensity():
     """
     """
-    Send('%c%c'%(27,2))
+    SendMessage(2, struct.pack('B',1) )
 
 def highIntensity():
     """
     """
-    Send('%c%c'%(27,3))
+    SendMessage(2, struct.pack('B',15) )
 
 
 def clear():
     """
     """
-    Send('%c%c'%(27,1))
+    SendMessage(1, struct.pack('B',0) )
 
 
 def drawFrame():
     """
     """
-    Send('%c%c'%(27,4))
+    SendMessage(4, struct.pack('B',0) )
 
 
 def int8_to_uint8(i):
@@ -252,9 +282,10 @@ def int8_to_uint8(i):
 def drawSprite(x,y,sprite):
     """
     """
+    SendMessage(5, struct.pack('BBB',int8_to_uint8(x),int8_to_uint8(y),int(sprite)) )
 
-    Send('%c%c'%(27,0))
-    Send('%c%c%c'%( int8_to_uint8(x),int8_to_uint8(y),int(sprite) ))
+    #Send('%c%c'%(27,0))
+    #Send('%c%c%c'%( int8_to_uint8(x),int8_to_uint8(y),int(sprite) ))
 
 
 def drawChar(x,y, char):
@@ -374,8 +405,8 @@ def t1():
 
 
 #t0()
-VertTest()
-#VertClock()
+#VertTest()
+VertClock()
 #ser.close() 
 
 

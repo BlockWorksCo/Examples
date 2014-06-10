@@ -25,6 +25,63 @@ public:
     {
     }
 
+
+    //
+    //
+    //
+    void ProcessMessage(uint8_t (&rawMessage)[16])
+    {
+        typedef union
+        {
+            uint8_t     uint8Value;
+            uint16_t    uint16Value;
+            uint8_t     byteValues[1];
+
+        } PayloadType;
+
+        typedef struct
+        {
+            uint8_t     length;
+            uint8_t     checksum;
+            uint8_t     type;
+            PayloadType payload;
+        } MessageType;
+
+        MessageType&    message     = *((MessageType*)&rawMessage);
+        static uint8_t  xPos        = 0;
+        static uint8_t  yPos        = 0;
+        static uint8_t  spriteId    = 0;
+
+        switch(message.type)
+        {
+            case 0:
+                break;
+
+            case 1:
+                display.clear();
+                break;
+
+            case 2:
+                display.setIntensity(message.payload.byteValues[0]);
+                break;
+
+            case 4:
+                display.drawFrame();
+                break;
+
+            case 5:
+                xPos        = message.payload.byteValues[0];
+                yPos        = message.payload.byteValues[1];
+                spriteId    = message.payload.byteValues[2];
+                display.drawSprite(spriteId, xPos, yPos);
+
+                break;
+
+            default:
+                break;
+        }
+    }
+
     //
     //
     //
