@@ -51,7 +51,7 @@ typedef Queue<uint8_t, 64, uint8_t>     	TxQueueType;
 
 
 
-typedef UART<38400,
+typedef UART<115200,
              RxQueueType, TxQueueType,
              _UBRR0H, _UBRR0L, _UCSR0A, _UCSR0B, _UCSR0C, _UDR0, RXEN0, TXEN0, RXCIE0, UDRIE0, U2X0
              >     UARTType;

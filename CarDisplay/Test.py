@@ -212,7 +212,7 @@ SpriteWidths = \
 
 
 
-ser = serial.Serial(port=2, baudrate=38400)
+ser = serial.Serial(port=2, baudrate=115200)
 
 
 def ByteOut(value):
