@@ -33,10 +33,6 @@ public:
     //
     void ProcessMessage(MessageType& message, uint8_t numberOfBytes)
     {
-        static uint8_t  xPos        = 0;
-        static uint8_t  yPos        = 0;
-        static uint8_t  spriteId    = 0;
-
         switch(message.type)
         {
             case 0:
@@ -55,12 +51,14 @@ public:
                 break;
 
             case 5:
-                xPos        = message.payload.byteValues[0];
-                yPos        = message.payload.byteValues[1];
-                spriteId    = message.payload.byteValues[2];
-                display.drawSprite(spriteId, xPos, yPos);
-
+            {
+                uint8_t     xPos        = message.payload.byteValues[0];
+                uint8_t     yPos        = message.payload.byteValues[1];
+                uint8_t     spriteId    = message.payload.byteValues[2];
+                display.drawSprite(spriteId, xPos, yPos);                
                 break;
+            }
+
 
             default:
                 break;
