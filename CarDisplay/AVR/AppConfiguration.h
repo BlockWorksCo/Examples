@@ -38,10 +38,7 @@ typedef AVROutput<3> 	LoadOutputType;
 typedef AVROutput<4> 	ClockOutputType;
 
 
-typedef Display< 2, //data
-            	 3, // load
-                 4, // clock
-                 5,
+typedef Display< 5,
                  DataOutputType,
                  LoadOutputType,
                  ClockOutputType>     DisplayType;

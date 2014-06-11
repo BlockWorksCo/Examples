@@ -17,10 +17,7 @@ extern "C" const unsigned char SPRITES[7];
 //
 //
 //
-template < uint8_t dataIn,
-           uint8_t load,
-           uint8_t clock,
-           uint8_t NUMBER_OF_8x8_MATRICES,
+template < uint8_t NUMBER_OF_8x8_MATRICES,
            typename DataOutputType,
            typename LoadOutputType,
            typename ClockOutputType>

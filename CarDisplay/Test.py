@@ -429,9 +429,9 @@ def BlockWorks():
 
 
 #t0()
-#BlockWorks()
+BlockWorks()
 #VertTest()
-VertClock()
+#VertClock()
 #ser.close() 
 
 
