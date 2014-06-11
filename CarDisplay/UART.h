@@ -45,11 +45,10 @@ class UART
             rxQueue(_rxQueue),
             txQueue(_txQueue)
     {
-        begin();
     }
 
 
-    void begin()
+    void start()
     {
         uint16_t baudsetting;
         bool useu2x = true;

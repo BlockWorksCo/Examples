@@ -240,7 +240,7 @@ def SendMessage(type, payload):
     ByteOut(0)
 
     checksum    = 0
-    length      = len(payload)
+    length      = len(payload)+3
     Send( struct.pack('BBB',length, checksum, type) )
     Send( payload )
 
@@ -377,11 +377,11 @@ def VertTest():
 
     while True:
         VertScroll('Hello     ','World     ')
-        time.sleep(0.5)
+        time.sleep(0.2)
         VertScroll('World     ','BlockWorks')
-        time.sleep(0.5)
+        time.sleep(0.2)
         VertScroll('BlockWorks','Hello     ')
-        time.sleep(0.5)
+        time.sleep(0.2)
 
 
 def t0():
@@ -394,6 +394,7 @@ def t0():
         drawText(0,y, 'BlockWorks')
         drawFrame()
         time.sleep(0.5)
+
 
 def t1():
     time.sleep(1.0)
@@ -429,9 +430,9 @@ def BlockWorks():
 
 
 #t0()
-BlockWorks()
+#BlockWorks()
 #VertTest()
-#VertClock()
+VertClock()
 #ser.close() 
 
 

@@ -8,17 +8,19 @@
 
 
 
-
-RxQueueType         rxQueue;
-TxQueueType         txQueue;
-DataOutputType      dataOutput;
-LoadOutputType      loadOutput;
-ClockOutputType     clockOutput;
-DisplayType         display(dataOutput, loadOutput, clockOutput);
-UARTType            uart0(rxQueue,txQueue);
-extern MessageHandlingPair::handlerType      carDisplay;
-MessageHandlingPair::protocolType        protocol(uart0, display, rxQueue, txQueue, carDisplay);
-MessageHandlingPair::handlerType      carDisplay(display, protocol);
+//
+//
+//
+RxQueueType                                 rxQueue;
+TxQueueType                                 txQueue;
+DataOutputType                              dataOutput;
+LoadOutputType                              loadOutput;
+ClockOutputType                             clockOutput;
+DisplayType                                 display(dataOutput, loadOutput, clockOutput);
+UARTType                                    uart0(rxQueue,txQueue);
+extern MessageHandlingPair::handlerType     carDisplay;
+MessageHandlingPair::protocolType           protocol(uart0, display, rxQueue, txQueue, carDisplay);
+MessageHandlingPair::handlerType            carDisplay(display, protocol);
 
 
 
@@ -29,9 +31,6 @@ ISR(USART_RX_vect)
 {
     uart0.RxISR();
 }
-
-
-
 
 
 ISR(USART_UDRE_vect)
@@ -63,7 +62,7 @@ void DebugOut(uint8_t ch)
 //
 extern "C" void AppMain()
 {
-    uart0.begin();
+    uart0.start();
 
     carDisplay.Run();
 }
