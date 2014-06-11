@@ -17,6 +17,8 @@ class CarDisplay
 {
 
     typedef typename pair::protocolType CommsProtocolType;
+    typedef typename pair::MessageType  MessageType;
+
 public:
 
     CarDisplay(DisplayType& _display, CommsProtocolType& _commsProtocol) :
@@ -29,25 +31,8 @@ public:
     //
     //
     //
-    void ProcessMessage(uint8_t (&rawMessage)[16])
+    void ProcessMessage(MessageType& message, uint8_t numberOfBytes)
     {
-        typedef union
-        {
-            uint8_t     uint8Value;
-            uint16_t    uint16Value;
-            uint8_t     byteValues[1];
-
-        } PayloadType;
-
-        typedef struct
-        {
-            uint8_t     length;
-            uint8_t     checksum;
-            uint8_t     type;
-            PayloadType payload;
-        } MessageType;
-
-        MessageType&    message     = *((MessageType*)&rawMessage);
         static uint8_t  xPos        = 0;
         static uint8_t  yPos        = 0;
         static uint8_t  spriteId    = 0;

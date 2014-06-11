@@ -14,7 +14,9 @@
 template <typename TransportType, typename DisplayType, typename RxQueueType, typename TxQueueType, typename pair>
 class SimpleBinaryProtocol
 {
-    typedef typename pair::handlerType HandlerType;
+    typedef typename pair::handlerType  HandlerType;
+    typedef typename pair::MessageType  MessageType;
+
 
 public:
 
@@ -23,8 +25,7 @@ public:
             display(_display),
             rxQ(_rxQ),
             txQ(_txQ),
-            handler(_handler),
-            position(0)
+            handler(_handler)
     {
     }
 
@@ -54,16 +55,23 @@ public:
         const uint8_t   escapeByte      = 27;
         static uint8_t  previousByte    = 0;
         static uint8_t  message[16];
+        static uint8_t  position        = 0;
 
         if(previousByte == escapeByte)
         {
             if(byte == escapeByte)
             {
+                //
+                // Escaped escape-byte case.
+                //
                 message[position%sizeof(message)]   = byte;
                 position++;
             }
             else
             {
+                //
+                // Escaped Control character.
+                //
                 switch(byte)
                 {
                     case 0:
@@ -74,11 +82,20 @@ public:
                         break;
 
                     case 255:
+                    {
                         //
                         // End of frame.
                         //
-                        handler.ProcessMessage(message);
+                        uint8_t     length          = message[0];
+                        uint8_t     checksum        = message[1];
+                        if( (length == position) && 
+                            (checksum == 0) )
+                        {
+                            MessageType&    msg = *((MessageType*)&message);
+                            handler.ProcessMessage( msg, position-2);                            
+                        }
                         break;
+                    }
 
                     default:
                         break;
@@ -87,6 +104,9 @@ public:
         }
         else if(byte != escapeByte) 
         {
+            //
+            // Normal, non-escaped case.
+            //
             message[position%sizeof(message)]   = byte;
             position++;
         }
@@ -104,7 +124,6 @@ private:
     RxQueueType&    rxQ;
     TxQueueType&    txQ;
     HandlerType&    handler;
-    uint8_t         position;
 };
 
 

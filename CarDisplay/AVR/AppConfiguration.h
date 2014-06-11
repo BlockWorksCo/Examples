@@ -51,6 +51,21 @@ typedef UART<38400,
 struct MessageHandlingPair 
 {
 
+	typedef union
+	{
+	    uint8_t     uint8Value;
+	    uint16_t    uint16Value;
+	    uint8_t     byteValues[4];
+
+	} PayloadType;
+
+	typedef struct
+	{
+	    uint8_t     type;
+	    PayloadType payload;
+	} MessageType;
+
+
 	typedef CarDisplay<DisplayType, MessageHandlingPair>   handlerType;
 
 
