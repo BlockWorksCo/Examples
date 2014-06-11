@@ -36,22 +36,6 @@ public:
         loadOutput(_loadOutput),
         clockOutput(_clockOutput)
     {
-
-    }
-
-
-    //
-    //
-    //
-    void setup()
-    {
-        //
-        // Set directions of pins.
-        //
-        pinMode(dataIn, OUTPUT);
-        pinMode(clock,  OUTPUT);
-        pinMode(load,   OUTPUT);
-
         //
         // initialisation of the max 7219
         //
@@ -98,7 +82,7 @@ public:
         //
         for(int j=0; j<8; j++)
         {
-            digitalWrite(load, LOW);    
+            loadOutput.Clear();
 
             for(int k=(NUMBER_OF_8x8_MATRICES-1); k>=0; k--)
             {
@@ -106,9 +90,9 @@ public:
                 shiftOutByte( frameBuffer[(k*8)+j] );
             }
 
-            digitalWrite(load, LOW);
+            loadOutput.Clear();
             CYCLE_DELAY;
-            digitalWrite(load,HIGH); 
+            loadOutput.Set();
         }
     }
 
@@ -177,7 +161,6 @@ public:
                 // dest[i] = 10101010  data[i] = 11001100 y = -2, result = 10xxxxxx | xx001100 = 10001100
                 //
                 uint8_t     absY = -y;
-                //dest[i]     = (dest[i] & (0xff<<(8-absY) )) | (data[i]>>absY );
                 dest[i]     = (dest[i] & (0xff<<(8-absY) )) | (data[i]>>absY );
             }                
         }
@@ -239,19 +222,19 @@ private:
         while(i > 0) 
         {
             mask = 0x01 << (i - 1);      // get bitmask
-            digitalWrite( clock, LOW);   // tick
+            clockOutput.Clear();
             CYCLE_DELAY;
 
             if (data & mask)
             {            // choose bit
-                digitalWrite(dataIn, HIGH);// send 1
+                dataOutput.Set();
             }
             else
             {
-                digitalWrite(dataIn, LOW); // send 0
+                dataOutput.Clear();
             }
 
-            digitalWrite(clock, HIGH);   // tock
+            clockOutput.Set();
             --i;                         // move to lesser bit
 
             CYCLE_DELAY;
@@ -269,16 +252,15 @@ private:
         /*
         //
         */
-        digitalWrite(load, LOW);    
+        loadOutput.Clear();
         for(int k=0; k<NUMBER_OF_8x8_MATRICES; k++)
         {
             shiftOutByte( reg );
             shiftOutByte( value );
         }
-        digitalWrite(load, LOW);
+        loadOutput.Clear();
         CYCLE_DELAY;
-        digitalWrite(load,HIGH); 
-        CYCLE_DELAY;
+        loadOutput.Set();
     }
 
 private:
