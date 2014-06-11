@@ -11,7 +11,10 @@
 
 RxQueueType         rxQueue;
 TxQueueType         txQueue;
-DisplayType         display;
+DataOutputType      dataOutput;
+LoadOutputType      loadOutput;
+ClockOutputType     clockOutput;
+DisplayType         display(dataOutput, loadOutput, clockOutput);
 UARTType            uart0(rxQueue,txQueue);
 extern MessageHandlingPair::handlerType      carDisplay;
 MessageHandlingPair::protocolType        protocol(uart0, display, rxQueue, txQueue, carDisplay);

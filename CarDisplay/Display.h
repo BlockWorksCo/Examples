@@ -20,7 +20,10 @@ extern "C" const unsigned char SPRITES[7];
 template < uint8_t dataIn,
            uint8_t load,
            uint8_t clock,
-           uint8_t NUMBER_OF_8x8_MATRICES >
+           uint8_t NUMBER_OF_8x8_MATRICES,
+           typename DataOutputType,
+           typename LoadOutputType,
+           typename ClockOutputType>
 class Display
 {
 public:
@@ -28,10 +31,14 @@ public:
     //
     //
     //
-    Display()
+    Display(DataOutputType& _dataOutput, LoadOutputType& _loadOutput, ClockOutputType& _clockOutput) :
+        dataOutput(_dataOutput),
+        loadOutput(_loadOutput),
+        clockOutput(_clockOutput)
     {
 
     }
+
 
     //
     //
@@ -274,7 +281,14 @@ private:
         CYCLE_DELAY;
     }
 
+private:
 
+    //
+    //
+    //
+    DataOutputType&     dataOutput;
+    LoadOutputType&     loadOutput;
+    ClockOutputType&    clockOutput;
 
     uint8_t      frameBuffer[8*NUMBER_OF_8x8_MATRICES];
 };
