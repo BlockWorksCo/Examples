@@ -88,10 +88,10 @@ public:
                         //
                         uint8_t     length          = message[0];
                         uint8_t     checksum        = message[1];
-                        if( (length == position) && 
-                            (checksum == 0) )
+                        //if( (length == position) && 
+                        //    (checksum == 0) )
                         {
-                            MessageType&    msg = *((MessageType*)&message);
+                            MessageType&    msg = *((MessageType*)&message[2]);
                             handler.ProcessMessage( msg, position-2);                            
                         }
                         break;
