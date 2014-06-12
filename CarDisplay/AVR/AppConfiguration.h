@@ -14,6 +14,7 @@
 #include "SimpleBinaryProtocol.h"
 #include "Queue.h"
 #include "GPIO.h"
+#include <avr/io.h>
 
 //
 // Compile-time configuration.
@@ -30,12 +31,17 @@
 #define _UCSR0C     0xC2
 #define _UDR0       0xC6
          
+#define PD 	0x0B
+#define PC 	0x08
+#define PB 	0x05
+#define DDRD 0x0A
+#define DDRC 0x07
+#define DDRB 0x04
 
 
-
-typedef AVROutput<2> 	DataOutputType;
-typedef AVROutput<3> 	LoadOutputType;
-typedef AVROutput<4> 	ClockOutputType;
+typedef AVROutput<PD, DDRD, 2> 	DataOutputType;
+typedef AVROutput<PD, DDRD, 3> 	LoadOutputType;
+typedef AVROutput<PD, DDRD, 4> 	ClockOutputType;
 
 
 typedef Display< 5,

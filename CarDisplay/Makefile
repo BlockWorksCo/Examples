@@ -20,7 +20,6 @@ INCLUDES+=-I$(BLOCKWORKS_PLATFORM)
 OBJS=\
 AppMain.o \
 wiring.o \
-wiring_shift.o \
 Sprites.o \
 PlatformMain.o
 
