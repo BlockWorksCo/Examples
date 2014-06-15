@@ -67,6 +67,7 @@ struct MessageHandlingPair
 	{
 	    uint8_t     uint8Value;
 	    uint16_t    uint16Value;
+	    uint8_t     frame[40];
 	    uint8_t     byteValues[4];
 
 	} PayloadType;

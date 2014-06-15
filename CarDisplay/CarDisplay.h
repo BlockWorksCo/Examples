@@ -47,7 +47,7 @@ public:
                 break;
 
             case 4:
-                display.drawFrame();
+                display.drawFrame( display.frameBuffer );
                 break;
 
             case 5:
@@ -56,6 +56,12 @@ public:
                 uint8_t     yPos        = message.payload.byteValues[1];
                 uint8_t     spriteId    = message.payload.byteValues[2];
                 display.drawSprite(spriteId, xPos, yPos);                
+                break;
+            }
+
+            case 6:
+            {
+                display.drawFrame( message.payload.frame );
                 break;
             }
 
@@ -84,7 +90,7 @@ public:
             display.drawSprite(text[i], x,0);
             x   += widths[i];
         }
-        display.drawFrame();
+        display.drawFrame( display.frameBuffer );
 
         //
         // Draw the frame to the display.

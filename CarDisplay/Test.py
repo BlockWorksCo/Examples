@@ -262,6 +262,12 @@ def highIntensity():
     SendMessage(2, struct.pack('B',15) )
 
 
+def setIntensity(value):
+    """
+    """
+    SendMessage(2, struct.pack('B',value) )
+
+
 def clear():
     """
     """
@@ -306,17 +312,6 @@ def drawText(x, y, text):
 
 
 
-
-
-
-
-def TestOne():
-    """
-    """
-    y=0
-    for x in range(-7,32):
-        clear()
-        drawSprite(x%256,y, '4')
 
 
 
@@ -407,9 +402,6 @@ def t1():
 def BlockWorks():
     """
     """
-    clear()
-    drawFrame()
-
     for x in range(-20, 1):
         clear();
         drawText(x,0, 'Block')
@@ -430,9 +422,6 @@ def BlockWorks():
 def BlockWorks2():
     """
     """
-    clear()
-    drawFrame()
-
     for x in range(0, 20):
         #clear();
         drawText(-19+x,0, 'Block')
@@ -444,9 +433,6 @@ def BlockWorks2():
 def BlockWorks3():
     """
     """
-    clear()
-    drawFrame()
-
     for x in range(0, 9):
         clear();
         drawText(0,-x, 'Block')
@@ -455,16 +441,22 @@ def BlockWorks3():
         time.sleep(0.01)
 
 
+
+def TextDemo():
+    """
+    """
+    setIntensity(1)
+    while True:
+        BlockWorks2()
+        time.sleep(0.5)
+        BlockWorks()
+        time.sleep(0.5)
+        BlockWorks3()
+        time.sleep(0.5)
+
+
+TextDemo()
 #t0()
-
-while True:
-    BlockWorks2()
-    time.sleep(0.5)
-    BlockWorks()
-    time.sleep(0.5)
-    BlockWorks3()
-    time.sleep(0.5)
-
 #VertTest()
 #VertClock()
 #ser.close() 

@@ -60,10 +60,11 @@ public:
         setAll(max7219_reg_intensity,   intensity);        
     }
 
+
     //
     //
     //
-    void drawFrame()
+    void drawFrame( uint8_t (&frame)[8*NUMBER_OF_8x8_MATRICES] )
     {
         //
         // initialisation of the max 7219
@@ -75,16 +76,19 @@ public:
         setAll(max7219_reg_decodeMode,  0);
 
         //
-        //
+        // For all lines in a single MAX7219
         //
         for(int j=0; j<8; j++)
         {
             loadOutput.Clear();
 
+            //
+            // For all MAX7219s in the display, shift out the data from the framebuffer.
+            //
             for(int k=(NUMBER_OF_8x8_MATRICES-1); k>=0; k--)
             {
                 shiftOutByte( (MAX7219Register)(max7219_reg_digit0+j) );
-                shiftOutByte( frameBuffer[(k*8)+j] );
+                shiftOutByte( frame[(k*8)+j] );
             }
 
             loadOutput.Clear();
@@ -94,7 +98,7 @@ public:
     }
 
     //
-    //
+    // Clear the default framebuffer.
     //
     void clear()
     {
@@ -102,10 +106,14 @@ public:
     }
 
     //
-    //
+    // Copy the source image into the framebuffer at the specified location.
     //
     void BitBlt(int8_t x, int8_t y, uint8_t width, uint8_t height, uint8_t* data)
     {
+
+        //
+        // Perform the clipping for x,y, width & height.
+        //
         if(x >= (NUMBER_OF_8x8_MATRICES*8) )
         {
             return;
@@ -140,6 +148,9 @@ public:
 
         uint8_t*    dest    = &frameBuffer[x];
 
+        //
+        // Iterate over remaining data, copying it to the framebuffer.
+        //
         if(y>=0)
         {
             for(int i=0; i<width; i++)
@@ -165,7 +176,7 @@ public:
 
 
     //
-    //
+    // Draw the specified sprite at the desired location in the framebuffer.
     //
     void drawSprite(uint8_t spriteId, int8_t x, int8_t y)
     {
@@ -185,7 +196,7 @@ private:
 
 
     //
-    //
+    // Registers in the MAX7219.
     //
     typedef enum
     {
@@ -208,7 +219,7 @@ private:
 
 
     //
-    //
+    // low-level software shift (SPI-like).
     //
     void shiftOutByte (uint8_t  data) 
     {
@@ -241,9 +252,9 @@ private:
     }
 
 
-
-
-
+    //
+    // Set the same register in all MAX7219s in the display.
+    //
     void setAll(MAX7219Register reg, uint8_t value)
     {
         /*
@@ -260,6 +271,12 @@ private:
         loadOutput.Set();
     }
 
+
+
+public:
+
+    uint8_t      frameBuffer[8*NUMBER_OF_8x8_MATRICES];
+
 private:
 
     //
@@ -268,8 +285,6 @@ private:
     DataOutputType&     dataOutput;
     LoadOutputType&     loadOutput;
     ClockOutputType&    clockOutput;
-
-    uint8_t      frameBuffer[8*NUMBER_OF_8x8_MATRICES];
 };
 
 
