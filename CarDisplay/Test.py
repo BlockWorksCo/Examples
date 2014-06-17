@@ -455,10 +455,10 @@ def TextDemo():
         time.sleep(0.5)
 
 
-TextDemo()
+#TextDemo()
 #t0()
 #VertTest()
-#VertClock()
+VertClock()
 #ser.close() 
 
 
