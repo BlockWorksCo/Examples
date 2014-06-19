@@ -70,6 +70,7 @@ public:
                     //
                     message[position%sizeof(message)]   = 27;
                     position = (position + 1) % (sizeof(message));
+                    byte    = 0; // So we don't stay in 'escape' mode by assigning this to the previous value. 
                     break;
 
                 case 0:

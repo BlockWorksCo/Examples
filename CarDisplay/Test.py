@@ -218,16 +218,22 @@ ser = serial.Serial(port=2, baudrate=115200)
 def ByteOut(value):
     """
     """
+    #print('[%02d]'%(value))
     ser.write('%c'%(value))
 
 
 def Send(data):
     for ch in data:
-        if ch == 27:
+        try:
+            value   = int(ch)
+        except ValueError:
+            value   = ord(ch)
+
+        if value == 27:
             ByteOut(27)
             ByteOut(27)
         else:
-            ByteOut(ch)
+            ByteOut(value)
 
 
 
@@ -479,21 +485,19 @@ def ImageTestTwo():
     while True:
 
         newFrame        = frame[1:]
-        #newFrame.append(int(random.random() * 256))
-        newFrame.append(c)
-        #print('[%02d]'%(c))
+        #c = int(random.random() * 256)
         c = (c  + 1) % 255
-        if(c == 27):
-            c = 28;
+        newFrame.append(c)
         frame           = newFrame
 
         showFrame(frame)
-        time.sleep(0.00)
+        #time.sleep(1.00)
+        #print('------')
 
 
 
-#ImageTestTwo()
-TextDemo()
+ImageTestTwo()
+#TextDemo()
 #t0()
 #VertTest()
 VertClock()
