@@ -54,52 +54,50 @@ public:
     {
         const uint8_t   escapeByte      = 27;
         static uint8_t  previousByte    = 0;
-        static uint8_t  message[48];
+        static uint8_t  message[64];
         static uint8_t  position        = 0;
 
         if(previousByte == escapeByte)
         {
-            if(byte == escapeByte)
+            //
+            // Escaped Control character.
+            //
+            switch(byte)
             {
-                //
-                // Escaped escape-byte case.
-                //
-                message[position%sizeof(message)]   = byte;
-                position++;
-            }
-            else
-            {
-                //
-                // Escaped Control character.
-                //
-                switch(byte)
+                case 27:
+                    //
+                    // Escaped escape-byte case.
+                    //
+                    message[position%sizeof(message)]   = 27;
+                    position = (position + 1) % (sizeof(message));
+                    break;
+
+                case 0:
+                    //
+                    // End of frame.
+                    //
+                    position    = 0;
+                    break;
+
+                case 255:
                 {
-                    case 0:
-                        //
-                        // End of frame.
-                        //
-                        position    = 0;
-                        break;
-
-                    case 255:
+                    //
+                    // End of frame.
+                    //
+                    uint8_t     length          = message[0];
+                    uint8_t     checksum        = message[1];
+                    if( (length == position) && 
+                        (checksum == 0) )
                     {
-                        //
-                        // End of frame.
-                        //
-                        uint8_t     length          = message[0];
-                        uint8_t     checksum        = message[1];
-                        if( (length == position) && 
-                            (checksum == 0) )
-                        {
-                            MessageType&    msg = *((MessageType*)&message[2]);
-                            handler.ProcessMessage( msg, position-2);                            
-                        }
-                        break;
+                        MessageType&    msg = *((MessageType*)&message[2]);
+                        handler.ProcessMessage( msg, position-2);                            
                     }
-
-                    default:
-                        break;
+                    position    = 0;
+                    break;
                 }
+
+                default:
+                    break;
             }
         }
         else if(byte != escapeByte) 
@@ -108,7 +106,7 @@ public:
             // Normal, non-escaped case.
             //
             message[position%sizeof(message)]   = byte;
-            position++;
+            position = (position + 1) % (sizeof(message));
         }
 
         previousByte    = byte;

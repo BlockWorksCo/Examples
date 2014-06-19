@@ -479,16 +479,21 @@ def ImageTestTwo():
     while True:
 
         newFrame        = frame[1:]
-        newFrame.append(int(random.random() * 256))
+        #newFrame.append(int(random.random() * 256))
+        newFrame.append(c)
+        #print('[%02d]'%(c))
+        c = (c  + 1) % 255
+        if(c == 27):
+            c = 28;
         frame           = newFrame
 
         showFrame(frame)
-        time.sleep(0.01)
+        time.sleep(0.00)
 
 
 
-ImageTestTwo()
-#TextDemo()
+#ImageTestTwo()
+TextDemo()
 #t0()
 #VertTest()
 VertClock()
