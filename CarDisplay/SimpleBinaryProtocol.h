@@ -38,8 +38,8 @@ public:
         bool dataAvailableFlag  = false;
         uint8_t ch = rxQ.Get(dataAvailableFlag);
         if(dataAvailableFlag == true)
-        {
-            //DebugOut(ch);
+        {            
+            DebugOut(ch);
             ProcessRawByte(ch);
         }
     }

@@ -88,6 +88,8 @@ class UART
         sbi(*ucsrb, rxcie);
         cbi(*ucsrb, udrie);
 
+        UCSR0C  = 3 << UCSZ00;
+
         sei();
     }
 

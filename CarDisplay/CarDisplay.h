@@ -99,6 +99,7 @@ public:
         while(true)
         {
             sei();
+            //DebugOut('.');
             commsProtocol.Process();        
         }
     }
