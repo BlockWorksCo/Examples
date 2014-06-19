@@ -39,7 +39,7 @@ public:
         uint8_t ch = rxQ.Get(dataAvailableFlag);
         if(dataAvailableFlag == true)
         {            
-            DebugOut(ch);
+            //DebugOut(ch);
             ProcessRawByte(ch);
         }
     }
@@ -54,7 +54,7 @@ public:
     {
         const uint8_t   escapeByte      = 27;
         static uint8_t  previousByte    = 0;
-        static uint8_t  message[16];
+        static uint8_t  message[48];
         static uint8_t  position        = 0;
 
         if(previousByte == escapeByte)

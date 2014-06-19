@@ -6,7 +6,7 @@ import time
 import ctypes
 import datetime
 import struct
-
+import random
 
 
 
@@ -244,8 +244,6 @@ def SendMessage(type, payload):
     Send( struct.pack('BBB',length, checksum, type) )
     Send( payload )
 
-    ser.write('%c%c'%(27,255))
-
     ByteOut(27)
     ByteOut(255)
 
@@ -272,6 +270,18 @@ def clear():
     """
     """
     SendMessage(1, struct.pack('B',0) )
+
+
+def clearWithValue(value):
+    """
+    """
+    SendMessage(6, struct.pack('40B',*(40*[value]) ) )
+
+
+def showFrame(frame):
+    """
+    """
+    SendMessage(6, struct.pack('40B',*frame ) )
 
 
 def drawFrame():
@@ -455,6 +465,29 @@ def TextDemo():
         time.sleep(0.5)
 
 
+def ImageTestOne():
+    c = 0
+    while True:
+        clearWithValue(c)
+        c = c + 1
+        time.sleep(0.5)
+
+
+def ImageTestTwo():
+    c = 0
+    frame = 40*[0xaa]
+    while True:
+
+        newFrame        = frame[1:]
+        newFrame.append(int(random.random() * 256))
+        frame           = newFrame
+
+        showFrame(frame)
+        time.sleep(0.01)
+
+
+
+ImageTestTwo()
 #TextDemo()
 #t0()
 #VertTest()
