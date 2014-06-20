@@ -7,6 +7,7 @@ import ctypes
 import datetime
 import struct
 import random
+import sys
 
 
 
@@ -213,19 +214,20 @@ SpriteWidths = \
 
 
 ser = serial.Serial(port=2, baudrate=115200)
+#ser=sys.stdout
 
 
 def ByteOut(value):
     """
     """
-    print('[%02d]'%(value))
+    #print('[%02d]'%(value))
     ser.write('%c'%(value))
 
 
 def Send(data):
     for ch in data:
         try:
-            value   = int(ch)
+            value   = int(ord(ch))
         except ValueError:
             value   = ord(ch)
 
@@ -306,8 +308,9 @@ def drawSprite(x,y,sprite):
     byteX   = int8_to_uint8(x)
     byteY   = int8_to_uint8(y)
     byteS   = int8_to_uint8(sprite)
-    print('s=%d'%(byteS))
-    SendMessage(5, struct.pack('BBB', byteX, byteY, byteS ))
+    payload = struct.pack('BBB', byteX, byteY, byteS )
+    #print('s=%d'%(int(ord(payload[2]))))
+    SendMessage(5, payload)
 
     #Send('%c%c'%(27,0))
     #Send('%c%c%c'%( int8_to_uint8(x),int8_to_uint8(y),int(sprite) ))
@@ -321,10 +324,9 @@ def drawChar(x,y, char):
     except ValueError:
         asciiValue   = ord(char)
 
-
     char    = chr(asciiValue)
     spriteValue = SpriteLUT[char]
-    print('drawChar(%c): ascii:%02d sprite:%02d'%(char,asciiValue,spriteValue))
+    #print('drawChar(%c): ascii:%02d sprite:%02d'%(char,asciiValue,spriteValue))
     drawSprite(x,y, spriteValue)
     return SpriteWidths[ spriteValue ]
 
@@ -523,14 +525,22 @@ def ImageTestThree():
         #print('------')
 
 
+
+def JitterBug():
+    """
+    """
+
+    while True:
+        clear()
+        dx = int(random.random()*3)
+        dy = int(random.random()*3)
+        drawText(1+dx-2,1+dy-2, 'BlockWorks')
+        drawFrame()
+        time.sleep(0.03)
+
+
 setIntensity(7)
-
-while True:
-    clear()
-    drawText(0,0, 'BlockWorks')
-    drawFrame()
-    time.sleep(1.0)
-
+JitterBug()
 #ImageTestThree()
 #ImageTestTwo()
 #t1()
