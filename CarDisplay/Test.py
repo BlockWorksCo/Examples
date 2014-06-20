@@ -218,7 +218,7 @@ ser = serial.Serial(port=2, baudrate=115200)
 def ByteOut(value):
     """
     """
-    #print('[%02d]'%(value))
+    print('[%02d]'%(value))
     ser.write('%c'%(value))
 
 
@@ -303,7 +303,11 @@ def int8_to_uint8(i):
 def drawSprite(x,y,sprite):
     """
     """
-    SendMessage(5, struct.pack('BBB',int8_to_uint8(x),int8_to_uint8(y),int(sprite)) )
+    byteX   = int8_to_uint8(x)
+    byteY   = int8_to_uint8(y)
+    byteS   = int8_to_uint8(sprite)
+    print('s=%d'%(byteS))
+    SendMessage(5, struct.pack('BBB', byteX, byteY, byteS ))
 
     #Send('%c%c'%(27,0))
     #Send('%c%c%c'%( int8_to_uint8(x),int8_to_uint8(y),int(sprite) ))
@@ -312,8 +316,17 @@ def drawSprite(x,y,sprite):
 def drawChar(x,y, char):
     """
     """
-    drawSprite(x,y, SpriteLUT[char])
-    return SpriteWidths[ SpriteLUT[char] ]
+    try:
+        asciiValue   = int(char)
+    except ValueError:
+        asciiValue   = ord(char)
+
+
+    char    = chr(asciiValue)
+    spriteValue = SpriteLUT[char]
+    print('drawChar(%c): ascii:%02d sprite:%02d'%(char,asciiValue,spriteValue))
+    drawSprite(x,y, spriteValue)
+    return SpriteWidths[ spriteValue ]
 
 
 def drawText(x, y, text):
@@ -408,10 +421,11 @@ def t0():
 
 
 def t1():
-    time.sleep(1.0)
+    """
+    """
     for x in range(0,30):
-        clear()
-        drawText(x,0, 'Hello World')
+        #clear()
+        drawText(0,0, 'BlockWorks')
         time.sleep(1.0)
 
 
@@ -427,7 +441,7 @@ def BlockWorks():
     time.sleep(0.5)
 
     for x in range(40, 18, -1):
-        #clear();
+        clear();
         #drawText(0,0, 'Block')
         drawText(x,0, 'Works')
         drawFrame()
@@ -439,7 +453,7 @@ def BlockWorks2():
     """
     """
     for x in range(0, 20):
-        #clear();
+        clear();
         drawText(-19+x,0, 'Block')
         drawText(38-x,0, 'Works')
         drawFrame()
@@ -485,19 +499,42 @@ def ImageTestTwo():
     while True:
 
         newFrame        = frame[1:]
-        #c = int(random.random() * 256)
-        c = (c  + 1) % 255
+        c = int(random.random() * 256)
+        #c = (c  + 1) % 255
         newFrame.append(c)
         frame           = newFrame
 
         showFrame(frame)
-        #time.sleep(1.00)
+        time.sleep(0.015)
         #print('------')
 
 
+def ImageTestThree():
+    c = 0
+    frame = 40*[0xaa]
+    while True:
 
-ImageTestTwo()
-#TextDemo()
+        for i in range(0,40):
+            c = int(random.random() * 256)
+            frame[i] = c
+
+        showFrame(frame)
+        time.sleep(0.02)
+        #print('------')
+
+
+setIntensity(7)
+
+while True:
+    clear()
+    drawText(0,0, 'BlockWorks')
+    drawFrame()
+    time.sleep(1.0)
+
+#ImageTestThree()
+#ImageTestTwo()
+#t1()
+TextDemo()
 #t0()
 #VertTest()
 VertClock()
