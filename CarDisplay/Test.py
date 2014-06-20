@@ -443,7 +443,7 @@ def BlockWorks():
     time.sleep(0.5)
 
     for x in range(40, 18, -1):
-        clear();
+        #clear();
         #drawText(0,0, 'Block')
         drawText(x,0, 'Works')
         drawFrame()
@@ -455,7 +455,7 @@ def BlockWorks2():
     """
     """
     for x in range(0, 20):
-        clear();
+        #clear();
         drawText(-19+x,0, 'Block')
         drawText(38-x,0, 'Works')
         drawFrame()
@@ -539,15 +539,46 @@ def JitterBug():
         time.sleep(0.03)
 
 
+def Equaliser():
+    """
+    """
+    barValues   = [255,127,63,31,15,7,3,1,0]
+
+    c = 0
+    values  = 40*[1]
+    frame = 40*[0xaa]
+    while True:
+
+        for i in range(0,40):
+            values[i] = values[i]-1
+
+        for i in range(0,40):
+            if random.random() > 0.5:
+                values[i] = values[i] + 2
+
+            if values[i] > 8:
+                values[i] = 8;
+            if values[i] < 0:
+                values[i] = 0
+
+            frame[i] = 255-barValues[ values[i] ]
+
+        showFrame(frame)
+        time.sleep(0.05)
+        #print('------')
+
+
+
 setIntensity(7)
-JitterBug()
+
+Equaliser()
+#JitterBug()
 #ImageTestThree()
-#ImageTestTwo()
+ImageTestTwo()
 #t1()
 TextDemo()
 #t0()
 #VertTest()
 VertClock()
-#ser.close() 
 
 
