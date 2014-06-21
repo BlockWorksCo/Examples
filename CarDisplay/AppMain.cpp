@@ -67,6 +67,9 @@ TxQueueType                                 txQueue;
 DataOutputType                              dataOutput;
 LoadOutputType                              loadOutput;
 ClockOutputType                             clockOutput;
+SPIRxQueueType                              spiRxQueue;
+SPITxQueueType                              spiTxQueue;
+SPIType                                     spi(spiRxQueue, spiTxQueue);
 DisplayType                                 display(dataOutput, loadOutput, clockOutput);
 UARTType                                    uart0(rxQueue,txQueue);
 extern MessageHandlingPair::handlerType     carDisplay;
@@ -90,7 +93,10 @@ ISR(USART_UDRE_vect)
 }
 
 
-
+ISR(SPI_STC_vect)
+{
+    spi.TransferCompleteISR();
+}
 
 
 void DebugOut(uint8_t ch)

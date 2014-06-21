@@ -14,6 +14,8 @@
 #include "SimpleBinaryProtocol.h"
 #include "Queue.h"
 #include "GPIO.h"
+#include "SPI.h"
+#include "MCP2515.h"
 #include <avr/io.h>
 
 //
@@ -43,6 +45,9 @@ typedef AVROutput<PD, DDRD, 2> 	DataOutputType;
 typedef AVROutput<PD, DDRD, 3> 	LoadOutputType;
 typedef AVROutput<PD, DDRD, 4> 	ClockOutputType;
 
+typedef Queue<uint8_t, 16, uint8_t>     				SPIRxQueueType;
+typedef Queue<uint8_t, 16, uint8_t>     				SPITxQueueType;
+typedef AVRSPI<0x01, SPIRxQueueType, SPITxQueueType > 	SPIType;
 
 typedef Display< 5,
                  DataOutputType,

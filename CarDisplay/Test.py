@@ -320,7 +320,7 @@ def drawChar(x,y, char):
     """
     """
     try:
-        asciiValue   = int(char)
+        asciiValue   = int(ord(char))
     except ValueError:
         asciiValue   = ord(char)
 
@@ -334,6 +334,7 @@ def drawChar(x,y, char):
 def drawText(x, y, text):
     """
     """
+    print(text)
     for char in text:
         charWidth = drawChar(x,y, char)
         x   = x + charWidth
@@ -539,7 +540,7 @@ def JitterBug():
         time.sleep(0.03)
 
 
-def Equaliser():
+def Analyser():
     """
     """
     barValues   = [255,127,63,31,15,7,3,1,0]
@@ -564,19 +565,19 @@ def Equaliser():
             frame[i] = 255-barValues[ values[i] ]
 
         showFrame(frame)
-        time.sleep(0.05)
+        time.sleep(0.02)
         #print('------')
 
 
 
-setIntensity(7)
+setIntensity(1)
 
-Equaliser()
+Analyser()
 #JitterBug()
 #ImageTestThree()
-ImageTestTwo()
+#ImageTestTwo()
 #t1()
-TextDemo()
+#TextDemo()
 #t0()
 #VertTest()
 VertClock()
