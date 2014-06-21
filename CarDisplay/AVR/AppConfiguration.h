@@ -33,29 +33,31 @@
 #define _UCSR0C     0xC2
 #define _UDR0       0xC6
          
-#define PD 	0x0B
-#define PC 	0x08
-#define PB 	0x05
+#define PD  0x0B
+#define PC  0x08
+#define PB  0x05
 #define DDRD 0x0A
 #define DDRC 0x07
 #define DDRB 0x04
 
 
-typedef AVROutput<PD, DDRD, 2> 	DataOutputType;
-typedef AVROutput<PD, DDRD, 3> 	LoadOutputType;
-typedef AVROutput<PD, DDRD, 4> 	ClockOutputType;
+typedef AVROutput<PD, DDRD, 2>  DataOutputType;
+typedef AVROutput<PD, DDRD, 3>  LoadOutputType;
+typedef AVROutput<PD, DDRD, 4>  ClockOutputType;
 
-typedef Queue<uint8_t, 16, uint8_t>     				SPIRxQueueType;
-typedef Queue<uint8_t, 16, uint8_t>     				SPITxQueueType;
-typedef AVRSPI<0x01, SPIRxQueueType, SPITxQueueType > 	SPIType;
+typedef Queue<uint8_t, 16, uint8_t>                     SPIRxQueueType;
+typedef Queue<uint8_t, 16, uint8_t>                     SPITxQueueType;
+typedef AVRSPI<0x01, SPIRxQueueType, SPITxQueueType >   SPIType;
+typedef AVROutput<PD, DDRD, 5>                          MCP2515ChipSelectType;
+typedef MCP2515<SPIType, MCP2515ChipSelectType>         MCP2515Type;
 
 typedef Display< 5,
                  DataOutputType,
                  LoadOutputType,
                  ClockOutputType>     DisplayType;
 
-typedef Queue<uint8_t, 128, uint8_t>     	RxQueueType;
-typedef Queue<uint8_t, 64, uint8_t>     	TxQueueType;
+typedef Queue<uint8_t, 128, uint8_t>        RxQueueType;
+typedef Queue<uint8_t, 64, uint8_t>         TxQueueType;
 
 
 
@@ -68,26 +70,26 @@ typedef UART<115200,
 struct MessageHandlingPair 
 {
 
-	typedef union
-	{
-	    uint8_t     uint8Value;
-	    uint16_t    uint16Value;
-	    uint8_t     frame[40];
-	    uint8_t     byteValues[4];
+    typedef union
+    {
+        uint8_t     uint8Value;
+        uint16_t    uint16Value;
+        uint8_t     frame[40];
+        uint8_t     byteValues[4];
 
-	} PayloadType;
+    } PayloadType;
 
-	typedef struct
-	{
-	    uint8_t     type;
-	    PayloadType payload;
-	} MessageType;
-
-
-	typedef CarDisplay<DisplayType, MessageHandlingPair>   handlerType;
+    typedef struct
+    {
+        uint8_t     type;
+        PayloadType payload;
+    } MessageType;
 
 
-	typedef SimpleBinaryProtocol<UARTType, DisplayType, RxQueueType, TxQueueType, MessageHandlingPair>   protocolType;
+    typedef CarDisplay<DisplayType, MessageHandlingPair>   handlerType;
+
+
+    typedef SimpleBinaryProtocol<UARTType, DisplayType, RxQueueType, TxQueueType, MessageHandlingPair>   protocolType;
 
 };
 
