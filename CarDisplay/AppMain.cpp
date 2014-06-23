@@ -12,6 +12,9 @@
 //
 //
 //
+TimingType 									timing;
+EventEngineType								eventEngine(timing);
+
 RxQueueType                                 rxQueue;
 TxQueueType                                 txQueue;
 DataOutputType                              dataOutput;
@@ -32,6 +35,7 @@ MessageHandlingPair::protocolType           protocol(uart0, display, rxQueue, tx
 MessageHandlingPair::handlerType            carDisplay(display, protocol);
 
 
+UARTByteAvailableHandlerType 				uartByteAvailableHandler(protocol, &MessageHandlingPair::protocolType::Process);
 
 
 

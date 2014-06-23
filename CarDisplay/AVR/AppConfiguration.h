@@ -16,6 +16,8 @@
 #include "GPIO.h"
 #include "SPI.h"
 #include "MCP2515.h"
+#include "Timing.h"
+#include "Events.h"
 #include <avr/io.h>
 
 //
@@ -41,9 +43,15 @@
 #define DDRB 0x04
 
 
-typedef AVROutput<PD, DDRD, 2>  DataOutputType;
-typedef AVROutput<PD, DDRD, 3>  LoadOutputType;
-typedef AVROutput<PD, DDRD, 4>  ClockOutputType;
+
+typedef Timing<0x0, uint16_t>                           TimingType;
+typedef EventEngine< 4,
+                     4,
+                     TimingType>                        EventEngineType;
+
+typedef AVROutput<PD, DDRD, 2>                          DataOutputType;
+typedef AVROutput<PD, DDRD, 3>                          LoadOutputType;
+typedef AVROutput<PD, DDRD, 4>                          ClockOutputType;
 
 typedef Queue<uint8_t, 16, uint8_t>                     SPIRxQueueType;
 typedef Queue<uint8_t, 16, uint8_t>                     SPITxQueueType;
@@ -93,6 +101,8 @@ struct MessageHandlingPair
 
 };
 
+
+typedef MethodHandler<MessageHandlingPair::protocolType>    UARTByteAvailableHandlerType;
 
 
 
