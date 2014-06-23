@@ -35,7 +35,7 @@ MessageHandlingPair::protocolType           protocol(uart0, display, rxQueue, tx
 MessageHandlingPair::handlerType            carDisplay(display, protocol);
 
 
-UARTByteAvailableHandlerType 				uartByteAvailableHandler(protocol, &MessageHandlingPair::protocolType::Process);
+UARTByteAvailableHandlerType 				uartByteAvailableHandler(&protocol, &MessageHandlingPair::protocolType::Process);
 
 
 
