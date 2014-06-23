@@ -334,7 +334,7 @@ def drawChar(x,y, char):
 def drawText(x, y, text):
     """
     """
-    print(text)
+    #print(text)
     for char in text:
         charWidth = drawChar(x,y, char)
         x   = x + charWidth
@@ -478,7 +478,6 @@ def BlockWorks3():
 def TextDemo():
     """
     """
-    setIntensity(1)
     while True:
         BlockWorks2()
         time.sleep(0.5)
@@ -570,14 +569,14 @@ def Analyser():
 
 
 
-setIntensity(1)
+setIntensity(10)
 
-Analyser()
+#Analyser()
 #JitterBug()
 #ImageTestThree()
 #ImageTestTwo()
 #t1()
-#TextDemo()
+TextDemo()
 #t0()
 #VertTest()
 VertClock()
