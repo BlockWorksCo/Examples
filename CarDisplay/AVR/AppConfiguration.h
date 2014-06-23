@@ -69,11 +69,6 @@ typedef Queue<uint8_t, 64, uint8_t>         TxQueueType;
 
 
 
-typedef UART<115200,
-             RxQueueType, TxQueueType,
-             _UBRR0H, _UBRR0L, _UCSR0A, _UCSR0B, _UCSR0C, _UDR0, RXEN0, TXEN0, RXCIE0, UDRIE0, U2X0
-             >     UARTType;
-
 
 struct MessageHandlingPair 
 {
@@ -97,12 +92,24 @@ struct MessageHandlingPair
     typedef CarDisplay<DisplayType, MessageHandlingPair>   handlerType;
 
 
+
+
+    typedef UART<115200,
+                 RxQueueType, TxQueueType,
+                 _UBRR0H, _UBRR0L, _UCSR0A, _UCSR0B, _UCSR0C, _UDR0, RXEN0, TXEN0, RXCIE0, UDRIE0, U2X0,
+                 EventEngineType,
+                 MessageHandlingPair
+                 >     UARTType;
+
     typedef SimpleBinaryProtocol<UARTType, DisplayType, RxQueueType, TxQueueType, MessageHandlingPair>   protocolType;
+
+
+
+    typedef MethodHandler<protocolType>    ByteReceivedEventType;
+
 
 };
 
-
-typedef MethodHandler<MessageHandlingPair::protocolType>    UARTByteAvailableHandlerType;
 
 
 

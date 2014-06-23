@@ -12,30 +12,31 @@
 //
 //
 //
-TimingType 									timing;
-EventEngineType								eventEngine(timing);
+TimingType 									        timing;
+EventEngineType								        eventEngine(timing);
 
-RxQueueType                                 rxQueue;
-TxQueueType                                 txQueue;
-DataOutputType                              dataOutput;
-LoadOutputType                              loadOutput;
-ClockOutputType                             clockOutput;
-DisplayType                                 display(dataOutput, loadOutput, clockOutput);
+RxQueueType                                         rxQueue;
+TxQueueType                                         txQueue;
+DataOutputType                                      dataOutput;
+LoadOutputType                                      loadOutput;
+ClockOutputType                                     clockOutput;
+DisplayType                                         display(dataOutput, loadOutput, clockOutput);
 
-SPIRxQueueType                              spiRxQueue;
-SPITxQueueType                              spiTxQueue;
-SPIType                                     spi(spiRxQueue, spiTxQueue);
-MCP2515ChipSelectType                       mcp2515ChipSelect;
-MCP2515Type                                 mcp2515(spi, mcp2515ChipSelect);
+SPIRxQueueType                                      spiRxQueue;
+SPITxQueueType                                      spiTxQueue;
+SPIType                                             spi(spiRxQueue, spiTxQueue);
+MCP2515ChipSelectType                               mcp2515ChipSelect;
+MCP2515Type                                         mcp2515(spi, mcp2515ChipSelect);
 
-UARTType                                    uart0(rxQueue,txQueue);
+extern MessageHandlingPair::ByteReceivedEventType   uartByteAvailableHandler;
+MessageHandlingPair::UARTType                       uart0(rxQueue,txQueue, eventEngine, uartByteAvailableHandler);
 
-extern MessageHandlingPair::handlerType     carDisplay;
-MessageHandlingPair::protocolType           protocol(uart0, display, rxQueue, txQueue, carDisplay);
-MessageHandlingPair::handlerType            carDisplay(display, protocol);
+extern MessageHandlingPair::handlerType             carDisplay;
+MessageHandlingPair::protocolType                   protocol(uart0, display, rxQueue, txQueue, carDisplay);
+MessageHandlingPair::handlerType                    carDisplay(display, protocol);
 
 
-UARTByteAvailableHandlerType 				uartByteAvailableHandler(protocol, &MessageHandlingPair::protocolType::Process);
+ MessageHandlingPair::ByteReceivedEventType 		uartByteAvailableHandler(protocol, &MessageHandlingPair::protocolType::Process);
 
 
 
@@ -80,6 +81,13 @@ extern "C" void AppMain()
 {
     uart0.start();
 
-    carDisplay.Run();
+    carDisplay.Initialise();
+
+    while(true)
+    {
+        sei();
+
+        eventEngine();
+    }
 }
 

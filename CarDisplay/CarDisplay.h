@@ -71,10 +71,11 @@ public:
         }
     }
 
+
     //
     //
     //
-    void Run() 
+    void Initialise()
     {
         static uint8_t  text[]      = {34,76,79,67,75,55,79,82,75,83};
         static uint8_t  widths[]    = {4, 3, 4, 4, 4, 5, 4, 4, 4, 4};
@@ -90,21 +91,8 @@ public:
             display.drawSprite(text[i], x,0);
             x   += widths[i];
         }
-        display.drawFrame( display.frameBuffer );
-
-        //
-        // Draw the frame to the display.
-        //
-        sei();
-        while(true)
-        {
-            sei();
-            //DebugOut('.');
-            commsProtocol.Process();        
-        }
+        display.drawFrame( display.frameBuffer );        
     }
-
-
 
 
 private:

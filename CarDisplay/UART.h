@@ -29,13 +29,17 @@ template <  uint32_t baud,
             uint8_t _ucsrc, uint8_t _udr,
             uint8_t rxen,  uint8_t txen, 
             uint8_t rxcie, uint8_t udrie, 
-            uint8_t u2x
+            uint8_t u2x,
+            typename EventEngineType,
+            typename ComboType
         >
 class UART
 {
+    typedef typename ComboType::ByteReceivedEventType    ByteReceivedEventType;
+
   public:
 
-    UART(rxQueueType& _rxQueue, txQueueType& _txQueue) :
+    UART(rxQueueType& _rxQueue, txQueueType& _txQueue, EventEngineType& _eventEngine, ByteReceivedEventType& _byteReceivedEvent) :
             ubrrh((uint8_t*)_ubrrh),
             ubrrl((uint8_t*)_ubrrl),
             ucsra((uint8_t*)_ucsra),
@@ -43,7 +47,10 @@ class UART
             ucsrc((uint8_t*)_ucsrc),
             udr((uint8_t*)_udr),
             rxQueue(_rxQueue),
-            txQueue(_txQueue)
+            txQueue(_txQueue),
+            eventEngine(_eventEngine),
+            byteReceivedEvent(_byteReceivedEvent),
+            eventDroppedFlag(false)
     {
     }
 
@@ -128,6 +135,8 @@ class UART
             uint8_t     c = UDR0;
             rxQueue.Put(c, elementDroppedFlag);                    
         } 
+
+        eventEngine.Put(byteReceivedEvent, eventDroppedFlag);
     }
 
 
@@ -163,6 +172,9 @@ private:
     rxQueueType&    rxQueue;
     txQueueType&    txQueue;
 
+    EventEngineType&        eventEngine;
+    ByteReceivedEventType&  byteReceivedEvent;
+    bool                    eventDroppedFlag;
 };
 
 
