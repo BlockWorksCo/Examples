@@ -58,6 +58,12 @@ ISR(SPI_STC_vect)
     spi.TransferCompleteISR();
 }
 
+#if 0
+ISR(TIMER0_OVF_vect)
+{
+    timing.TickISR();
+}
+#endif
 
 void DebugOut(uint8_t ch)
 {

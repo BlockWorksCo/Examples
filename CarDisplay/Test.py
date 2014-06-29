@@ -571,7 +571,7 @@ def Analyser():
 
 setIntensity(10)
 
-Analyser()
+#Analyser()
 #JitterBug()
 #ImageTestThree()
 #ImageTestTwo()
