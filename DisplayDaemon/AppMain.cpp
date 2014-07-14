@@ -36,7 +36,7 @@ extern "C" void AppMain()
     
     while(true)
     {
-        txQueue.Put('a', elementDroppedFlag)
+        txQueue.Put('a', elementDroppedFlag);
         uart0.ProcessQueue();
     }
 }
