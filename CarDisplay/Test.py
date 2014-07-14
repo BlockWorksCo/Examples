@@ -8,7 +8,28 @@ import datetime
 import struct
 import random
 import sys
+import Tkinter
 
+
+
+
+def ShowDisplay():
+    """
+    """
+    top = Tkinter.Tk()
+    C = Tkinter.Canvas(top, bg="blue", height=250, width=300)
+
+    coord = 10, 50, 240, 210
+    arc = C.create_arc(coord, start=0, extent=150, fill="red")
+
+    for x in range(0,40):
+        for y in range(0,8):
+            sx = x*12
+            sy = y*12
+            b = C.create_polygon( sx,sy, sx+10,sy, sx+10,sy+10, sx,sy+10, fill="black")
+
+    C.pack()
+    top.mainloop()
 
 
 SpriteLUT = \
@@ -213,8 +234,11 @@ SpriteWidths = \
 
 
 
-ser = serial.Serial(port=2, baudrate=115200)
-#ser=sys.stdout
+try:
+    ser = serial.Serial(port=2, baudrate=115200)
+except serial.serialutil.SerialException:
+    ShowDisplay()
+
 
 
 def ByteOut(value):
@@ -569,12 +593,12 @@ def Analyser():
 
 
 
-setIntensity(10)
+setIntensity(7)
 
-#Analyser()
+Analyser()
 #JitterBug()
 #ImageTestThree()
-#ImageTestTwo()
+ImageTestTwo()
 #t1()
 TextDemo()
 #t0()
