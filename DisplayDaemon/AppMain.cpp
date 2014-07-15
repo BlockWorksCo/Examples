@@ -12,35 +12,17 @@
 
 
 
-char* blaa()
+uint8_t* GetFB()
 {
-    int            fdout;
-    char*          dst;
-    struct stat    statbuf;
+    int             fd;
+    static uint8_t  fb[40];
 
     /* open/create the output file */
-    fdout   = open("/tmp/ledfb", O_RDWR | O_CREAT | O_TRUNC, 0777);
-    if(fdout == -1)
-       printf("can't create for writing\n");
+    fd   = open("/tmp/ledfb", O_RDONLY);
+    read(fd, &fb[0], sizeof(fb));
+    close(fd);
 
-    /* write a dummy byte at the last location */
-    for(int i=0; i<40; i++)
-    {
-        write (fdout, "a", 1);
-    }
-
-    /* mmap the file */
-    dst     = (char*)mmap(0, 40, PROT_READ | PROT_WRITE, MAP_SHARED, fdout, 0);
-    if ( dst == (caddr_t)-1 )
-        printf("mmap error for output\n");
-
-    /* this copies the input file to the output file */
-    memset(dst, 'c', 40);
-    strcpy(dst, "Hello World.");
-
-    printf("mmap ptr = %08x\n", dst);
-
-    return dst;
+    return &fb[0];
 }
 
 
@@ -56,7 +38,44 @@ TxQueueType        txQueue;
 UARTType           uart0("/dev/ttyS0", rxQueue,txQueue);
 
 
+void Send(TxQueueType& txq, uint8_t value)
+{
+    bool    elementDroppedFlag  = false;
 
+    if(value == 27)
+    {
+        txQueue.Put(27, elementDroppedFlag);
+        txQueue.Put(27, elementDroppedFlag);
+        uart0.ProcessQueue();
+    }
+    else
+    {
+        txQueue.Put(value, elementDroppedFlag);
+        uart0.ProcessQueue();
+    }
+}
+
+void SendFBToDisplay(TxQueueType& txq, uint8_t* fb)
+{
+    bool    elementDroppedFlag  = false;
+    
+    txQueue.Put(27, elementDroppedFlag);
+    txQueue.Put(0, elementDroppedFlag);
+    uart0.ProcessQueue();
+
+    Send(txq, 0);    // length
+    Send(txq, 40+3); // checksum
+    Send(txq, 6);    // type
+
+    for(uint8_t i=0; i<40; i++)
+    {
+        Send(txq, fb[i]);    
+    }
+
+    txQueue.Put(27, elementDroppedFlag);
+    txQueue.Put(255, elementDroppedFlag);
+    uart0.ProcessQueue();
+}
 
 
 //
@@ -69,15 +88,15 @@ UARTType           uart0("/dev/ttyS0", rxQueue,txQueue);
 //
 extern "C" void AppMain()
 {
-    bool    elementDroppedFlag  = false;
-    
-    char* fb    = blaa();
 
     while(true)
     {
-        txQueue.Put('a', elementDroppedFlag);
-        uart0.ProcessQueue();
-        printf("[%s]\n", fb);
+        static uint32_t     fc  = 0;
+
+        uint8_t* fb    = GetFB();
+        SendFBToDisplay(txQueue, fb);
+
+        printf("[%d]\n", fc++);
         sleep(1);
     }
 }
