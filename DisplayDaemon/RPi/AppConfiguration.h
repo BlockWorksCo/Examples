@@ -12,6 +12,8 @@
 #include "Queue.h"
 
 
+#define UART_NAME 		"/dev/ttyUSB0"
+
 
 
 

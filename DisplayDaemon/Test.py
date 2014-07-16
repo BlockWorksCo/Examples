@@ -1,7 +1,6 @@
 
 
 
-import serial
 import time
 import ctypes
 import datetime
@@ -250,7 +249,9 @@ def clearWithValue(value):
 def showFrame(frame):
     """
     """
-    open('/tmp/ledfb','rw').write(frame)
+    frame = struct.pack('40B',*(frame) )
+    #frame = struct.pack('40B',*(40*[127]) )
+    open('/tmp/ledfb','wb').write(frame)
 
 
 def drawFrame():

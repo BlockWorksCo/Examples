@@ -35,7 +35,7 @@ uint8_t* GetFB()
 RxQueueType        rxQueue;
 TxQueueType        txQueue;
 
-UARTType           uart0("/dev/ttyS0", rxQueue,txQueue);
+UARTType           uart0(UART_NAME, rxQueue,txQueue);
 
 
 void Send(TxQueueType& txq, uint8_t value)
@@ -47,6 +47,7 @@ void Send(TxQueueType& txq, uint8_t value)
         txQueue.Put(27, elementDroppedFlag);
         txQueue.Put(27, elementDroppedFlag);
         uart0.ProcessQueue();
+        uart0.ProcessQueue();
     }
     else
     {
@@ -55,26 +56,33 @@ void Send(TxQueueType& txq, uint8_t value)
     }
 }
 
-void SendFBToDisplay(TxQueueType& txq, uint8_t* fb)
+void SendMessage(TxQueueType& txq, uint8_t* payload, uint8_t type, uint8_t payloadLength)
 {
     bool    elementDroppedFlag  = false;
     
     txQueue.Put(27, elementDroppedFlag);
     txQueue.Put(0, elementDroppedFlag);
     uart0.ProcessQueue();
+    uart0.ProcessQueue();
 
-    Send(txq, 0);    // length
-    Send(txq, 40+3); // checksum
-    Send(txq, 6);    // type
+    Send(txq, 0);               // length
+    Send(txq, payloadLength+3); // checksum
+    Send(txq, type);            // type
 
-    for(uint8_t i=0; i<40; i++)
+    for(uint8_t i=0; i<payloadLength; i++)
     {
-        Send(txq, fb[i]);    
+        Send(txq, payload[i]);    
     }
 
     txQueue.Put(27, elementDroppedFlag);
     txQueue.Put(255, elementDroppedFlag);
     uart0.ProcessQueue();
+    uart0.ProcessQueue();
+}
+
+void SendFBToDisplay(TxQueueType& txq, uint8_t* fb)
+{
+   SendMessage(txq, fb, 6, 40);    
 }
 
 
@@ -88,7 +96,6 @@ void SendFBToDisplay(TxQueueType& txq, uint8_t* fb)
 //
 extern "C" void AppMain()
 {
-
     while(true)
     {
         static uint32_t     fc  = 0;

@@ -12,6 +12,7 @@
 #include "Queue.h"
 
 
+#define UART_NAME 		"/dev/ttyS0"
 
 
 
