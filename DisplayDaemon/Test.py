@@ -7,6 +7,7 @@ import datetime
 import struct
 import random
 import sys
+import os
 
 
 
@@ -251,7 +252,8 @@ def showFrame(frame):
     """
     frame = struct.pack('40B',*(frame) )
     #frame = struct.pack('40B',*(40*[127]) )
-    open('/tmp/ledfb','wb').write(frame)
+    fbName  = {'nt':'c:\\temp\\ledfb', 'posix':'/tmp/ledfb'}
+    open(fbName[os.name],'wb').write(frame)
 
 
 def drawFrame():
