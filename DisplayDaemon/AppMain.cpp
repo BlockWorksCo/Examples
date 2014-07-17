@@ -96,6 +96,11 @@ void SendFBToDisplay(TxQueueType& txq, uint8_t* fb)
 //
 extern "C" void AppMain()
 {
+    for(int i=0; i<40; i++)
+    {
+        Send(txQueue, i);
+    }
+    
     while(true)
     {
         static uint32_t     fc  = 0;
