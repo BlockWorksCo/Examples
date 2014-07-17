@@ -16,6 +16,7 @@ C               = None
 def redraw():
     """
     """
+    C.delete('all')
     offsetX     = 20
     offsetY     = 20
     for x in range(0,40):
@@ -30,8 +31,9 @@ def redraw():
                 colour  = 'gray'
             else:
                 colour  = 'red'
-            b = C.create_polygon( offsetX++sx,offsetY+sy, offsetX+sx+10,offsetY+sy, offsetX+sx+10,offsetY+sy+10, offsetX+sx,offsetY+sy+10, fill=colour)
-    top.after(100, redraw)
+            #b = C.create_polygon( offsetX+sx,offsetY+sy, offsetX+sx+10,offsetY+sy, offsetX+sx+10,offsetY+sy+10, offsetX+sx,offsetY+sy+10, fill=colour)
+            b = C.create_oval( offsetX+sx,offsetY+sy,  offsetX+sx+10,offsetY+sy+10, fill=colour, outline='')
+    top.after(20, redraw)
 
 
 
