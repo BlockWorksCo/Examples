@@ -13,19 +13,22 @@ import Font
 
 
 NUMBER_OF_8x8_MATRICES  = 5
+fbName  = {'nt':'c:\\temp\\ledfb', 'posix':'/tmp/ledfb'}
+
+
+
+
 
 def showFrame(frame):
     """
     """
     frame = struct.pack('40B',*(frame) )
-    fbName  = {'nt':'c:\\temp\\ledfb', 'posix':'/tmp/ledfb'}
     open(fbName[os.name],'wb').write(frame)
 
 
 def getFrame(frame):
     """
     """
-    fbName      = {'nt':'c:\\temp\\ledfb', 'posix':'/tmp/ledfb'}
     fbData      = open(fbName[os.name]).read(40)
     fbStruct    = struct.Struct('B'*40)
     try:
@@ -96,7 +99,7 @@ def BitBlt(x, y, width, height, data):
             #
             absY = -y
             dest[x+i]   = (dest[i] & (0xff<<(8-absY) )) | (data[i]>>absY )
-            
+
     showFrame(dest)
             
 
