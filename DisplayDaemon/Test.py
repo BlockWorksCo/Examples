@@ -8,231 +8,33 @@ import struct
 import random
 import sys
 import os
+import Font
 
 
 
+NUMBER_OF_8x8_MATRICES  = 5
 
-SpriteLUT = \
-{
-    ' ':0,
-    '!':1,
-    '"':2,
-    '#':3,
-    '$':4,
-    '%':5,
-    '&':6,
-    '\'':7,
-    '(':8,
-    ')':9,
-    '*':10,
-    '+':11,
-    ',':12,
-    '-':13,
-    '.':14,
-    '/':15,
-    '0':16,
-    '1':17,
-    '2':18,
-    '3':19,
-    '4':20,
-    '5':21,
-    '6':22,
-    '7':23,
-    '8':24,
-    '9':25,
-    ':':26,
-    ';':27,
-    '<':28,
-    '=':29,
-    '>':30,
-    '?':31,
-    '@':32,
-    'A':33,
-    'B':34,
-    'C':35,
-    'D':36,
-    'E':37,
-    'F':38,
-    'G':39,
-    'H':40,
-    'I':41,
-    'J':42,
-    'K':43,
-    'L':44,
-    'M':45,
-    'N':46,
-    'O':47,
-    'P':48,
-    'Q':49,
-    'R':50,
-    'S':51,
-    'T':52,
-    'U':53,
-    'V':54,
-    'W':55,
-    'X':56,
-    'Y':57,
-    'Z':58,
-    '[':59,
-    '\\':60,
-    ']':61,
-    '^':62,
-    '_':63,
-    '`':64,
-    'a':65,
-    'b':66,
-    'c':67,
-    'd':68,
-    'e':69,
-    'f':70,
-    'g':71,
-    'h':72,
-    'i':73,
-    'j':74,
-    'k':75,
-    'l':76,
-    'm':77,
-    'n':78,
-    'o':79,
-    'p':80,
-    'q':81,
-    'r':82,
-    's':83,
-    't':84,
-    'u':85,
-    'v':86,
-    'w':87,
-    'x':88,
-    'y':89,
-    'z':90,
-    '{':91,
-    '|':92,
-    '}':93,
-    '~':94,
-}
-
-
-SpriteWidths = \
-[
-    2,
-    1,
-    3,
-    5,
-    4,
-    5,
-    5,
-    1,
-    3,
-    3,
-    5,
-    5,
-    2,
-    4,
-    2,
-    4,
-    4,
-    3,
-    4,
-    4,
-    4,
-    4,
-    4,
-    4,
-    4,
-    4,
-    2,
-    2,
-    3,
-    3,
-    3,
-    4,
-    5,
-    4,
-    4,
-    4,
-    4,
-    4,
-    4,
-    4,
-    4,
-    3,
-    4,
-    4,
-    4,
-    5,
-    5,
-    4,
-    4,
-    4,
-    4,
-    4,
-    5,
-    4,
-    5,
-    5,
-    5,
-    5,
-    4,
-    2,
-    4,
-    2,
-    3,
-    4,
-    2,
-    4,
-    4,
-    4,
-    4,
-    4,
-    3,
-    4,
-    4,
-    3,
-    4,
-    4,
-    3,
-    5,
-    4,
-    4,
-    4,
-    4,
-    4,
-    4,
-    3,
-    4,
-    5,
-    5,
-    5,
-    4,
-    3,
-    3,
-    1,
-    3,
-    4,
-]
-
-
-
-
-
-def lowIntensity():
+def showFrame(frame):
     """
     """
-    #SendMessage(2, struct.pack('B',1) )
-    pass
-
-def highIntensity():
-    """
-    """
-    #SendMessage(2, struct.pack('B',15) )
-    pass
+    frame = struct.pack('40B',*(frame) )
+    fbName  = {'nt':'c:\\temp\\ledfb', 'posix':'/tmp/ledfb'}
+    open(fbName[os.name],'wb').write(frame)
 
 
-def setIntensity(value):
+def getFrame(frame):
     """
     """
-    #SendMessage(2, struct.pack('B',value) )
-    pass
+    fbName      = {'nt':'c:\\temp\\ledfb', 'posix':'/tmp/ledfb'}
+    fbData      = open(fbName[os.name]).read(40)
+    fbStruct    = struct.Struct('B'*40)
+    try:
+        values  = fbStruct.unpack_from(fbData)
+    except struct.error:
+        values  = [0x0]*40
+
+    return values
+
 
 
 def clear():
@@ -247,46 +49,71 @@ def clearWithValue(value):
     showFrame(struct.pack('40B',*(40*[value]) ) )
 
 
-def showFrame(frame):
+def BitBlt(x, y, width, height, data):
     """
+    Copy the source image into the framebuffer at the specified location.
     """
-    frame = struct.pack('40B',*(frame) )
-    #frame = struct.pack('40B',*(40*[127]) )
-    fbName  = {'nt':'c:\\temp\\ledfb', 'posix':'/tmp/ledfb'}
-    open(fbName[os.name],'wb').write(frame)
+    
+    #
+    # Perform the clipping for x,y, width & height.
+    #
+    if x >= (NUMBER_OF_8x8_MATRICES*8):
+        return
+    
+    if y < -height:    
+        return    
+    
+    if x < -width:
+        return
+    
+    if y >= 8:
+        return
+    
+    if x+width > (NUMBER_OF_8x8_MATRICES*8) :
+        width = (NUMBER_OF_8x8_MATRICES*8)-x
+    
+    if x<0:
+        width   = width + x
+        data    = data - x
+        x       = 0
+    
+    dest    = getFrame()
+    
+    #
+    # Iterate over remaining data, copying it to the framebuffer.
+    #
+    if y >= 0:
+        for i in range(0,width):
+            #
+            # dest[i] = 10101010 data[i] = 11001100 y=6 result = 101010xx | 00000011 = 10101011
+            #
+            dest[x+i]    = (dest[i] & (0xff>>(8-y) )) | (data[i]<<y);
+                
+    if y < 0:
+        for i in range(0,width):
+            #
+            # dest[i] = 10101010  data[i] = 11001100 y = -2, result = 10xxxxxx | xx001100 = 10001100
+            #
+            absY = -y
+            dest[x+i]   = (dest[i] & (0xff<<(8-absY) )) | (data[i]>>absY )
+            
+    showFrame(dest)
+            
 
 
-def drawFrame():
-    """
-    """
-    showFrame()
 
 
-def int8_to_uint8(i):
-    return ctypes.c_uint8(i).value
-
-
-def drawSprite(x,y,sprite):
-    """
-    """
-    pass
-    #Send('%c%c'%(27,0))
-    #Send('%c%c%c'%( int8_to_uint8(x),int8_to_uint8(y),int(sprite) ))
 
 
 def drawChar(x,y, char):
     """
     """
-    try:
-        asciiValue   = int(ord(char))
-    except ValueError:
-        asciiValue   = ord(char)
+    width       = font[char]['Width']
+    height      = font[char]['Height']
+    data        = font[char]['Data']
+    BitBlt(x,y, width, height, data)
 
-    char    = chr(asciiValue)
-    spriteValue = SpriteLUT[char]
-    #print('drawChar(%c): ascii:%02d sprite:%02d'%(char,asciiValue,spriteValue))
-    drawSprite(x,y, spriteValue)
-    return SpriteWidths[ spriteValue ]
+    return width
 
 
 def drawText(x, y, text):
@@ -313,7 +140,7 @@ def VertScroll(topLine, bottomLine):
         clear()
         drawText(0,y, topLine)
         drawText(0,y+8, bottomLine)
-        drawFrame()
+        showFrame()
         #time.sleep(0.01)
 
 
@@ -338,7 +165,7 @@ def VertDiffScroll(topLine, bottomLine):
                 charWidth = 5
             x   = x + charWidth
 
-        drawFrame()
+        showFrame()
         time.sleep(0.0)
 
 
@@ -377,7 +204,7 @@ def t0():
         #drawText(10,y+8, '>World<')
         #drawText(0,y, '>>> Hello <<<')
         drawText(0,y, 'BlockWorks')
-        drawFrame()
+        showFrame()
         time.sleep(0.5)
 
 
@@ -386,7 +213,7 @@ def t1():
     """
     for x in range(0,30):
         #clear()
-        drawText(0,0, 'BlockWorks')
+        showFrame(0,0, 'BlockWorks')
         time.sleep(1.0)
 
 
@@ -396,7 +223,7 @@ def BlockWorks():
     for x in range(-20, 1):
         clear();
         drawText(x,0, 'Block')
-        drawFrame()
+        showFrame()
         time.sleep(0.01)
 
     time.sleep(0.5)
@@ -405,7 +232,7 @@ def BlockWorks():
         #clear();
         #drawText(0,0, 'Block')
         drawText(x,0, 'Works')
-        drawFrame()
+        showFrame()
         time.sleep(0.01)
 
 
@@ -417,7 +244,7 @@ def BlockWorks2():
         #clear();
         drawText(-19+x,0, 'Block')
         drawText(38-x,0, 'Works')
-        drawFrame()
+        showFrame()
         time.sleep(0.01)
 
 
@@ -428,7 +255,7 @@ def BlockWorks3():
         clear();
         drawText(0,-x, 'Block')
         drawText(18,x, 'Works')
-        drawFrame()
+        showFrame()
         time.sleep(0.01)
 
 
@@ -493,7 +320,7 @@ def JitterBug():
         dx = int(random.random()*3)
         dy = int(random.random()*3)
         drawText(1+dx-2,1+dy-2, 'BlockWorks')
-        drawFrame()
+        showFrame()
         time.sleep(0.03)
 
 
