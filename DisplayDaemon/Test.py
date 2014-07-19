@@ -15,13 +15,16 @@ from Font import font
 NUMBER_OF_8x8_MATRICES  = 5
 fbName  = {'nt':'c:\\temp\\ledfb', 'posix':'/tmp/ledfb'}
 
+cachedFrameBuffer   = [0]*40
 
 
 
-
-def showFrame(frame):
+def showFrame():
     """
     """
+    global cachedFrameBuffer
+    frame = cachedFrameBuffer
+
     frame = struct.pack('40B',*(frame) )
     open(fbName[os.name],'wb').write(frame)
 
@@ -29,6 +32,8 @@ def showFrame(frame):
 def getFrame():
     """
     """
+    return cachedFrameBuffer
+
     fbData      = open(fbName[os.name]).read(40)
     fbStruct    = struct.Struct('B'*40)
     try:
@@ -43,7 +48,8 @@ def getFrame():
 def clear():
     """
     """
-    showFrame( 40*[0] )
+    global cachedFrameBuffer
+    cachedFrameBuffer   = [0]*40
 
 
 def clearWithValue(value):
@@ -111,7 +117,7 @@ def BitBlt(x, y, width, height, data):
             previous = dest[x+i]
             dest[x+i]   = (previous & mask) | int8_to_uint8(data[startX+i]>>absY )
 
-    showFrame(dest)
+    #showFrame(dest)
             
 
 
@@ -154,7 +160,7 @@ def VertScroll(topLine, bottomLine):
         clear()
         drawText(0,y, topLine)
         drawText(0,y+8, bottomLine)
-        #showFrame()
+        showFrame()
         #time.sleep(0.01)
 
 
@@ -179,8 +185,8 @@ def VertDiffScroll(topLine, bottomLine):
                 charWidth = 5
             x   = x + charWidth
 
-        #showFrame()
-        time.sleep(0.0)
+        showFrame()
+        time.sleep(0.01)
 
 
 
@@ -194,6 +200,7 @@ def VertClock():
         VertDiffScroll(prevTime, currentTime)
         time.sleep(1.0)
         prevTime = currentTime
+        showFrame()
 
 
 
@@ -217,7 +224,7 @@ def t0():
         #drawText(10,y+8, '>World<')
         #drawText(0,y, '>>> Hello <<<')
         drawText(0,y, 'BlockWorks')
-        #showFrame()
+        showFrame()
         time.sleep(0.5)
 
 
@@ -236,7 +243,7 @@ def BlockWorks():
     for x in range(-20, 1):
         clear();
         drawText(x,0, 'Block')
-        #showFrame()
+        showFrame()
         time.sleep(0.01)
 
     time.sleep(0.5)
@@ -245,7 +252,7 @@ def BlockWorks():
         #clear();
         #drawText(0,0, 'Block')
         drawText(x,0, 'Works')
-        #showFrame()
+        showFrame()
         time.sleep(0.01)
 
 
@@ -257,7 +264,7 @@ def BlockWorks2():
         #clear();
         drawText(-19+x,0, 'Block')
         drawText(38-x,0, 'Works')
-        #showFrame()
+        showFrame()
         time.sleep(0.01)
 
 
@@ -268,7 +275,7 @@ def BlockWorks3():
         clear();
         drawText(0,-x, 'Block')
         drawText(18,x, 'Works')
-        #showFrame()
+        showFrame()
         time.sleep(0.01)
 
 
@@ -333,7 +340,7 @@ def JitterBug():
         dx = int(random.random()*3)
         dy = int(random.random()*3)
         drawText(1+dx-2,1+dy-2, 'BlockWorks')
-        #showFrame()
+        showFrame()
         time.sleep(0.03)
 
 
@@ -374,7 +381,7 @@ def Analyser():
 #ImageTestThree()
 #ImageTestTwo()
 #t1()
-TextDemo()
+#TextDemo()
 #t0()
 #VertTest()
 VertClock()
