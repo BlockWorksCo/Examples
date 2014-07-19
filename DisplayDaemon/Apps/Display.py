@@ -28,7 +28,9 @@ def showFrame():
 
     frame = struct.pack('40B',*(frame) )
     fileName = '%s%s'%(fbName[os.name], frameBufferId)
-    open(fileName,'wb').write(frame)
+    fd = open(fileName,'wb')
+    fd.write(frame)
+    fd.flush()
 
 
 def getFrame():

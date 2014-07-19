@@ -4,8 +4,6 @@
 import serial
 import time
 import struct
-import thread
-import Tkinter
 import random
 import sys
 import os
@@ -161,10 +159,8 @@ def DisplayDaemon(frameBufferList):
 
             frameBufferId   = frameBufferList[frameIndex]
             fileName = '%s%s'%(fbName[os.name], frameBufferId)
-            fd = open(fileName,'rb')
-
-        fd.seek(0,0)
-        fbData  = fd.read(40)
+        
+        fbData  = open(fileName,'rb').read(40)
         try:
             values  = fbStruct.unpack_from(fbData)
             #print('good data')
@@ -196,6 +192,9 @@ if __name__ == '__main__':
         ser = serial.Serial(port='/dev/ttyUSB0', baudrate=115200)
         DisplayDaemon(frameBufferList)
     except serial.serialutil.SerialException:
+        import thread
+        import Tkinter
+
         ser     = []
         thread.start_new_thread(DisplayDaemon, (frameBufferList,) )
         ShowDisplay()
