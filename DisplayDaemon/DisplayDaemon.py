@@ -139,14 +139,29 @@ def showFrame(frame):
 
 
 
-def DisplayDaemon(fileName):
+def DisplayDaemon(frameBufferList):
     """
     """
     #setIntensity(15)
 
+    frameBufferId   = frameBufferList[0]
+    fileName = '%s%s'%(fbName[os.name], frameBufferId)
     fd = open(fileName,'rb')
+
     fbStruct    = struct.Struct('B'*40)
+
+    frameCount = 0
+    frameIndex = 0
     while True:
+
+        if frameCount >= 500:
+            frameCount = 0
+            frameIndex = (frameIndex + 1) % len(frameBufferList)
+            print('Switch to %d'%frameIndex)
+
+            frameBufferId   = frameBufferList[frameIndex]
+            fileName = '%s%s'%(fbName[os.name], frameBufferId)
+            fd = open(fileName,'rb')
 
         fd.seek(0,0)
         fbData  = fd.read(40)
@@ -157,6 +172,7 @@ def DisplayDaemon(fileName):
             #print('bad data')
             values  = [0x0]*40
 
+        frameCount = frameCount + 1
         showFrame(values)
         time.sleep(0.02)
 
@@ -175,15 +191,13 @@ if __name__ == '__main__':
     frameBufferList = sys.argv[1:]
     print(frameBufferList)
 
-    frameBufferId   = frameBufferList[0]
-    fileName = '%s%s'%(fbName[os.name], frameBufferId)
 
     try:
         ser = serial.Serial(port='/dev/ttyUSB0', baudrate=115200)
-        DisplayDaemon(fileName)
+        DisplayDaemon(frameBufferList)
     except serial.serialutil.SerialException:
         ser     = []
-        thread.start_new_thread(DisplayDaemon, (fileName,) )
+        thread.start_new_thread(DisplayDaemon, (frameBufferList,) )
         ShowDisplay()
 
 
