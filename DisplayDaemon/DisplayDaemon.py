@@ -33,7 +33,7 @@ def redraw():
                 colour  = 'red'
             #b = C.create_polygon( offsetX+sx,offsetY+sy, offsetX+sx+10,offsetY+sy, offsetX+sx+10,offsetY+sy+10, offsetX+sx,offsetY+sy+10, fill=colour)
             b = C.create_oval( offsetX+sx,offsetY+sy,  offsetX+sx+10,offsetY+sy+10, fill=colour, outline='')
-    top.after(20, redraw)
+    top.after(10, redraw)
 
 
 
@@ -140,7 +140,7 @@ def showFrame(frame):
 def DisplayDaemon(fileName):
     """
     """
-    setIntensity(15)
+    #setIntensity(15)
 
     fd = open(fileName,'rb')
     fbStruct    = struct.Struct('B'*40)

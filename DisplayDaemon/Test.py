@@ -8,7 +8,7 @@ import struct
 import random
 import sys
 import os
-import Font
+from Font import font
 
 
 
@@ -26,7 +26,7 @@ def showFrame(frame):
     open(fbName[os.name],'wb').write(frame)
 
 
-def getFrame(frame):
+def getFrame():
     """
     """
     fbData      = open(fbName[os.name]).read(40)
@@ -35,21 +35,27 @@ def getFrame(frame):
         values  = fbStruct.unpack_from(fbData)
     except struct.error:
         values  = [0x0]*40
-
-    return values
+    
+    return list(values)
 
 
 
 def clear():
     """
     """
-    showFrame(struct.pack('40B',*(40*[0]) ) )
+    showFrame( 40*[0] )
 
 
 def clearWithValue(value):
     """
     """
     showFrame(struct.pack('40B',*(40*[value]) ) )
+
+
+
+def int8_to_uint8(i):
+    return ctypes.c_uint8(i).value
+
 
 
 def BitBlt(x, y, width, height, data):
@@ -75,13 +81,14 @@ def BitBlt(x, y, width, height, data):
     if x+width > (NUMBER_OF_8x8_MATRICES*8) :
         width = (NUMBER_OF_8x8_MATRICES*8)-x
     
+    startX = 0
     if x<0:
         width   = width + x
-        data    = data - x
+        startX  = -x
         x       = 0
     
     dest    = getFrame()
-    
+
     #
     # Iterate over remaining data, copying it to the framebuffer.
     #
@@ -90,7 +97,9 @@ def BitBlt(x, y, width, height, data):
             #
             # dest[i] = 10101010 data[i] = 11001100 y=6 result = 101010xx | 00000011 = 10101011
             #
-            dest[x+i]    = (dest[i] & (0xff>>(8-y) )) | (data[i]<<y);
+            mask = 0xff>>(8-y)
+            previous = dest[x+i]
+            dest[x+i]  = (previous & mask) | int8_to_uint8(data[startX+i]<<y);
                 
     if y < 0:
         for i in range(0,width):
@@ -98,7 +107,9 @@ def BitBlt(x, y, width, height, data):
             # dest[i] = 10101010  data[i] = 11001100 y = -2, result = 10xxxxxx | xx001100 = 10001100
             #
             absY = -y
-            dest[x+i]   = (dest[i] & (0xff<<(8-absY) )) | (data[i]>>absY )
+            mask = 0xff<<(8-absY)
+            previous = dest[x+i]
+            dest[x+i]   = (previous & mask) | int8_to_uint8(data[startX+i]>>absY )
 
     showFrame(dest)
             
@@ -143,7 +154,7 @@ def VertScroll(topLine, bottomLine):
         clear()
         drawText(0,y, topLine)
         drawText(0,y+8, bottomLine)
-        showFrame()
+        #showFrame()
         #time.sleep(0.01)
 
 
@@ -168,7 +179,7 @@ def VertDiffScroll(topLine, bottomLine):
                 charWidth = 5
             x   = x + charWidth
 
-        showFrame()
+        #showFrame()
         time.sleep(0.0)
 
 
@@ -202,12 +213,11 @@ def VertTest():
 def t0():
     while True:
         clear()
-        lowIntensity()
         y = 0
         #drawText(10,y+8, '>World<')
         #drawText(0,y, '>>> Hello <<<')
         drawText(0,y, 'BlockWorks')
-        showFrame()
+        #showFrame()
         time.sleep(0.5)
 
 
@@ -217,7 +227,7 @@ def t1():
     for x in range(0,30):
         #clear()
         showFrame(0,0, 'BlockWorks')
-        time.sleep(1.0)
+        time.sleep(0.0)
 
 
 def BlockWorks():
@@ -226,7 +236,7 @@ def BlockWorks():
     for x in range(-20, 1):
         clear();
         drawText(x,0, 'Block')
-        showFrame()
+        #showFrame()
         time.sleep(0.01)
 
     time.sleep(0.5)
@@ -235,7 +245,7 @@ def BlockWorks():
         #clear();
         #drawText(0,0, 'Block')
         drawText(x,0, 'Works')
-        showFrame()
+        #showFrame()
         time.sleep(0.01)
 
 
@@ -247,7 +257,7 @@ def BlockWorks2():
         #clear();
         drawText(-19+x,0, 'Block')
         drawText(38-x,0, 'Works')
-        showFrame()
+        #showFrame()
         time.sleep(0.01)
 
 
@@ -258,7 +268,7 @@ def BlockWorks3():
         clear();
         drawText(0,-x, 'Block')
         drawText(18,x, 'Works')
-        showFrame()
+        #showFrame()
         time.sleep(0.01)
 
 
@@ -323,7 +333,7 @@ def JitterBug():
         dx = int(random.random()*3)
         dy = int(random.random()*3)
         drawText(1+dx-2,1+dy-2, 'BlockWorks')
-        showFrame()
+        #showFrame()
         time.sleep(0.03)
 
 
@@ -357,12 +367,12 @@ def Analyser():
 
 
 
-setIntensity(7)
+#setIntensity(7)
 
-Analyser()
+#Analyser()
 #JitterBug()
 #ImageTestThree()
-ImageTestTwo()
+#ImageTestTwo()
 #t1()
 TextDemo()
 #t0()
