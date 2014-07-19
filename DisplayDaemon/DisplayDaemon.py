@@ -7,11 +7,14 @@ import struct
 import random
 import sys
 import os
+import zmq
 
 
 frameBuffer     = [0xaa]*40
 topWindow       = None
 C               = None
+pubSocket       = None
+subSocket       = None
 
 def redraw():
     """
@@ -36,6 +39,24 @@ def redraw():
     top.after(10, redraw)
 
 
+def key(event):
+    global pubSocket
+
+    if event.char == event.keysym:
+        #msg = 'Normal Key %r' % event.char
+        pass
+    elif len(event.char) == 1:
+        #msg = 'Punctuation Key %r (%r)' % (event.keysym, event.char)
+        pass
+    else:
+        if event.keysym == 'Left':
+            pubSocket.send('LeftMsg')
+        if event.keysym == 'Right':
+            pubSocket.send('RightMsg')
+        if event.keysym == 'Down':
+            pubSocket.send('DownMsg')
+
+
 
 def ShowDisplay():
     """
@@ -45,6 +66,8 @@ def ShowDisplay():
 
     top = Tkinter.Tk()
     C = Tkinter.Canvas(top, bg="gray", height=200, width=550)
+
+    top.bind_all('<Key>', key)
 
     C.pack()
     top.after(100, redraw)
@@ -160,6 +183,14 @@ def DisplayDaemon(frameBufferList):
             frameBufferId   = frameBufferList[frameIndex]
             fileName = '%s%s'%(fbName[os.name], frameBufferId)
         
+
+        try:
+            msg     = subSocket.recv(zmq.NOBLOCK)
+            print(msg)
+        except zmq.error.Again:
+            pass
+
+
         fbData  = open(fileName,'rb').read(40)
         try:
             values  = fbStruct.unpack_from(fbData)
@@ -187,6 +218,13 @@ if __name__ == '__main__':
     frameBufferList = sys.argv[1:]
     print(frameBufferList)
 
+    zmqContext  = zmq.Context()
+    pubSocket   = zmqContext.socket(zmq.PUB)
+    pubSocket.bind('tcp://*:6633')
+
+    subSocket   = zmqContext.socket(zmq.SUB)
+    subSocket.connect("tcp://127.0.0.1:6633")
+    subSocket.setsockopt(zmq.SUBSCRIBE,'')
 
     try:
         ser = serial.Serial(port='/dev/ttyUSB0', baudrate=115200)
