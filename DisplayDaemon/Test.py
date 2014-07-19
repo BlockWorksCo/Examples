@@ -374,16 +374,20 @@ def Analyser():
 
 
 
-#setIntensity(7)
 
-#Analyser()
-#JitterBug()
-#ImageTestThree()
-#ImageTestTwo()
-#t1()
-#TextDemo()
-#t0()
-#VertTest()
-VertClock()
+if __name__ == '__main__':
+    """
+    """
+    #setIntensity(7)
+
+    #Analyser()
+    #JitterBug()
+    #ImageTestThree()
+    #ImageTestTwo()
+    #t1()
+    TextDemo()
+    #t0()
+    #VertTest()
+    VertClock()
 
 

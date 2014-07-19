@@ -7,6 +7,8 @@ import struct
 import thread
 import Tkinter
 import random
+import sys
+import os
 
 
 frameBuffer     = [0xaa]*40
@@ -162,16 +164,27 @@ def DisplayDaemon(fileName):
 
 
 
+frameBufferId   = ''
+fbName  = {'nt':'c:\\temp\\ledfb', 'posix':'/tmp/ledfb'}
+frameBufferList     = []
 
 
+if __name__ == '__main__':
+    """
+    """
+    frameBufferList = sys.argv[1:]
+    print(frameBufferList)
 
-try:
-    ser = serial.Serial(port='/dev/ttyUSB0', baudrate=115200)
-    DisplayDaemon('/tmp/ledfb')
-except serial.serialutil.SerialException:
-    ser     = []
-    thread.start_new_thread(DisplayDaemon, ('c:\\temp\ledfb',) )
-    ShowDisplay()
+    frameBufferId   = frameBufferList[0]
+    fileName = '%s%s'%(fbName[os.name], frameBufferId)
+
+    try:
+        ser = serial.Serial(port='/dev/ttyUSB0', baudrate=115200)
+        DisplayDaemon(fileName)
+    except serial.serialutil.SerialException:
+        ser     = []
+        thread.start_new_thread(DisplayDaemon, (fileName,) )
+        ShowDisplay()
 
 
 
