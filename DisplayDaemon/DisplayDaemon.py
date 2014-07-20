@@ -8,6 +8,9 @@ import random
 import sys
 import os
 import zmq
+import ctypes
+import thread
+
 
 
 frameBuffer     = [0xaa]*40
@@ -15,6 +18,9 @@ topWindow       = None
 C               = None
 pubSocket       = None
 subSocket       = None
+
+
+
 
 def redraw():
     """
@@ -30,10 +36,18 @@ def redraw():
             sx = x*12
             sy = y*12
 
-            if (columnByte & (1<<y)) == 0:
-                colour  = 'gray'
-            else:
-                colour  = 'red'
+            if type(columnByte) == 'str':
+                print(columnByte)
+
+            try:
+                if ((columnByte) & (1<<y)) == 0:
+                    colour  = 'gray'
+                else:
+                    colour  = 'red'
+            except:
+                print(type(columnByte))
+                print(frameBuffer)
+                sys.exit(-1)
             #b = C.create_polygon( offsetX+sx,offsetY+sy, offsetX+sx+10,offsetY+sy, offsetX+sx+10,offsetY+sy+10, offsetX+sx,offsetY+sy+10, fill=colour)
             b = C.create_oval( offsetX+sx,offsetY+sy,  offsetX+sx+10,offsetY+sy+10, fill=colour, outline='')
     top.after(10, redraw)
@@ -56,6 +70,13 @@ def key(event):
         if event.keysym == 'Down':
             pubSocket.send('DownMsg')
 
+
+
+def int8_to_uint8(i):
+    try:
+        return ctypes.c_uint8(i).value
+    except:
+        print('[%s,%s]'%(str(i),type(i)))
 
 
 def ShowDisplay():
@@ -156,7 +177,40 @@ def showFrame(frame):
 
 
 
+def DoTransition(fromId, toId, event):
+    """
+    """
+    fromFileName    = '%s%s'%(fbName[os.name], fromId)
+    toFileName      = '%s%s'%(fbName[os.name], toId)
 
+    values = 40*[0xaa]
+
+    fbStruct    = struct.Struct('B'*40)
+    try:
+        fromData    = fbStruct.unpack_from(open(fromFileName,'rb').read(40))
+    except struct.error:
+        fromData    = 40*[0]
+
+    try:
+        toData      = fbStruct.unpack_from(open(toFileName,'rb').read(40))
+    except struct.error:
+        toData    = 40*[0]
+
+    for i in range(10):
+
+
+        if event == 'RightMsg':
+            split   = i*4
+            values[0:split]     = toData[(40-split):]
+            values[split:39]     = fromData[0:(40-split)]
+
+        if event == 'LeftMsg':
+            split   = 40-(i*4)
+            values[0:split]     = fromData[(40-split):]
+            values[split:39]     = toData[0:(40-split)]
+
+        showFrame(values)
+        time.sleep(0.05)
 
 
 
@@ -175,18 +229,23 @@ def DisplayDaemon(frameBufferList):
     frameIndex = 0
     while True:
 
-        if frameCount >= 500:
-            frameCount = 0
-            frameIndex = (frameIndex + 1) % len(frameBufferList)
-            print('Switch to %d'%frameIndex)
-
-            frameBufferId   = frameBufferList[frameIndex]
-            fileName = '%s%s'%(fbName[os.name], frameBufferId)
-        
 
         try:
             msg     = subSocket.recv(zmq.NOBLOCK)
-            print(msg)
+
+            oldFrameIndex = frameIndex
+
+            if msg == 'LeftMsg':
+                frameIndex = (frameIndex + 1) % len(frameBufferList)
+            if msg == 'RightMsg':
+                frameIndex = (frameIndex - 1) % len(frameBufferList)
+
+            print('Switch to %d'%frameIndex)
+
+            DoTransition(frameBufferList[oldFrameIndex], frameBufferList[frameIndex], msg)
+            frameBufferId   = frameBufferList[frameIndex]
+            fileName = '%s%s'%(fbName[os.name], frameBufferId)
+
         except zmq.error.Again:
             pass
 
@@ -204,6 +263,13 @@ def DisplayDaemon(frameBufferList):
         time.sleep(0.02)
 
 
+
+def PeriodicSwitch(pubSocket):
+    """
+    """
+    while True:
+        time.sleep(10.0)
+        pubSocket.send('LeftMsg')
 
 
 
@@ -226,11 +292,13 @@ if __name__ == '__main__':
     subSocket.connect("tcp://127.0.0.1:6633")
     subSocket.setsockopt(zmq.SUBSCRIBE,'')
 
+    thread.start_new_thread(PeriodicSwitch, (pubSocket,) )
+
+
     try:
         ser = serial.Serial(port='/dev/ttyUSB0', baudrate=115200)
         DisplayDaemon(frameBufferList)
     except serial.serialutil.SerialException:
-        import thread
         import Tkinter
 
         ser     = []
