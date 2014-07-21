@@ -54,7 +54,7 @@ class GUIDisplay:
                     colour  = 'red'
                 b = self.C.create_oval( offsetX+sx,offsetY+sy,  offsetX+sx+10,offsetY+sy+10, fill=colour, outline='')
 
-        self.top.after(10, redraw)
+        self.top.after(10, self.redraw)
 
 
     def key(self, event):
@@ -78,16 +78,15 @@ class GUIDisplay:
     def ShowDisplay(self):
         """
         """
-        global top
-        global C
+        import Tkinter
 
         self.top = Tkinter.Tk()
-        self.C = Tkinter.Canvas(top, bg="gray", height=200, width=550)
+        self.C = Tkinter.Canvas(self.top, bg="gray", height=200, width=550)
 
-        self.top.bind_all('<Key>', key)
+        self.top.bind_all('<Key>', self.key)
 
         self.C.pack()
-        self.top.after(100, redraw)
+        self.top.after(100, self.redraw)
 
 
 
@@ -258,7 +257,7 @@ outBuffer   = []
 
 
 
-def DoTransition(fromId, toId, event):
+def DoTransition(display, fromId, toId, event):
     """
     """
     fromFileName    = '%s%s'%(fbName[os.name], fromId)
@@ -290,7 +289,7 @@ def DoTransition(fromId, toId, event):
             values[0:split]     = fromData[(40-split):]
             values[split:39]     = toData[0:(40-split)]
 
-        showFrame(values)
+        display.showFrame(values)
         time.sleep(0.05)
 
 
@@ -322,7 +321,7 @@ def DisplayDaemon(display, frameBufferList):
 
             print('Switch to %d'%frameIndex)
 
-            DoTransition(frameBufferList[oldFrameIndex], frameBufferList[frameIndex], msg)
+            DoTransition(display, frameBufferList[oldFrameIndex], frameBufferList[frameIndex], msg)
             frameBufferId   = frameBufferList[frameIndex]
             fileName = '%s%s'%(fbName[os.name], frameBufferId)
 
@@ -345,7 +344,7 @@ def PeriodicSwitch(pubSocket):
     """
     """
     while True:
-        time.sleep(30.0)
+        time.sleep(10.0)
         pubSocket.send('LeftMsg')
 
 
