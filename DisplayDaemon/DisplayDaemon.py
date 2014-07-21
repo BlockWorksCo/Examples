@@ -9,6 +9,7 @@ import os
 import zmq
 import ctypes
 import thread
+import datetime
 
 
 
@@ -218,7 +219,7 @@ class TextDisplay:
         """
         global frameBuffer
         frameBuffer = frame
-        
+
         sys.stdout.write('\x1b[2J')
         sys.stdout.write('\x1b[1;1H')
         for y in range(0,8):
@@ -230,7 +231,7 @@ class TextDisplay:
                 sy = y*12
 
                 if ((columnByte) & (1<<y)) == 0:
-                    character   = '.'
+                    character   = ' '
                 else:
                     character   = 'O'
                 sys.stdout.write(character)
@@ -347,8 +348,60 @@ def PeriodicSwitch(pubSocket):
     """
     """
     while True:
-        time.sleep(10.0)
+        time.sleep(120.0)
         pubSocket.send('LeftMsg')
+
+
+
+
+
+
+def PowermateReader(pubSocket):
+    """
+    """
+    infile_path = "/dev/input/by-id/usb-Griffin_Technology__Inc._Griffin_PowerMate-event-if00"
+
+    #long int, long int, unsigned short, unsigned short, unsigned int
+    FORMAT = 'llHHI'
+    EVENT_SIZE = struct.calcsize(FORMAT)
+
+    timestampOfLastEvent    = datetime.datetime.now()
+
+    #open file in binary mode
+    in_file = open(infile_path, "rb")
+
+    event = in_file.read(EVENT_SIZE)
+
+    while True:
+        (tv_sec, tv_usec, type, code, value) = struct.unpack(FORMAT, event)
+        timestampOfThisEvent    = datetime.datetime.now()
+        microsecondsSinceLastEvent  = (timestampOfThisEvent - timestampOfLastEvent).microseconds
+        #print(microsecondsSinceLastEvent)
+
+        if  microsecondsSinceLastEvent > 250000:
+
+            timestampOfLastEvent    = timestampOfThisEvent
+
+            if type == 2 and value == 1:
+                print('right')
+                pubSocket.send('RightMsg')
+
+            if type == 2 and value == 4294967295:
+                print('left')
+                pubSocket.send('LeftMsg')
+
+
+        if type == 1 and value == 1:
+            print('down')
+
+        if type == 1 and value == 0:
+            print('up')
+
+        event = in_file.read(EVENT_SIZE)
+
+    in_file.close()
+
+
 
 
 
@@ -371,12 +424,12 @@ if __name__ == '__main__':
     subSocket.connect("tcp://127.0.0.1:6633")
     subSocket.setsockopt(zmq.SUBSCRIBE,'')
 
-    thread.start_new_thread(PeriodicSwitch, (pubSocket,) )
-
-    #display     = GUIDisplay()
+    display     = GUIDisplay()
     #display     = LEDDisplay()
-    display     = TextDisplay()
+    #display     = TextDisplay()
 
+    thread.start_new_thread(PowermateReader, (pubSocket,) )
+    thread.start_new_thread(PeriodicSwitch, (pubSocket,) )
     thread.start_new_thread(DisplayDaemon, (display,frameBufferList) )
 
     display.Run()
