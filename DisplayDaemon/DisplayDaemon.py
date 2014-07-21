@@ -216,6 +216,9 @@ class TextDisplay:
     def showFrame(self, frame):
         """
         """
+        global frameBuffer
+        frameBuffer = frame
+        
         sys.stdout.write('\x1b[2J')
         sys.stdout.write('\x1b[1;1H')
         for y in range(0,8):
@@ -227,7 +230,7 @@ class TextDisplay:
                 sy = y*12
 
                 if ((columnByte) & (1<<y)) == 0:
-                    character   = ' '
+                    character   = '.'
                 else:
                     character   = 'O'
                 sys.stdout.write(character)
