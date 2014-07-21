@@ -1,7 +1,6 @@
 
 
 
-import serial
 import time
 import struct
 import random
@@ -14,164 +13,246 @@ import thread
 
 
 frameBuffer     = [0xaa]*40
-topWindow       = None
-C               = None
 pubSocket       = None
 subSocket       = None
 
 
 
 
-def redraw():
+class GUIDisplay:
     """
     """
-    C.delete('all')
-    offsetX     = 20
-    offsetY     = 20
-    for x in range(0,40):
 
-        columnByte  = frameBuffer[x]
+    topWindow       = None
+    C               = None
 
-        for y in range(0,8):
-            sx = x*12
-            sy = y*12
 
-            if type(columnByte) == 'str':
-                print(columnByte)
+    def __init__(self):
+        """
+        """
+        import Tkinter
+        self.ShowDisplay()
 
-            try:
+
+    def redraw(self):
+        """
+        """
+        self.C.delete('all')
+        offsetX     = 20
+        offsetY     = 20
+        for x in range(0,40):
+
+            columnByte  = frameBuffer[x]
+
+            for y in range(0,8):
+                sx = x*12
+                sy = y*12
+
                 if ((columnByte) & (1<<y)) == 0:
                     colour  = 'gray'
                 else:
                     colour  = 'red'
-            except:
-                print(type(columnByte))
-                print(frameBuffer)
-                sys.exit(-1)
-            #b = C.create_polygon( offsetX+sx,offsetY+sy, offsetX+sx+10,offsetY+sy, offsetX+sx+10,offsetY+sy+10, offsetX+sx,offsetY+sy+10, fill=colour)
-            b = C.create_oval( offsetX+sx,offsetY+sy,  offsetX+sx+10,offsetY+sy+10, fill=colour, outline='')
-    top.after(10, redraw)
+                b = self.C.create_oval( offsetX+sx,offsetY+sy,  offsetX+sx+10,offsetY+sy+10, fill=colour, outline='')
+
+        self.top.after(10, redraw)
 
 
-def key(event):
-    global pubSocket
+    def key(self, event):
+        global pubSocket
 
-    if event.char == event.keysym:
-        #msg = 'Normal Key %r' % event.char
-        pass
-    elif len(event.char) == 1:
-        #msg = 'Punctuation Key %r (%r)' % (event.keysym, event.char)
-        pass
-    else:
-        if event.keysym == 'Left':
-            pubSocket.send('LeftMsg')
-        if event.keysym == 'Right':
-            pubSocket.send('RightMsg')
-        if event.keysym == 'Down':
-            pubSocket.send('DownMsg')
-
-
-
-def int8_to_uint8(i):
-    try:
-        return ctypes.c_uint8(i).value
-    except:
-        print('[%s,%s]'%(str(i),type(i)))
-
-
-def ShowDisplay():
-    """
-    """
-    global top
-    global C
-
-    top = Tkinter.Tk()
-    C = Tkinter.Canvas(top, bg="gray", height=200, width=550)
-
-    top.bind_all('<Key>', key)
-
-    C.pack()
-    top.after(100, redraw)
-    top.mainloop()
-
-
-
-outBuffer   = []
-
-
-def Flush():
-    """
-    """
-    global outBuffer
-    data    = struct.pack('B'*len(outBuffer), *outBuffer)
-    ser.write(data)
-    outBuffer   = []
-
-
-def ByteOut(value):
-    """
-    """
-    outBuffer.append(value)
-
-
-def Send(data):
-    for ch in data:
-        try:
-            value   = int(ord(ch))
-        except ValueError:
-            value   = ord(ch)
-
-        if value == 27:
-            ByteOut(27)
-            ByteOut(27)
+        if event.char == event.keysym:
+            #msg = 'Normal Key %r' % event.char
+            pass
+        elif len(event.char) == 1:
+            #msg = 'Punctuation Key %r (%r)' % (event.keysym, event.char)
+            pass
         else:
-            ByteOut(value)
+            if event.keysym == 'Left':
+                pubSocket.send('LeftMsg')
+            if event.keysym == 'Right':
+                pubSocket.send('RightMsg')
+            if event.keysym == 'Down':
+                pubSocket.send('DownMsg')
+
+
+    def ShowDisplay(self):
+        """
+        """
+        global top
+        global C
+
+        self.top = Tkinter.Tk()
+        self.C = Tkinter.Canvas(top, bg="gray", height=200, width=550)
+
+        self.top.bind_all('<Key>', key)
+
+        self.C.pack()
+        self.top.after(100, redraw)
 
 
 
-
-def SendMessage(type, payload):
-    """
-    """
-
-    ByteOut(27)
-    ByteOut(0)
-
-    checksum    = 0
-    length      = len(payload)+3
-    Send( struct.pack('BBB',length, checksum, type) )
-    Send( payload )
-
-    ByteOut(27)
-    ByteOut(255)
-
-    Flush()
-
-
-
-def setIntensity(value):
-    """
-    """
-    if ser != []:
-        SendMessage(2, struct.pack('B',value) )
-    else:
+    def setIntensity(self, value):
+        """
+        """
         pass
 
 
-def showFrame(frame):
-    """
-    """
-    if ser != []:
-        SendMessage(6, struct.pack('40B',*frame ) )
-    else:
+    def showFrame(self, frame):
+        """
+        """
         global frameBuffer
         frameBuffer = frame
 
 
+    def Run(self):
+        """
+        """
+        self.top.mainloop()
+
+
+
+        
+
+class LEDDisplay:
+    """
+    """
+
+    def __init__(self):
+        """
+        """
+        import serial
+        self.ser = serial.Serial(port='/dev/ttyUSB0', baudrate=115200)
+        
+
+    def setIntensity(self, value):
+        """
+        """
+        self.SendMessage(2, struct.pack('B',value) )
+
+
+    def showFrame(self, frame):
+        """
+        """
+        self.SendMessage(6, struct.pack('40B',*frame ) )
+
+
+    def Flush(self):
+        """
+        """
+        global outBuffer
+        data    = struct.pack('B'*len(outBuffer), *outBuffer)
+        self.ser.write(data)
+        outBuffer   = []
+
+
+    def ByteOut(self, value):
+        """
+        """
+        outBuffer.append(value)
+
+
+    def Send(self, data):
+        """
+        """
+        for ch in data:
+            try:
+                value   = int(ord(ch))
+            except ValueError:
+                value   = ord(ch)
+
+            if value == 27:
+                self.ByteOut(27)
+                self.ByteOut(27)
+            else:
+                self.ByteOut(value)
+
+
+    def SendMessage(self, type, payload):
+        """
+        """
+
+        self.ByteOut(27)
+        self.ByteOut(0)
+
+        checksum    = 0
+        length      = len(payload)+3
+        self.Send( struct.pack('BBB',length, checksum, type) )
+        self.Send( payload )
+
+        self.ByteOut(27)
+        self.ByteOut(255)
+
+        self.Flush()
+
+
+    def Run(self):
+        """
+        """
+        while True:
+            time.sleep(1.0)
 
 
 
 
+
+
+
+class TextDisplay:
+    """
+    """
+
+
+    def __init__(self):
+        """
+        """
+        pass
+        
+
+    def setIntensity(self, value):
+        """
+        """
+        pass
+
+
+    def showFrame(self, frame):
+        """
+        """
+        sys.stdout.write('\x1b[2J')
+        sys.stdout.write('\x1b[1;1H')
+        for y in range(0,8):
+
+            for x in range(0,40):
+
+                columnByte  = frameBuffer[x]
+                sx = x*12
+                sy = y*12
+
+                if ((columnByte) & (1<<y)) == 0:
+                    character   = ' '
+                else:
+                    character   = 'O'
+                sys.stdout.write(character)
+
+            sys.stdout.write('\n')
+
+    def Run(self):
+        """
+        """
+        while True:
+            time.sleep(1.0)
+
+
+
+
+
+
+
+
+
+
+
+
+outBuffer   = []
 
 
 
@@ -214,7 +295,7 @@ def DoTransition(fromId, toId, event):
 
 
 
-def DisplayDaemon(frameBufferList):
+def DisplayDaemon(display, frameBufferList):
     """
     """
     #setIntensity(15)
@@ -225,7 +306,6 @@ def DisplayDaemon(frameBufferList):
 
     fbStruct    = struct.Struct('B'*40)
 
-    frameCount = 0
     frameIndex = 0
     while True:
 
@@ -253,13 +333,10 @@ def DisplayDaemon(frameBufferList):
         fbData  = open(fileName,'rb').read(40)
         try:
             values  = fbStruct.unpack_from(fbData)
-            #print('good data')
         except struct.error:
-            #print('bad data')
             values  = [0x0]*40
 
-        frameCount = frameCount + 1
-        showFrame(values)
+        display.showFrame(values)
         time.sleep(0.02)
 
 
@@ -268,7 +345,7 @@ def PeriodicSwitch(pubSocket):
     """
     """
     while True:
-        time.sleep(10.0)
+        time.sleep(30.0)
         pubSocket.send('LeftMsg')
 
 
@@ -294,16 +371,14 @@ if __name__ == '__main__':
 
     thread.start_new_thread(PeriodicSwitch, (pubSocket,) )
 
+    #display     = GUIDisplay()
+    #display     = LEDDisplay()
+    display     = TextDisplay()
 
-    try:
-        ser = serial.Serial(port='/dev/ttyUSB0', baudrate=115200)
-        DisplayDaemon(frameBufferList)
-    except serial.serialutil.SerialException:
-        import Tkinter
+    thread.start_new_thread(DisplayDaemon, (display,frameBufferList) )
 
-        ser     = []
-        thread.start_new_thread(DisplayDaemon, (frameBufferList,) )
-        ShowDisplay()
+    display.Run()
+
 
 
 
