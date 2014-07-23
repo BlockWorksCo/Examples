@@ -100,6 +100,7 @@ class GUIDisplay:
     def showFrame(self, frame):
         """
         """
+        frame = frame[0:40]
         global frameBuffer
         frameBuffer = frame
 
@@ -133,6 +134,7 @@ class LEDDisplay:
     def showFrame(self, frame):
         """
         """
+        frame = frame[0:40]
         self.SendMessage(6, struct.pack('40B',*frame ) )
 
 
@@ -217,6 +219,7 @@ class TextDisplay:
     def showFrame(self, frame):
         """
         """
+        frame = frame[0:40]
         global frameBuffer
         frameBuffer = frame
 
@@ -424,8 +427,8 @@ if __name__ == '__main__':
     subSocket.connect("tcp://127.0.0.1:6633")
     subSocket.setsockopt(zmq.SUBSCRIBE,'')
 
-    display     = GUIDisplay()
-    #display     = LEDDisplay()
+    #display     = GUIDisplay()
+    display     = LEDDisplay()
     #display     = TextDisplay()
 
     thread.start_new_thread(PowermateReader, (pubSocket,) )
