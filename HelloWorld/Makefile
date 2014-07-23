@@ -1,0 +1,27 @@
+
+
+
+#
+#
+#
+BLOCKWORKS_PLATFORM=$(BLOCKWORKS_PLATFORM_BASE)/$(PLATFORM)
+
+
+#
+#
+#
+INCLUDES=-I./$(PLATFORM)
+INCLUDES+=-I$(BLOCKWORKS_PLATFORM)/Common
+INCLUDES+=-I$(BLOCKWORKS_PLATFORM)
+
+OBJS=\
+AppMain.o \
+PlatformMain.o
+
+
+include $(BLOCKWORKS_PLATFORM)/Makefile
+
+
+
+
+
