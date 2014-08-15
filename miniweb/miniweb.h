@@ -33,7 +33,7 @@
 #define ADD_CHK2(x)     ADC(chksum[1], c, x);
 #define ADC(a, c, x)    adc(&(a), &(c), x)
 #define ADD_CHK(x)      add_chk(x)
-#define DEV_GETC(x)     x = dev_getc()
+
 #define DEV_WAITC(x)    DEV_WAIT(x); ADD_CHK(x)
 
 
@@ -107,6 +107,12 @@ class MiniWebServer
     typedef typename IPStackType::WebServerType         WebServerType;
     typedef typename IPStackType::PacketInterfaceType   PacketInterfaceType;
     typedef typename IPStackType::PacketGeneratorType   PacketGeneratorType;
+
+
+    uint8_t DEV_GETC()
+    {
+        return dev_getc();
+    }   
 
 
 public:
@@ -208,20 +214,20 @@ public:
             }
 
             /* IP Type of Service field, discard. */
-            DEV_GETC(a);
+            a  = DEV_GETC();
 
             /* IP packet length. */
-            DEV_GETC(a);
+            a  = DEV_GETC();
             len = a << 8;
-            DEV_GETC(a);
+            a  = DEV_GETC();
             len |= a;
 
             /* IP ID, discard. */
-            DEV_GETC(a);
-            DEV_GETC(a);
+            a  = DEV_GETC();
+            a  = DEV_GETC();
 
             /* Fragmentation offset. */
-            DEV_GETC(a);
+            a  = DEV_GETC();
 
             if((a & 0x20) || (a & 0x1f) != 0)
             {
@@ -229,7 +235,7 @@ public:
                 goto drop;
             }
 
-            DEV_GETC(a);
+            a  = DEV_GETC();
 
             if(a != 0)
             {
@@ -238,11 +244,11 @@ public:
             }
 
             /* TTL, discard. */
-            DEV_GETC(a);
+            a  = DEV_GETC();
 
             /* Get the IP protocol field. If this isn't a TCP packet, we drop
                it. */
-            DEV_GETC(a);
+            a  = DEV_GETC();
 
             if(a != IP_PROTO_TCP)
             {
@@ -251,25 +257,25 @@ public:
             }
 
             /* Get the IP checksum field, and discard it. */
-            DEV_GETC(a);
-            DEV_GETC(a);
+            a  = DEV_GETC();
+            a  = DEV_GETC();
 
             /* Get the source address of the packet, which we will use as the
                destination address for our replies. */
-            DEV_GETC(a);
+            a  = DEV_GETC();
             ipaddr[0] = a;
-            DEV_GETC(a);
+            a  = DEV_GETC();
             ipaddr[1] = a;
-            DEV_GETC(a);
+            a  = DEV_GETC();
             ipaddr[2] = a;
-            DEV_GETC(a);
+            a  = DEV_GETC();
             ipaddr[3] = a;
 
             /* And we discard the destination IP address. */
-            DEV_GETC(a);
-            DEV_GETC(a);
-            DEV_GETC(a);
-            DEV_GETC(a);
+            a  = DEV_GETC();
+            a  = DEV_GETC();
+            a  = DEV_GETC();
+            a  = DEV_GETC();
 
             /* Check the computed IP header checksum. If it fails, we go ahead
                and drop the packet. */
@@ -292,7 +298,7 @@ public:
             chksumflags = 0;
             /* Get the source TCP port and store it for our replies. */
 
-            DEV_GETC(a);
+            a  = DEV_GETC();
 
             if(tcpstate == LISTEN || tcpstate == TIME_WAIT)
             {
@@ -304,7 +310,7 @@ public:
                 goto drop;
             }
 
-            DEV_GETC(a);
+            a  = DEV_GETC();
 
             if(tcpstate == LISTEN || tcpstate == TIME_WAIT)
             {
@@ -319,8 +325,8 @@ public:
 
 
             /* Get the TCP destination port. */
-            DEV_GETC(a);
-            DEV_GETC(a);
+            a  = DEV_GETC();
+            a  = DEV_GETC();
 
 
             if(tcpstate == LISTEN || tcpstate == TIME_WAIT)
@@ -337,13 +343,13 @@ public:
             }
 
             /* Get the TCP sequence number. */
-            DEV_GETC(a);
+            a  = DEV_GETC();
             seqno[0] = a;
-            DEV_GETC(a);
+            a  = DEV_GETC();
             seqno[1] = a;
-            DEV_GETC(a);
+            a  = DEV_GETC();
             seqno[2] = a;
-            DEV_GETC(a);
+            a  = DEV_GETC();
             seqno[3] = a;
 
             /* Next, check the acknowledgement. If it acknowledges outstanding
@@ -360,7 +366,7 @@ public:
 
                 for(x = 0; x < 4; x ++)
                 {
-                    DEV_GETC(a);
+                    a  = DEV_GETC();
 
                     while(stateptr != NULL && a > stateptr->seqno[x])
                     {
@@ -386,14 +392,14 @@ public:
             {
                 for(x = 0; x < 4; x++)
                 {
-                    DEV_GETC(a);
+                    a  = DEV_GETC();
                 }
             }
 
 
 
             /* Get the TCP offset and use it in the following computation. */
-            DEV_GETC(a);
+            a  = DEV_GETC();
 
             /* If this segment contains TCP data, we increase the sequence
                number we acknowledge by the size of this data. */
@@ -412,7 +418,7 @@ public:
             }
 
             /* TCP flags. */
-            DEV_GETC(a);
+            a  = DEV_GETC();
 
             if(a & TCP_RST)
             {
@@ -465,7 +471,7 @@ public:
 
             /* Get the high byte of the TCP window and limit our sending rate
                if needed. */
-            DEV_GETC(a);
+            a  = DEV_GETC();
 
 
             if(a < cwnd + inflight)
@@ -480,7 +486,7 @@ public:
                pointer. */
             for(x = 0; x < 5; x ++)
             {
-                DEV_GETC(a);
+                a  = DEV_GETC();
             }
 
             /* We continue checksumming the rest of the packet. */
@@ -495,7 +501,7 @@ public:
 
             for(len = len - 40; len > 0; len--)
             {
-                DEV_GETC(a);
+                a  = DEV_GETC();
             }
 
             while(c)
