@@ -23,32 +23,39 @@
 #include <stdint.h>
 #include "miniweb.h"
 
+#define DPRINTF   printf
 
 /* These are kept in CPU registers. */
-uint8_t a, x, y, c;
+uint8_t               a;
+uint8_t               x;
+uint8_t               y;
+uint8_t               c;
 
 /* These are kept in RAM. */
-uint8_t ipaddr[4];
-uint8_t srcport[2];
-uint8_t port;
-uint8_t seqno[4];
-struct tcpip_header* stateptr;
+uint8_t               ipaddr[4];
+uint8_t               srcport[2];
+uint8_t               port;
+uint8_t               seqno[4];
+struct tcpip_header*  stateptr;
 
-uint8_t chksum[2];
-unsigned short len;
-uint8_t* tmpptr;
+uint8_t               chksum[2];
+unsigned short        len;
+uint8_t*              tmpptr;
 
-struct tcpip_header* tmpstateptr;
-uint8_t cwnd;
-uint8_t tcpstate;
-uint8_t inflight;
-
+struct tcpip_header*  tmpstateptr;
+uint8_t               cwnd;
+uint8_t               tcpstate;
+uint8_t               inflight;
 
 /* These actually only need four bits each. */
-uint8_t timer, txtime, nrtx;
+uint8_t               timer;
+uint8_t               txtime;
+uint8_t               nrtx;
 
 /* Only two bits of state needed here. */
-uint8_t chksumflags;
+uint8_t               chksumflags;
+
+
 #define CHKSUMFLAG_BYTE 2
 #define CHKSUMFLAG_CARRY 1
 
@@ -56,26 +63,29 @@ uint8_t chksumflags;
 
 /* This is just a declaration, and does not use RAM. */
 extern struct tcpip_header* pages[];
-extern struct tcpip_header reset;
+extern struct tcpip_header  reset;
 
 void tcpip_output(void);
 
 
-#define Y_NORESPONSE 0
-#define Y_RESPONSE 1
-#define Y_NEWDATA 2
+#define Y_NORESPONSE    0
+#define Y_RESPONSE      1
+#define Y_NEWDATA       2
 
-#define ADD_CHK1(x)   ADC(chksum[0], c, x);
-#define ADD_CHK2(x)   ADC(chksum[1], c, x);
-#define ADC(a, c, x)  adc(&(a), &(c), x)
-#define ADD_CHK(x)    add_chk(x)
-#define DEV_GETC(x)   x   = dev_getc()
-#define DEV_WAITC(x)  DEV_WAIT(x); ADD_CHK(x)
+#define ADD_CHK1(x)     ADC(chksum[0], c, x);
+#define ADD_CHK2(x)     ADC(chksum[1], c, x);
+#define ADC(a, c, x)    adc(&(a), &(c), x)
+#define ADD_CHK(x)      add_chk(x)
+#define DEV_GETC(x)     x = dev_getc()
+#define DEV_WAITC(x)    DEV_WAIT(x); ADD_CHK(x)
 
 
+//
+//
+//
 void adc(uint8_t* a, uint8_t* c, uint8_t x)
 {
-    unsigned short tmp;
+    uint16_t tmp;
 
     tmp = *a + x + *c;
     *a = tmp & 0xff;
@@ -83,6 +93,9 @@ void adc(uint8_t* a, uint8_t* c, uint8_t x)
 }
 
 
+//
+//
+//
 void add_chk(uint8_t x)
 {
     ADC(chksum[(chksumflags & CHKSUMFLAG_BYTE) >> 1], c, x);
@@ -90,6 +103,9 @@ void add_chk(uint8_t x)
 }
 
 
+//
+//
+//
 uint8_t dev_getc(void)
 {
     uint8_t x;
@@ -99,6 +115,9 @@ uint8_t dev_getc(void)
 }
 
 
+//
+//
+//
 void miniweb_init(void)
 {
     nrtx = 0;
@@ -110,9 +129,12 @@ void miniweb_init(void)
 }
 
 
+//
+//
+//
 void miniweb_main_loop(void)
 {
-    while(1)
+    while(true)
     {
 drop:
         DEV_DROP();
@@ -136,7 +158,7 @@ drop:
            options. */
         if(a != 0x45)
         {
-            printf("Packet dropped due to options or version mismatch\n");
+            DPRINTF("Packet dropped due to options or version mismatch\n");
             goto drop;
         }
 
@@ -158,7 +180,7 @@ drop:
 
         if((a & 0x20) || (a & 0x1f) != 0)
         {
-            printf("Got IP fragment, dropping\n");
+            DPRINTF("Got IP fragment, dropping\n");
             goto drop;
         }
 
@@ -166,7 +188,7 @@ drop:
 
         if(a != 0)
         {
-            printf("Got IP fragment, dropping\n");
+            DPRINTF("Got IP fragment, dropping\n");
             goto drop;
         }
 
@@ -179,7 +201,7 @@ drop:
 
         if(a != IP_PROTO_TCP)
         {
-            printf("Not a TCP packet, dropping\n");
+            DPRINTF("Not a TCP packet, dropping\n");
             goto drop;
         }
 
@@ -213,7 +235,7 @@ drop:
 
         if(chksum[0] != 0xff || chksum[1] != 0xff)
         {
-            printf("Failed IP header checksum, dropping\n");
+            DPRINTF("Failed IP header checksum, dropping\n");
             goto drop;
         }
 
@@ -233,7 +255,7 @@ drop:
         }
         else if(srcport[0] != a)
         {
-            printf("Got new port and not in LISTEN or TIME_WAIT, dropping packet\n");
+            DPRINTF("Got new port and not in LISTEN or TIME_WAIT, dropping packet\n");
             goto drop;
         }
 
@@ -245,7 +267,7 @@ drop:
         }
         else if(srcport[1] != a)
         {
-            printf("Got new port and not in LISTEN or TIME_WAIT, dropping packet\n");
+            DPRINTF("Got new port and not in LISTEN or TIME_WAIT, dropping packet\n");
             goto drop;
         }
 
@@ -265,7 +287,7 @@ drop:
 
         if(port < PORTLOW || port >= PORTHIGH)
         {
-            printf("Port outside range %d\n", port);
+            DPRINTF("Port outside range %d\n", port);
             goto drop;
         }
 
@@ -309,7 +331,7 @@ drop:
 
                     y = Y_NORESPONSE;
                     tcpstate = LISTEN;
-                    printf("Stateptr == NULL, connection dropped\n");
+                    DPRINTF("Stateptr == NULL, connection dropped\n");
                 }
             }
 
@@ -378,7 +400,7 @@ drop:
             {
                 tcpstate = ESTABLISHED;
                 tmpstateptr = stateptr = pages[port - PORTLOW];
-                printf("New connection from %d.%d.%d.%d:%d\n",
+                DPRINTF("New connection from %d.%d.%d.%d:%d\n",
                        ipaddr[0], ipaddr[1], ipaddr[2], ipaddr[3],
                        (srcport[0] << 8) + srcport[1]);
                 inflight = 0;
@@ -403,7 +425,7 @@ drop:
 
         if(a < cwnd + inflight)
         {
-            /*      printf("Limited by receiver's window %d new window %d.\n", a, a - inflight);*/
+            /*      DPRINTF("Limited by receiver's window %d new window %d.\n", a, a - inflight);*/
             cwnd = a - inflight;
         }
 
@@ -436,7 +458,7 @@ drop:
             ADD_CHK(0);
         }
 
-        /*    printf("TCP checksum 0x%02x%02x\n", chksum[0], chksum[1]);*/
+        /*    DPRINTF("TCP checksum 0x%02x%02x\n", chksum[0], chksum[1]);*/
 
         /* We compare the calculated checksum with the precalculated
            pseudo header checksum. If they don't match, don't send. */
@@ -461,13 +483,16 @@ drop:
         }
         else
         {
-            printf("Packet dropped due to failing TCP checksum.\n");
+            DPRINTF("Packet dropped due to failing TCP checksum.\n");
         }
     }
 }
 
 
 
+//
+//
+//
 void tcpip_output(void)
 {
     txtime = timer;
@@ -476,7 +501,7 @@ void tcpip_output(void)
 
     if(tmpstateptr == NULL)
     {
-        printf("tmpstateptr == NULL!\n");
+        DPRINTF("tmpstateptr == NULL!\n");
         return;
     }
 
@@ -612,6 +637,9 @@ void tcpip_output(void)
 
 
 
+//
+//
+//
 void miniweb_timer(void)
 {
     timer++;
@@ -626,7 +654,7 @@ void miniweb_timer(void)
             inflight = 0;
             tmpstateptr = stateptr;
 
-            printf("Retransmitting\n");
+            DPRINTF("Retransmitting\n");
             tcpip_output();
             nrtx++;
 
@@ -639,7 +667,7 @@ void miniweb_timer(void)
         else if(timer - txtime > 8 &&
                 stateptr->flag == WAIT)
         {
-            printf("Connection dropped\n");
+            DPRINTF("Connection dropped\n");
             stateptr = (tcpip_header*)NULL;
             miniweb_init();
         }
