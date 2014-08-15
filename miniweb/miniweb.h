@@ -136,62 +136,12 @@ class MiniWebServer
 public:
     MiniWebServer(struct tcpip_header* _pages[], struct tcpip_header _reset) :
         pages(_pages),
-        reset(_reset)
+        reset(_reset),
+        nrtx(0),
+        tcpstate(LISTEN),
+        cwnd(1),
+        inflight(0)
     {
-    }
-
-    /* This is just a declaration, and does not use RAM. */
-    struct tcpip_header* pages[];
-    struct tcpip_header  reset;
-
-
-
-    //
-    //
-    //
-    void adc(uint8_t* a, uint8_t* c, uint8_t x)
-    {
-        uint16_t tmp;
-
-        tmp = *a + x + *c;
-        *a = tmp & 0xff;
-        *c = tmp >> 8;
-    }
-
-
-    //
-    //
-    //
-    void add_chk(uint8_t x)
-    {
-        ADC(chksum[(chksumflags & CHKSUMFLAG_BYTE) >> 1], c, x);
-        chksumflags ^= CHKSUMFLAG_BYTE;
-    }
-
-
-    //
-    //
-    //
-    uint8_t dev_getc(void)
-    {
-        uint8_t x;
-        DEV_GET(x);
-        ADD_CHK(x);
-        return x;
-    }
-
-
-    //
-    //
-    //
-    void miniweb_init(void)
-    {
-        nrtx = 0;
-
-        tcpstate = LISTEN;
-        cwnd = 1;
-        inflight = 0;
-
     }
 
 
@@ -560,6 +510,41 @@ private:
     //
     //
     //
+    void adc(uint8_t* a, uint8_t* c, uint8_t x)
+    {
+        uint16_t tmp;
+
+        tmp = *a + x + *c;
+        *a = tmp & 0xff;
+        *c = tmp >> 8;
+    }
+
+
+    //
+    //
+    //
+    void add_chk(uint8_t x)
+    {
+        ADC(chksum[(chksumflags & CHKSUMFLAG_BYTE) >> 1], c, x);
+        chksumflags ^= CHKSUMFLAG_BYTE;
+    }
+
+
+    //
+    //
+    //
+    uint8_t dev_getc(void)
+    {
+        uint8_t x;
+        DEV_GET(x);
+        ADD_CHK(x);
+        return x;
+    }
+
+
+    //
+    //
+    //
     void tcpip_output(void)
     {
         txtime = timer;
@@ -773,6 +758,11 @@ private:
 
     /* Only two bits of state needed here. */
     uint8_t               chksumflags;
+
+
+    /* This is just a declaration, and does not use RAM. */
+    struct tcpip_header* pages[];
+    struct tcpip_header  reset;
 
 
 
