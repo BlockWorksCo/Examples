@@ -143,6 +143,8 @@ class MiniWebServer
     //
     typedef typename IPStackType::WebServerType         WebServerType;
     typedef typename IPStackType::PacketInterfaceType   PacketInterfaceType;
+    typedef typename IPStackType::PacketGeneratorType   PacketGeneratorType;
+
 
 public:
 
