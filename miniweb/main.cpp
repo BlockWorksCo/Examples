@@ -16,7 +16,6 @@
  *
  */
 
-#include "dev.h"
 #include "miniweb.h"
 #include "tun_dev.h"
 

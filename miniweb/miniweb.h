@@ -23,7 +23,6 @@
 
 
 #include <stdio.h>
-#include "dev.h"
 #include <stdint.h>
 
 
@@ -126,7 +125,11 @@ void miniweb_init(void);
 #define DEV_WAITC(x)    DEV_WAIT(x); ADD_CHK(x)
 
 
-
+#define DEV_WAIT(x) x = packetInterface.dev_wait()
+#define DEV_GET(x) x = packetInterface.dev_get()
+#define DEV_PUT(x) packetInterface.dev_put(x)
+#define DEV_DROP() packetInterface.dev_drop()
+#define DEV_DONE() packetInterface.dev_done()
 
 
 template < typename IPStackType >
