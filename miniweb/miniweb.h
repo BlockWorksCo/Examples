@@ -134,37 +134,6 @@ class MiniWebServer
 {
 
 public:
-    /* These are kept in CPU registers. */
-    uint8_t               a;
-    uint8_t               x;
-    uint8_t               y;
-    uint8_t               c;
-
-    /* These are kept in RAM. */
-    uint8_t               ipaddr[4];
-    uint8_t               srcport[2];
-    uint8_t               port;
-    uint8_t               seqno[4];
-    struct tcpip_header*  stateptr;
-
-    uint8_t               chksum[2];
-    unsigned short        len;
-    uint8_t*              tmpptr;
-
-    struct tcpip_header*  tmpstateptr;
-    uint8_t               cwnd;
-    uint8_t               tcpstate;
-    uint8_t               inflight;
-
-    /* These actually only need four bits each. */
-    uint8_t               timer;
-    uint8_t               txtime;
-    uint8_t               nrtx;
-
-    /* Only two bits of state needed here. */
-    uint8_t               chksumflags;
-
-
     MiniWebServer(struct tcpip_header* _pages[], struct tcpip_header _reset) :
         pages(_pages),
         reset(_reset)
@@ -585,6 +554,7 @@ public:
         }
     }
 
+private:
 
 
     //
@@ -773,7 +743,37 @@ public:
 
 
 
-private:
+
+    /* These are kept in CPU registers. */
+    uint8_t               a;
+    uint8_t               x;
+    uint8_t               y;
+    uint8_t               c;
+
+    /* These are kept in RAM. */
+    uint8_t               ipaddr[4];
+    uint8_t               srcport[2];
+    uint8_t               port;
+    uint8_t               seqno[4];
+    struct tcpip_header*  stateptr;
+
+    uint8_t               chksum[2];
+    unsigned short        len;
+    uint8_t*              tmpptr;
+
+    struct tcpip_header*  tmpstateptr;
+    uint8_t               cwnd;
+    uint8_t               tcpstate;
+    uint8_t               inflight;
+
+    /* These actually only need four bits each. */
+    uint8_t               timer;
+    uint8_t               txtime;
+    uint8_t               nrtx;
+
+    /* Only two bits of state needed here. */
+    uint8_t               chksumflags;
+
 
 
 };
