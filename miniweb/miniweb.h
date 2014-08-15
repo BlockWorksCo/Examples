@@ -189,7 +189,7 @@ public:
 
             /* Get first byte of IP packet, which is the IP version number and
                IP header length. */
-            a   = DEV_WAIT();
+            a   = packetInterface.dev_wait();
             ADD_CHK(x);
 
             /* We discard every packet that isn't IP version 4 and that has IP
@@ -571,22 +571,7 @@ public:
 
 
 private:
-
-    //
-    //
-    //
-    uint8_t DEV_WAIT() 
-    {
-        return packetInterface.dev_wait();    
-    } 
-
-    //
-    //
-    //
-    uint8_t DEV_GET()
-    {
-        return packetInterface.dev_get();    
-    }   
+  
 
     //
     //
@@ -647,7 +632,7 @@ private:
     uint8_t dev_getc(void)
     {
         uint8_t x;
-        x  = DEV_GET();
+        x  = packetInterface.dev_get();
         ADD_CHK(x);
         return x;
     }
