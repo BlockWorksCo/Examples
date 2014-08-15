@@ -110,20 +110,20 @@ void miniweb_init(void);
 
 
 
-    #define DPRINTF   printf
-    #define CHKSUMFLAG_BYTE 2
-    #define CHKSUMFLAG_CARRY 1
+#define DPRINTF   printf
+#define CHKSUMFLAG_BYTE 2
+#define CHKSUMFLAG_CARRY 1
 
-    #define Y_NORESPONSE    0
-    #define Y_RESPONSE      1
-    #define Y_NEWDATA       2
+#define Y_NORESPONSE    0
+#define Y_RESPONSE      1
+#define Y_NEWDATA       2
 
-    #define ADD_CHK1(x)     ADC(chksum[0], c, x);
-    #define ADD_CHK2(x)     ADC(chksum[1], c, x);
-    #define ADC(a, c, x)    adc(&(a), &(c), x)
-    #define ADD_CHK(x)      add_chk(x)
-    #define DEV_GETC(x)     x = dev_getc()
-    #define DEV_WAITC(x)    DEV_WAIT(x); ADD_CHK(x)
+#define ADD_CHK1(x)     ADC(chksum[0], c, x);
+#define ADD_CHK2(x)     ADC(chksum[1], c, x);
+#define ADC(a, c, x)    adc(&(a), &(c), x)
+#define ADD_CHK(x)      add_chk(x)
+#define DEV_GETC(x)     x = dev_getc()
+#define DEV_WAITC(x)    DEV_WAIT(x); ADD_CHK(x)
 
 
 
