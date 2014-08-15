@@ -34,8 +34,7 @@ INCLUDES+=-I$(BLOCKWORKS_PLATFORM)
 
 OBJS=\
 main.o \
-pages.o \
-tun_dev.o
+pages.o
 
 
 include $(BLOCKWORKS_PLATFORM)/Makefile

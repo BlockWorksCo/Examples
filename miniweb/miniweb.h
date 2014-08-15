@@ -129,16 +129,22 @@ void miniweb_init(void);
 
 
 
-template < typename PacketInterfaceType >
+template < typename IPStackType >
 class MiniWebServer
 {
+    //
+    // Break out the CombinationTypes for this class.
+    //
+    typedef typename IPStackType::WebServerType         WebServerType;
+    typedef typename IPStackType::PacketInterfaceType   PacketInterfaceType;
 
 public:
 
     //
     //
     //
-    MiniWebServer(struct tcpip_header** _pages) :
+    MiniWebServer(struct tcpip_header** _pages, PacketInterfaceType& _packetInterface) :
+        packetInterface(_packetInterface),
         cwnd(1),
         tcpstate(LISTEN),
         inflight(0),
@@ -742,6 +748,10 @@ private:
 
 
 
+    //
+    //
+    //
+    PacketInterfaceType&    packetInterface;
 
 
     /* These are kept in CPU registers. */

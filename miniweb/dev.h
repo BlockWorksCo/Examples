@@ -18,11 +18,11 @@
 #ifndef __DEV_H__
 #define __DEV_H__
 
-#define DEV_WAIT(x) x = dev_wait()
-#define DEV_GET(x) x = dev_get()
-#define DEV_PUT(x) dev_put(x)
-#define DEV_DROP() dev_drop()
-#define DEV_DONE() dev_done()
+#define DEV_WAIT(x) x = packetInterface.dev_wait()
+#define DEV_GET(x) x = packetInterface.dev_get()
+#define DEV_PUT(x) packetInterface.dev_put(x)
+#define DEV_DROP() packetInterface.dev_drop()
+#define DEV_DONE() packetInterface.dev_done()
 
 unsigned char dev_get(void);
 void dev_put(unsigned char byte);

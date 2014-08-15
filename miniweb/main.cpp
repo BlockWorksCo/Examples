@@ -20,18 +20,28 @@
 #include "miniweb.h"
 #include "tun_dev.h"
 
-extern struct tcpip_header* 	pages[];
 
-MiniWebServer<int> 			webServer(pages);
-TUNPacketInterface<int> 	tunPacketInterface();
+struct IPStackType
+{
+	typedef MiniWebServer<IPStackType> 		WebServerType;
+	typedef TUNPacketInterface<IPStackType> PacketInterfaceType;
+};
 
-/*-----------------------------------------------------------------------------------*/
+
+
+extern struct tcpip_header* 			pages[];
+extern TUNPacketInterface<IPStackType> 	tunPacketInterface;
+
+MiniWebServer<IPStackType> 			webServer(pages, tunPacketInterface);
+TUNPacketInterface<IPStackType> 	tunPacketInterface(webServer);
+
+//
+//
+//
 int main(int argc, char **argv)
 {
-	dev_init();
-	
 	webServer.miniweb_main_loop();
 
 	return 0;
 }
-/*-----------------------------------------------------------------------------------*/
+

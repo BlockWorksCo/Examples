@@ -38,7 +38,6 @@
 #include <linux/if_tun.h>
 #include <netinet/in.h>
 
-extern MiniWebServer<int>  webServer;
 
 static int drop = 0;
 
@@ -79,15 +78,23 @@ struct tcpip_hdr
 template < typename IPStackType >
 class TUNPacketInterface
 {
+    //
+    // Break out the CombinationTypes for this class.
+    //
+    typedef typename IPStackType::WebServerType         WebServerType;
+    typedef typename IPStackType::PacketInterfaceType   PacketInterfaceType;
 
 public:
 
-    TUNPacketInterface()
+    TUNPacketInterface(WebServerType& _webServer) :
+        webServer(_webServer)
     {
         
     }
 
-private:
+public:
+
+    WebServerType&  webServer;
 
 
     /*-----------------------------------------------------------------------------------*/

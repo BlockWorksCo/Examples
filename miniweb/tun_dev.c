@@ -34,7 +34,6 @@
 #include <linux/if_tun.h>
 #include <netinet/in.h>
 
-extern MiniWebServer<int>  webServer;
 
 static int drop = 0;
 
