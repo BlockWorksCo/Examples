@@ -20,35 +20,35 @@
 
 #include <stdio.h>
 #include "dev.h"
-
+#include <stdint.h>
 #include "miniweb.h"
 
 
 /* These are kept in CPU registers. */
-static unsigned char a, x, y, c;
+uint8_t a, x, y, c;
 
 /* These are kept in RAM. */
-static unsigned char ipaddr[4];
-static unsigned char srcport[2];
-static unsigned char port;
-static unsigned char seqno[4];
-static struct tcpip_header* stateptr;
+uint8_t ipaddr[4];
+uint8_t srcport[2];
+uint8_t port;
+uint8_t seqno[4];
+struct tcpip_header* stateptr;
 
-static unsigned char chksum[2];
-static unsigned short len;
-static unsigned char* tmpptr;
+uint8_t chksum[2];
+unsigned short len;
+uint8_t* tmpptr;
 
-static struct tcpip_header* tmpstateptr;
-static unsigned char cwnd;
-static unsigned char tcpstate;
-static unsigned char inflight;
+struct tcpip_header* tmpstateptr;
+uint8_t cwnd;
+uint8_t tcpstate;
+uint8_t inflight;
 
 
 /* These actually only need four bits each. */
-static unsigned char timer, txtime, nrtx;
+uint8_t timer, txtime, nrtx;
 
 /* Only two bits of state needed here. */
-static unsigned char chksumflags;
+uint8_t chksumflags;
 #define CHKSUMFLAG_BYTE 2
 #define CHKSUMFLAG_CARRY 1
 
@@ -58,22 +58,22 @@ static unsigned char chksumflags;
 extern struct tcpip_header* pages[];
 extern struct tcpip_header reset;
 
-static void tcpip_output(void);
+void tcpip_output(void);
 
 
 #define Y_NORESPONSE 0
 #define Y_RESPONSE 1
 #define Y_NEWDATA 2
 
-#define ADD_CHK1(x) ADC(chksum[0], c, x);
-#define ADD_CHK2(x) ADC(chksum[1], c, x);
-#define ADC(a, c, x) adc(&(a), &(c), x)
-#define ADD_CHK(x)  add_chk(x)
-#define DEV_GETC(x) x = dev_getc()
-#define DEV_WAITC(x) DEV_WAIT(x); ADD_CHK(x)
+#define ADD_CHK1(x)   ADC(chksum[0], c, x);
+#define ADD_CHK2(x)   ADC(chksum[1], c, x);
+#define ADC(a, c, x)  adc(&(a), &(c), x)
+#define ADD_CHK(x)    add_chk(x)
+#define DEV_GETC(x)   x   = dev_getc()
+#define DEV_WAITC(x)  DEV_WAIT(x); ADD_CHK(x)
 
 
-static void adc(unsigned char* a, unsigned char* c, unsigned char x)
+void adc(uint8_t* a, uint8_t* c, uint8_t x)
 {
     unsigned short tmp;
 
@@ -83,16 +83,16 @@ static void adc(unsigned char* a, unsigned char* c, unsigned char x)
 }
 
 
-static void add_chk(unsigned char x)
+void add_chk(uint8_t x)
 {
     ADC(chksum[(chksumflags & CHKSUMFLAG_BYTE) >> 1], c, x);
     chksumflags ^= CHKSUMFLAG_BYTE;
 }
 
 
-static unsigned char dev_getc(void)
+uint8_t dev_getc(void)
 {
-    unsigned char x;
+    uint8_t x;
     DEV_GET(x);
     ADD_CHK(x);
     return x;
@@ -231,7 +231,6 @@ drop:
         {
             srcport[0] = a;
         }
-
         else if(srcport[0] != a)
         {
             printf("Got new port and not in LISTEN or TIME_WAIT, dropping packet\n");
@@ -244,7 +243,6 @@ drop:
         {
             srcport[1] = a;
         }
-
         else if(srcport[1] != a)
         {
             printf("Got new port and not in LISTEN or TIME_WAIT, dropping packet\n");
@@ -317,7 +315,6 @@ drop:
 
 
         }
-
         else
         {
             for(x = 0; x < 4; x++)
@@ -377,7 +374,6 @@ drop:
             {
                 tcpstate = TIME_WAIT;
             }
-
             else if(a & TCP_SYN)
             {
                 tcpstate = ESTABLISHED;
@@ -463,7 +459,6 @@ drop:
             }
 
         }
-
         else
         {
             printf("Packet dropped due to failing TCP checksum.\n");
@@ -473,7 +468,7 @@ drop:
 
 
 
-static void tcpip_output(void)
+void tcpip_output(void)
 {
     txtime = timer;
 
