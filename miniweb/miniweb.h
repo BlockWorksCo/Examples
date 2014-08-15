@@ -39,9 +39,7 @@
 
 #define DEV_WAIT(x)     x = packetInterface.dev_wait()
 #define DEV_GET(x)      x = packetInterface.dev_get()
-#define DEV_PUT(x)      packetInterface.dev_put(x)
-#define DEV_DROP()      packetInterface.dev_drop()
-#define DEV_DONE()      packetInterface.dev_done()
+
 
 
 
@@ -112,6 +110,22 @@ class MiniWebServer
     uint8_t DEV_GETC()
     {
         return dev_getc();
+    }   
+
+    void DEV_DROP()
+    {
+        packetInterface.dev_drop();
+    }   
+
+    void DEV_DONE()
+    {
+       packetInterface.dev_done();    
+    }   
+
+
+    void DEV_PUT(uint8_t x)
+    {
+       packetInterface.dev_put(x);    
     }   
 
 
