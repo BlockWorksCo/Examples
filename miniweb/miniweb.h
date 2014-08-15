@@ -29,11 +29,6 @@
 #define IPADDR          htonl((IPADDR0 << 24) + (IPADDR1 << 16) + (IPADDR2 << 8) + IPADDR3)
 #define DPRINTF         printf
 
-#define ADD_CHK1(x)     ADC(chksum[0], c, x);
-#define ADD_CHK2(x)     ADC(chksum[1], c, x);
-#define ADC(a, c, x)    adc(&(a), &(c), x)
-#define ADD_CHK(x)      add_chk(x)
-
 
 
 
@@ -135,6 +130,30 @@ class MiniWebServer
     uint8_t DEV_GET()
     {
         return packetInterface.dev_get();    
+    }   
+
+
+    void ADD_CHK1(uint8_t x)
+    {
+        ADC(chksum[0], c, x);
+    }     
+
+
+    void ADD_CHK2(uint8_t x)
+    {
+        ADC(chksum[1], c, x);
+    }     
+
+
+    void ADC(uint8_t a, uint8_t c, uint8_t x)
+    {
+        adc(&a, &c, x);    
+    }    
+
+
+    void ADD_CHK(uint8_t x)
+    {
+        add_chk(x);
     }   
 
 
