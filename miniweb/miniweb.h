@@ -37,7 +37,6 @@
 
 
 
-#define DEV_GET(x)      x = packetInterface.dev_get()
 
 
 
@@ -132,6 +131,11 @@ class MiniWebServer
     {
         return packetInterface.dev_wait();    
     } 
+
+    uint8_t DEV_GET()
+    {
+        return packetInterface.dev_get();    
+    }   
 
 
 public:
@@ -635,7 +639,7 @@ private:
     uint8_t dev_getc(void)
     {
         uint8_t x;
-        DEV_GET(x);
+        x  = DEV_GET();
         ADD_CHK(x);
         return x;
     }
