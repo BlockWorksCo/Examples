@@ -153,13 +153,14 @@ public:
     //
     //
     //
-    MiniWebServer( tcpip_header** _pages, PacketInterfaceType& _packetInterface) :
+    MiniWebServer( tcpip_header** _pages, PacketInterfaceType& _packetInterface, PacketGeneratorType& _packetGenerator) :
         packetInterface(_packetInterface),
         cwnd(1),
         tcpstate(LISTEN),
         inflight(0),
         nrtx(0),
-        pages(_pages)
+        pages(_pages),
+        packetGenerator(_packetGenerator)
     {
     }
 
@@ -800,9 +801,9 @@ private:
 
 
     /* This is just a declaration, and does not use RAM. */
-    tcpip_header**          pages;
+    tcpip_header**        pages;
 
-
+    PacketGeneratorType&  packetGenerator;
 
 };
 
