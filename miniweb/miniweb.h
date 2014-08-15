@@ -46,43 +46,6 @@
 
 
 
-enum packetflags
-{
-    NONE,
-    WAIT
-};
-
-struct tcpip_header
-{
-    struct tcpip_header*    next;
-    enum packetflags        flag;
-    uint8_t                 length;  /* The size of the data contained
-                               within the packet (i.e., minus TCP and IP
-                               headers.) */
-    /* This is the IP header. */
-    uint8_t     vhl;  /* IP version and header length. */
-    uint8_t     tos;              /* Type of service. */
-    uint8_t     len[2];           /* Total length. */
-    uint8_t     id[2];            /* IP identification. */
-    uint8_t     ipoffset[2];      /* IP fragmentation offset. */
-    uint8_t     ttl;              /* Time to live. */
-    uint8_t     protocol;         /* Protocol. */
-    uint8_t     ipchksum[2];      /* IP header checksum. */
-    uint8_t     srcipaddr[4];     /* The source IP address. */
-    /* destipaddr[4]     We don't store the destination IP address here. */
-    /* This is the TCP header. */
-    uint8_t     srcport[2];  /* TCP source port. */
-             /* destport[2]       We don't store the destination TCP port here. */
-    uint8_t     seqno[4];         /* TCP sequence number. */
-             /* ackno[4]          We don't store acknowledgement number here. */
-    uint8_t     tcpoffset;        /* 4 unused bits and TCP data offset. */
-    uint8_t     flags;            /* TCP flags. */
-    uint8_t     wnd[2];          /* Advertised receiver's window. */
-    uint8_t     tcpchksum[2];     /* TCP checksum. */
-    uint8_t     urgp[2];          /* Urgent pointer. */
-    uint8_t     data[0];
-};
-
 
 
 const uint8_t TCP_MSS           = 200;
@@ -148,10 +111,49 @@ class MiniWebServer
 
 public:
 
+    typedef enum 
+    {
+        NONE,
+        WAIT
+    } packetflags;
+
+    typedef struct _tcpip_header
+    {
+        struct _tcpip_header*   next;
+        packetflags     flag;
+        uint8_t         length;  /* The size of the data contained
+                                   within the packet (i.e., minus TCP and IP
+                                   headers.) */
+        /* This is the IP header. */
+        uint8_t         vhl;  /* IP version and header length. */
+        uint8_t         tos;              /* Type of service. */
+        uint8_t         len[2];           /* Total length. */
+        uint8_t         id[2];            /* IP identification. */
+        uint8_t         ipoffset[2];      /* IP fragmentation offset. */
+        uint8_t         ttl;              /* Time to live. */
+        uint8_t         protocol;         /* Protocol. */
+        uint8_t         ipchksum[2];      /* IP header checksum. */
+        uint8_t         srcipaddr[4];     /* The source IP address. */
+        /* destipaddr[4]     We don't store the destination IP address here. */
+        /* This is the TCP header. */
+        uint8_t         srcport[2];  /* TCP source port. */
+                 /* destport[2]       We don't store the destination TCP port here. */
+        uint8_t         seqno[4];         /* TCP sequence number. */
+                 /* ackno[4]          We don't store acknowledgement number here. */
+        uint8_t         tcpoffset;        /* 4 unused bits and TCP data offset. */
+        uint8_t         flags;            /* TCP flags. */
+        uint8_t         wnd[2];          /* Advertised receiver's window. */
+        uint8_t         tcpchksum[2];     /* TCP checksum. */
+        uint8_t         urgp[2];          /* Urgent pointer. */
+        uint8_t         data[0];
+    } tcpip_header;
+
+public:
+
     //
     //
     //
-    MiniWebServer(struct tcpip_header** _pages, PacketInterfaceType& _packetInterface) :
+    MiniWebServer( tcpip_header** _pages, PacketInterfaceType& _packetInterface) :
         packetInterface(_packetInterface),
         cwnd(1),
         tcpstate(LISTEN),
@@ -572,6 +574,8 @@ public:
     }
 
 
+
+
 private:
 
 
@@ -756,6 +760,8 @@ private:
 
 
 
+private:
+
     //
     //
     //
@@ -773,13 +779,13 @@ private:
     uint8_t               srcport[2];
     uint8_t               port;
     uint8_t               seqno[4];
-    struct tcpip_header*  stateptr;
+    tcpip_header*         stateptr;
 
     uint8_t               chksum[2];
     unsigned short        len;
     uint8_t*              tmpptr;
 
-    struct tcpip_header*  tmpstateptr;
+    tcpip_header*         tmpstateptr;
     uint8_t               cwnd;
     uint8_t               tcpstate;
     uint8_t               inflight;
@@ -794,7 +800,7 @@ private:
 
 
     /* This is just a declaration, and does not use RAM. */
-    struct tcpip_header** pages;
+    tcpip_header**          pages;
 
 
 

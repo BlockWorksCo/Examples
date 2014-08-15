@@ -16,33 +16,25 @@
  *
  */
 
-#include "miniweb.h"
-#include "tun_dev.h"
-#include "pages.h"
-
-
-struct IPStackType
-{
-	typedef MiniWebServer<IPStackType> 		WebServerType;
-	typedef TUNPacketInterface<IPStackType> PacketInterfaceType;
-	typedef PacketGenerator<IPStackType> 	PacketGeneratorType;
-};
+#include "AppConfiguration.h"
 
 
 
-extern struct tcpip_header* 			pages[];
-extern TUNPacketInterface<IPStackType> 	tunPacketInterface;
+extern IPStackType::WebServerType::tcpip_header*    pages[];
+extern TUNPacketInterface<IPStackType>              tunPacketInterface;
 
-MiniWebServer<IPStackType> 				webServer(pages, tunPacketInterface);
-TUNPacketInterface<IPStackType> 		tunPacketInterface(webServer);
+MiniWebServer<IPStackType>                          webServer(pages, tunPacketInterface);
+TUNPacketInterface<IPStackType>                     tunPacketInterface(webServer);
+
+
 
 //
 //
 //
 int main(int argc, char **argv)
 {
-	webServer.miniweb_main_loop();
+    webServer.miniweb_main_loop();
 
-	return 0;
+    return 0;
 }
 
