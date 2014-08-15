@@ -789,7 +789,7 @@ private:
     //
     //
     //
-    PacketInterfaceType&    packetInterface;
+    PacketInterfaceType&  packetInterface;
 
 
     /* These are kept in CPU registers. */
