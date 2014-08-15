@@ -1,0 +1,158 @@
+HTTP/1.0 200 OK
+Content-Type: text/html
+
+<html>
+<head>
+<title>Miniweb - TCP/IP stack and webserver in less than 30 bytes</title>
+</head>
+<body bgcolor="white" text="black">
+
+<table width="500" border="0" cellpadding="0" cellspacing="0"><tr><td>
+<table width="500" border="0" cellpadding="0" cellspacing="0"><tr><td>
+<h1>Miniweb - TCP/IP stack and webserver in less than 30 bytes</h1>
+</td></tr></table>
+
+<p align="justify">
+Miniweb is a very tiny implementation of the TCP/IP protocol stack
+together with a webserver written by Adam Dunkels. The TCP/IP stack
+and the webserver uses around 30 bytes of RAM. The code is written in
+C and constitutes around 400 lines, comments removed. It should be
+possible to further minimize the code size and memory
+usage. <b>Note:</b> this code is <b>not</b> intended for actual use,
+it is only meant for educational purposes!
+</p>
+
+
+<h2>Miniweb</h2>
+<p align="justify">
+In order to reduce RAM usage, Miniweb stores its web pages as
+precomputed IP/TCP packets complete with headers. When sending the
+packets, only a few fields are updated and the checksums
+adjusted. Incoming packets are processed one byte at a time and
+therefore there is no need to buffer the data. The checksum is
+computed when each byte is received and if the checksum is found to be
+incorrect when the entire packet has been received, the contents of
+the packet is not used for further processing.
+</p>
+
+<p align="justify">
+There are two variants of Miniweb, a stateless variant and a statefull
+variant. The stateless variant is a bit smaller and uses less RAM, but
+does not provide the same functionality as the statefull
+variant.
+</p>
+
+<p align="justify">
+Both variants can handle multiple pages, <a
+href="http://192.168.0.2:81/another_page.html">this</a> is another
+page. 
+</p>
+
+<h3>The stateless Miniweb</h3>
+<p align="justify">
+The stateless Miniweb keeps only minimal state information. Instead of
+keeping connection state, the stateless Miniweb uses the
+acknowledgement numbers of the incomming ACKs to decide which TCP
+segment to send. The IP address, port number and TCP sequence number
+of the last received ACK is also saved so that if an ACK is lost, the
+corresponding segment can be retransmitted. This means that if an ACK
+in another "connection" arrives before the retransmission occurs, the
+state of the previous connection is lost, and the retransmission will
+never occur. This connection will hang until the application in the
+other end sends data.
+</p>
+<p align="justify">
+<b>It it important to note</b> that this approach of course is
+<b>totally and utterly wrong</b>; a system using this approach should
+<b>not</b> be connected to an actual network, let alone the global
+Internet!
+</p>
+
+<p align="justify">
+To make matters worse:
+</p>
+<ul>
+<li>Miniweb does not support multiple TCP connections
+<li>There is no support for dynamic content
+</ul>
+
+<p align="center">
+<center>
+<table width="90%" border="0" cellpadding="0" cellspacing="0"><tr><td>
+<center><b>Table 1.</b> <font size="-1"> Number of lines of code and
+RAM usage in the stateless Miniweb. The total RAM usage varies between
+24 and 28 bytes depending on the number of bytes used for pointers on
+the system for which Miniweb is compiled. The number of lines of code
+are very approximate.</font></center>
+<table border="4" width="100%">
+<tr>
+<td>Protocol</td><td>Function</td><td>Lines of code</td><td>Bytes of RAM</td>
+</tr>
+<tr><td>TCP and IP</td><td>Checksum calculation</td><td>2</td><td>3</td></tr>
+<tr><td>IP</td><td>Input processing</td><td>43</td><td>6</td></tr>
+<tr><td>IP</td><td>Ouput processing</td><td>26</td><td>4 - 8</td></tr>
+<tr><td>TCP</td><td>Input processing</td><td>75</td><td>7</td></tr>
+<tr><td>TCP</td><td>Output processing</td><td>38</td><td>&nbsp;</td></tr>
+<tr><td>TCP</td><td>Retransmission</td><td>4</td><td>2</td></tr>
+<tr><td>TCP</td><td>Dropping connections after too many
+retransmissions</td><td>4</td><td>1</td></tr>
+<tr><td>TCP</td><td>Dropping stale connections</td><td>4</td><td>0</td></tr>
+<tr><td>HTTP</td><td>Differentiating between web
+pages</td><td>2</td><td>1</td></tr>
+<tr><td><b>Total</b></td><td>&nbsp;</td><td>&nbsp;</td><td>24 - 28</td></tr>
+
+</table>
+</table>
+</center>
+</p>
+
+<h3>The stateful Miniweb</h3>
+
+The stateful variant of Miniweb is activated by a compile time option
+(-DSTATEFUL) and uses 5-7 bytes of extra RAM. This variant actually
+keeps connection state and might therefore be considered to be a more
+"real" TCP/IP implementation. It also does congestion control, making
+it even more "real".
+
+<h4>Congestion control</h4>
+The stateful version of miniweb features a very minimal congestion
+control mechanism; it implements the slow start algorithm. The
+rationale behind this is that a webserver of this magnitude will most
+likely only serve small files and images, and for such small transfers
+the congestion avoidance phase is never entered anyway. 
+
+<h2>Testing Miniweb</h2>
+<p align="justify">
+If you have a FreeBSD box you can test Miniweb directly. Linux users
+need to download the <a
+href="http://vtun.sourceforge.net/tun/">universal tun/tap</a> network
+interface and compile it into their kernel.
+</p>
+
+<p align="justify">
+Download <a
+href="http://dunkels.com/adam/download/?f=miniweb.tar.gz">the code</a>
+and do: 
+<pre>
+gunzip -c miniweb.tar.gz | tar xvf -
+cd miniweb
+gmake
+su
+./miniweb
+</pre>
+</p>
+<p align="justify">
+Now you should have the Miniweb TCP/IP stack and web server running on
+IP address <a href="http://192.168.0.2/">192.168.0.2</a>. You can try
+it out by clicking on the link. Note that it isn't possible to use
+<b>ping</b> to reach the TCP/IP stack.
+</p>
+<p align="justify">
+To inspect the packets that are sent to and from Miniweb, run
+<pre>
+tcpdump -l -n -S -i tun0
+</pre>
+</p>
+</table>
+</body>
+</html>
