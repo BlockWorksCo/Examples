@@ -34,10 +34,9 @@
 #define ADC(a, c, x)    adc(&(a), &(c), x)
 #define ADD_CHK(x)      add_chk(x)
 
-#define DEV_WAITC(x)    DEV_WAIT(x); ADD_CHK(x)
 
 
-#define DEV_WAIT(x)     x = packetInterface.dev_wait()
+
 #define DEV_GET(x)      x = packetInterface.dev_get()
 
 
@@ -129,6 +128,12 @@ class MiniWebServer
     }   
 
 
+    uint8_t DEV_WAIT() 
+    {
+        return packetInterface.dev_wait();    
+    } 
+
+
 public:
 
     typedef enum 
@@ -217,7 +222,8 @@ public:
 
             /* Get first byte of IP packet, which is the IP version number and
                IP header length. */
-            DEV_WAITC(a);
+            a   = DEV_WAIT();
+            ADD_CHK(x);
 
             /* We discard every packet that isn't IP version 4 and that has IP
                options. */
