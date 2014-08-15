@@ -31,8 +31,8 @@ struct IPStackType
 extern struct tcpip_header* 			pages[];
 extern TUNPacketInterface<IPStackType> 	tunPacketInterface;
 
-MiniWebServer<IPStackType> 			webServer(pages, tunPacketInterface);
-TUNPacketInterface<IPStackType> 	tunPacketInterface(webServer);
+MiniWebServer<IPStackType> 				webServer(pages, tunPacketInterface);
+TUNPacketInterface<IPStackType> 		tunPacketInterface(webServer);
 
 //
 //

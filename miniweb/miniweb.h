@@ -26,21 +26,25 @@
 #include <stdint.h>
 
 
+#define IPADDR          htonl((IPADDR0 << 24) + (IPADDR1 << 16) + (IPADDR2 << 8) + IPADDR3)
+#define DPRINTF   printf
 
-#define IPADDR0 192
-#define IPADDR1 168
-#define IPADDR2 0
-#define IPADDR3 2
+#define ADD_CHK1(x)     ADC(chksum[0], c, x);
+#define ADD_CHK2(x)     ADC(chksum[1], c, x);
+#define ADC(a, c, x)    adc(&(a), &(c), x)
+#define ADD_CHK(x)      add_chk(x)
+#define DEV_GETC(x)     x = dev_getc()
+#define DEV_WAITC(x)    DEV_WAIT(x); ADD_CHK(x)
 
-#define TCP_CHECK0 0x3f
-#define TCP_CHECK1 0x63
 
-#define IPADDR htonl((IPADDR0 << 24) + (IPADDR1 << 16) + (IPADDR2 << 8) + IPADDR3)
+#define DEV_WAIT(x) x = packetInterface.dev_wait()
+#define DEV_GET(x) x = packetInterface.dev_get()
+#define DEV_PUT(x) packetInterface.dev_put(x)
+#define DEV_DROP() packetInterface.dev_drop()
+#define DEV_DONE() packetInterface.dev_done()
 
-#define PORTHIGH 85
-#define PORTLOW  80
 
-#define IP_PROTO_TCP 6
+
 
 enum packetflags
 {
@@ -79,9 +83,7 @@ struct tcpip_header
     unsigned char data[0];
 };
 
-void miniweb_main_loop(void);
-void miniweb_timer(void);
-void miniweb_init(void);
+
 
 #define TCP_MSS 200
 #define TCP_WIN 4096
@@ -106,10 +108,6 @@ void miniweb_init(void);
 #define TIME_WAIT   10
 
 
-
-
-
-#define DPRINTF   printf
 #define CHKSUMFLAG_BYTE 2
 #define CHKSUMFLAG_CARRY 1
 
@@ -117,21 +115,26 @@ void miniweb_init(void);
 #define Y_RESPONSE      1
 #define Y_NEWDATA       2
 
-#define ADD_CHK1(x)     ADC(chksum[0], c, x);
-#define ADD_CHK2(x)     ADC(chksum[1], c, x);
-#define ADC(a, c, x)    adc(&(a), &(c), x)
-#define ADD_CHK(x)      add_chk(x)
-#define DEV_GETC(x)     x = dev_getc()
-#define DEV_WAITC(x)    DEV_WAIT(x); ADD_CHK(x)
+const uint8_t IPADDR0         = 192;
+const uint8_t IPADDR1         = 168;
+const uint8_t IPADDR2         = 0;
+const uint8_t IPADDR3         = 2;
+
+const uint8_t TCP_CHECK0      = 0x3f;
+const uint8_t TCP_CHECK1      = 0x63;
 
 
-#define DEV_WAIT(x) x = packetInterface.dev_wait()
-#define DEV_GET(x) x = packetInterface.dev_get()
-#define DEV_PUT(x) packetInterface.dev_put(x)
-#define DEV_DROP() packetInterface.dev_drop()
-#define DEV_DONE() packetInterface.dev_done()
+const uint8_t PORTHIGH        = 85;
+const uint8_t PORTLOW         = 80;
+
+const uint8_t IP_PROTO_TCP    = 6;
 
 
+
+
+//
+//
+//
 template < typename IPStackType >
 class MiniWebServer
 {

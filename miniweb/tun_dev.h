@@ -20,7 +20,6 @@
 #define __TUN_DEV_H__
 
 
-#include "dev.h"
 #include "miniweb.h"
 
 #include <fcntl.h>
