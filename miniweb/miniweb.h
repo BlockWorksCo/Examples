@@ -54,33 +54,33 @@ enum packetflags
 
 struct tcpip_header
 {
-    struct tcpip_header* next;
-    enum packetflags flag;
-    unsigned char length;  /* The size of the data contained
+    struct tcpip_header*    next;
+    enum packetflags        flag;
+    uint8_t                 length;  /* The size of the data contained
                                within the packet (i.e., minus TCP and IP
                                headers.) */
     /* This is the IP header. */
-    unsigned char vhl,  /* IP version and header length. */
-             tos,              /* Type of service. */
-             len[2],           /* Total length. */
-             id[2],            /* IP identification. */
-             ipoffset[2],      /* IP fragmentation offset. */
-             ttl,              /* Time to live. */
-             protocol,         /* Protocol. */
-             ipchksum[2],      /* IP header checksum. */
-             srcipaddr[4];     /* The source IP address. */
+    uint8_t     vhl;  /* IP version and header length. */
+    uint8_t     tos;              /* Type of service. */
+    uint8_t     len[2];           /* Total length. */
+    uint8_t     id[2];            /* IP identification. */
+    uint8_t     ipoffset[2];      /* IP fragmentation offset. */
+    uint8_t     ttl;              /* Time to live. */
+    uint8_t     protocol;         /* Protocol. */
+    uint8_t     ipchksum[2];      /* IP header checksum. */
+    uint8_t     srcipaddr[4];     /* The source IP address. */
     /* destipaddr[4]     We don't store the destination IP address here. */
     /* This is the TCP header. */
-    unsigned char srcport[2],  /* TCP source port. */
+    uint8_t     srcport[2];  /* TCP source port. */
              /* destport[2]       We don't store the destination TCP port here. */
-             seqno[4],         /* TCP sequence number. */
+    uint8_t     seqno[4];         /* TCP sequence number. */
              /* ackno[4]          We don't store acknowledgement number here. */
-             tcpoffset,        /* 4 unused bits and TCP data offset. */
-             flags,            /* TCP flags. */
-             wnd[2],           /* Advertised receiver's window. */
-             tcpchksum[2],     /* TCP checksum. */
-             urgp[2];          /* Urgent pointer. */
-    unsigned char data[0];
+    uint8_t     tcpoffset;        /* 4 unused bits and TCP data offset. */
+    uint8_t     flags;            /* TCP flags. */
+    uint8_t     wnd[2];          /* Advertised receiver's window. */
+    uint8_t     tcpchksum[2];     /* TCP checksum. */
+    uint8_t     urgp[2];          /* Urgent pointer. */
+    uint8_t     data[0];
 };
 
 
