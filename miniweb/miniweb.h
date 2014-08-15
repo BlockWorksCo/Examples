@@ -110,6 +110,23 @@ void miniweb_init(void);
 
 
 
+    #define DPRINTF   printf
+    #define CHKSUMFLAG_BYTE 2
+    #define CHKSUMFLAG_CARRY 1
+
+    #define Y_NORESPONSE    0
+    #define Y_RESPONSE      1
+    #define Y_NEWDATA       2
+
+    #define ADD_CHK1(x)     ADC(chksum[0], c, x);
+    #define ADD_CHK2(x)     ADC(chksum[1], c, x);
+    #define ADC(a, c, x)    adc(&(a), &(c), x)
+    #define ADD_CHK(x)      add_chk(x)
+    #define DEV_GETC(x)     x = dev_getc()
+    #define DEV_WAITC(x)    DEV_WAIT(x); ADD_CHK(x)
+
+
+
 
 
 template < typename PacketInterfaceType >
@@ -117,8 +134,6 @@ class MiniWebServer
 {
 
 public:
-    #define DPRINTF   printf
-
     /* These are kept in CPU registers. */
     uint8_t               a;
     uint8_t               x;
@@ -150,30 +165,16 @@ public:
     uint8_t               chksumflags;
 
 
-    #define CHKSUMFLAG_BYTE 2
-    #define CHKSUMFLAG_CARRY 1
-
-
-    MiniWebServer(struct tcpip_header* _pages[], struct tcpip_header _reset)
+    MiniWebServer(struct tcpip_header* _pages[], struct tcpip_header _reset) :
+        pages(_pages),
+        reset(_reset)
     {
-
     }
 
     /* This is just a declaration, and does not use RAM. */
     struct tcpip_header* pages[];
     struct tcpip_header  reset;
 
-
-    #define Y_NORESPONSE    0
-    #define Y_RESPONSE      1
-    #define Y_NEWDATA       2
-
-    #define ADD_CHK1(x)     ADC(chksum[0], c, x);
-    #define ADD_CHK2(x)     ADC(chksum[1], c, x);
-    #define ADC(a, c, x)    adc(&(a), &(c), x)
-    #define ADD_CHK(x)      add_chk(x)
-    #define DEV_GETC(x)     x = dev_getc()
-    #define DEV_WAITC(x)    DEV_WAIT(x); ADD_CHK(x)
 
 
     //
