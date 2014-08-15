@@ -72,123 +72,145 @@ struct tcpip_hdr
 
 };
 
-/*-----------------------------------------------------------------------------------*/
-void
-dev_init(void)
-{
-    /*  int val;*/
-    fd = open("/dev/tun0", O_RDWR);
 
-    if(fd == -1)
+
+
+
+template < typename IPStackType >
+class TUNPacketInterface
+{
+
+public:
+
+    TUNPacketInterface()
     {
-        perror("tun_dev: dev_init: open");
-        exit(1);
+        
     }
 
-#ifdef linux
-    int r = system("ifconfig tun0 inet 192.168.0.2 192.168.0.1");
+private:
 
-    r = system("route add -net 192.168.0.0 netmask 255.255.255.0 dev tun0");
-    r++;
-#else
-    /*  system("ifconfig tun0 inet sidewalker rallarsnus");  */
-    system("ifconfig tun0 inet 192.168.0.1 192.168.0.2");
-#endif /* linux */
 
-    /* val = 0;
-     ioctl(fd, TUNSIFHEAD, &val); */
-    bytes_left = 0;
-    outptr = 0;
-}
-/*-----------------------------------------------------------------------------------*/
-unsigned char
-dev_wait(void)
-{
-    fd_set fdset;
-    struct timeval tv;
-    int ret;
-
-again:
-    tv.tv_sec = 0;
-    tv.tv_usec = 500000;
-    FD_ZERO(&fdset);
-    FD_SET(fd, &fdset);
-
-    ret = select(fd + 1, &fdset, NULL, NULL, &tv);
-
-    if(ret == 0)
+    /*-----------------------------------------------------------------------------------*/
+    void
+    dev_init(void)
     {
-        webServer.miniweb_timer();
-        goto again;
-    }
+        /*  int val;*/
+        fd = open("/dev/tun0", O_RDWR);
 
-    bytes_left = read(fd, inbuf, sizeof(inbuf));
+        if(fd == -1)
+        {
+            perror("tun_dev: dev_init: open");
+            exit(1);
+        }
 
-    if(bytes_left == -1)
-    {
-        perror("tun_dev: dev_get: read");
-    }
+    #ifdef linux
+        int r = system("ifconfig tun0 inet 192.168.0.2 192.168.0.1");
 
-    /*    printf("tun_dev: dev_get: read %d bytes\n", bytes_left);*/
-    inptr = 0;
+        r = system("route add -net 192.168.0.0 netmask 255.255.255.0 dev tun0");
+        r++;
+    #else
+        /*  system("ifconfig tun0 inet sidewalker rallarsnus");  */
+        system("ifconfig tun0 inet 192.168.0.1 192.168.0.2");
+    #endif /* linux */
 
-    return dev_get();
-}
-/*-----------------------------------------------------------------------------------*/
-unsigned char
-dev_get(void)
-{
-    if(bytes_left > 0)
-    {
-        bytes_left--;
-        /*    printf("0x%02x ", (unsigned char)inbuf[inptr]); fflush(NULL);*/
-        return inbuf[inptr++];
-    }
-
-    return 0;
-}
-/*-----------------------------------------------------------------------------------*/
-void
-dev_put(unsigned char byte)
-{
-    /*  printf("0x%02x ", byte); */
-    outbuf[outptr++] = byte;
-}
-/*-----------------------------------------------------------------------------------*/
-void
-dev_drop(void)
-{
-    /*  printf("\n");*/
-    bytes_left = 0;
-}
-/*-----------------------------------------------------------------------------------*/
-void
-dev_done(void)
-{
-    int ret;
-
-    /*  check_checksum(outbuf, outptr);*/
-
-    /*  drop++;*/
-    if(drop % 9 == 1)
-    {
-        drop = 0;
-        /*    printf("Dropped a packet!\n");*/
+        /* val = 0;
+         ioctl(fd, TUNSIFHEAD, &val); */
+        bytes_left = 0;
         outptr = 0;
-        return;
     }
-
-    ret = write(fd, outbuf, outptr);
-
-    if(ret == -1)
+    /*-----------------------------------------------------------------------------------*/
+    unsigned char
+    dev_wait(void)
     {
-        perror("tun_dev: dev_done: write");
-        exit(1);
+        fd_set fdset;
+        struct timeval tv;
+        int ret;
+
+    again:
+        tv.tv_sec = 0;
+        tv.tv_usec = 500000;
+        FD_ZERO(&fdset);
+        FD_SET(fd, &fdset);
+
+        ret = select(fd + 1, &fdset, NULL, NULL, &tv);
+
+        if(ret == 0)
+        {
+            webServer.miniweb_timer();
+            goto again;
+        }
+
+        bytes_left = read(fd, inbuf, sizeof(inbuf));
+
+        if(bytes_left == -1)
+        {
+            perror("tun_dev: dev_get: read");
+        }
+
+        /*    printf("tun_dev: dev_get: read %d bytes\n", bytes_left);*/
+        inptr = 0;
+
+        return dev_get();
+    }
+    /*-----------------------------------------------------------------------------------*/
+    unsigned char
+    dev_get(void)
+    {
+        if(bytes_left > 0)
+        {
+            bytes_left--;
+            /*    printf("0x%02x ", (unsigned char)inbuf[inptr]); fflush(NULL);*/
+            return inbuf[inptr++];
+        }
+
+        return 0;
+    }
+    /*-----------------------------------------------------------------------------------*/
+    void
+    dev_put(unsigned char byte)
+    {
+        /*  printf("0x%02x ", byte); */
+        outbuf[outptr++] = byte;
+    }
+    /*-----------------------------------------------------------------------------------*/
+    void
+    dev_drop(void)
+    {
+        /*  printf("\n");*/
+        bytes_left = 0;
+    }
+    /*-----------------------------------------------------------------------------------*/
+    void
+    dev_done(void)
+    {
+        int ret;
+
+        /*  check_checksum(outbuf, outptr);*/
+
+        /*  drop++;*/
+        if(drop % 9 == 1)
+        {
+            drop = 0;
+            /*    printf("Dropped a packet!\n");*/
+            outptr = 0;
+            return;
+        }
+
+        ret = write(fd, outbuf, outptr);
+
+        if(ret == -1)
+        {
+            perror("tun_dev: dev_done: write");
+            exit(1);
+        }
+
+        outptr = 0;
+        /*  printf("\n");*/
     }
 
-    outptr = 0;
-    /*  printf("\n");*/
-}
+};
+
+
 
 
 #endif
