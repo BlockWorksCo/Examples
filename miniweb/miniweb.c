@@ -65,40 +65,15 @@ static void tcpip_output(void);
 #define Y_RESPONSE 1
 #define Y_NEWDATA 2
 
-/* a + c << 8 = a + x + c */
-/*#define ADC(a, c, x) do { \
-                        unsigned short __tmp; \
-            __tmp = a + (x) + c; \
-            a = __tmp & 0xff; \
-            c = __tmp >> 8; \
-            } while(0)*/
-
 #define ADD_CHK1(x) ADC(chksum[0], c, x);
-
 #define ADD_CHK2(x) ADC(chksum[1], c, x);
-
-/*#define ADD_CHK(x) do { \
-               if(!(chksumflags & CHKSUMFLAG_BYTE)) { \
-             ADD_CHK1(x); \
-                         chksumflags = chksumflags | CHKSUMFLAG_BYTE; \
-               } else { \
-             ADD_CHK2(x); \
-                         chksumflags = chksumflags & ~CHKSUMFLAG_BYTE; \
-               } \
-                    } while(0)
-
-#define DEV_GETC(x) do { \
-                       DEV_GET(x); \
-                       ADD_CHK(x); \
-               } while(0) */
-
 #define ADC(a, c, x) adc(&(a), &(c), x)
 #define ADD_CHK(x)  add_chk(x)
 #define DEV_GETC(x) x = dev_getc()
 #define DEV_WAITC(x) DEV_WAIT(x); ADD_CHK(x)
-/*-----------------------------------------------------------------------------------*/
-static void
-adc(unsigned char* a, unsigned char* c, unsigned char x)
+
+
+static void adc(unsigned char* a, unsigned char* c, unsigned char x)
 {
     unsigned short tmp;
 
@@ -106,25 +81,25 @@ adc(unsigned char* a, unsigned char* c, unsigned char x)
     *a = tmp & 0xff;
     *c = tmp >> 8;
 }
-/*-----------------------------------------------------------------------------------*/
-static void
-add_chk(unsigned char x)
+
+
+static void add_chk(unsigned char x)
 {
     ADC(chksum[(chksumflags & CHKSUMFLAG_BYTE) >> 1], c, x);
     chksumflags ^= CHKSUMFLAG_BYTE;
 }
-/*-----------------------------------------------------------------------------------*/
-static unsigned char
-dev_getc(void)
+
+
+static unsigned char dev_getc(void)
 {
     unsigned char x;
     DEV_GET(x);
     ADD_CHK(x);
     return x;
 }
-/*-----------------------------------------------------------------------------------*/
-void
-miniweb_init(void)
+
+
+void miniweb_init(void)
 {
     nrtx = 0;
 
@@ -133,9 +108,9 @@ miniweb_init(void)
     inflight = 0;
 
 }
-/*-----------------------------------------------------------------------------------*/
-void
-miniweb_main_loop(void)
+
+
+void miniweb_main_loop(void)
 {
     while(1)
     {
@@ -495,9 +470,10 @@ drop:
         }
     }
 }
-/*-----------------------------------------------------------------------------------*/
-static void
-tcpip_output(void)
+
+
+
+static void tcpip_output(void)
 {
     txtime = timer;
 
@@ -637,9 +613,11 @@ tcpip_output(void)
 
 
 }
-/*-----------------------------------------------------------------------------------*/
-void
-miniweb_timer(void)
+
+
+
+
+void miniweb_timer(void)
 {
     timer++;
 
@@ -672,7 +650,6 @@ miniweb_timer(void)
         }
     }
 }
-/*-----------------------------------------------------------------------------------*/
 
 
 
