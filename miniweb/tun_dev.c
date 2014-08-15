@@ -34,6 +34,8 @@
 #include <linux/if_tun.h>
 #include <netinet/in.h>
 
+extern MiniWebServer<int>  webServer;
+
 static int drop = 0;
 
 static int fd;
@@ -112,7 +114,7 @@ again:
 
     if(ret == 0)
     {
-        miniweb_timer();
+        webServer.miniweb_timer();
         goto again;
     }
 

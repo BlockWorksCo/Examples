@@ -134,6 +134,10 @@ class MiniWebServer
 {
 
 public:
+
+    //
+    //
+    //
     MiniWebServer(struct tcpip_header** _pages) :
         cwnd(1),
         tcpstate(LISTEN),
@@ -143,6 +147,15 @@ public:
     {
     }
 
+    //
+    //
+    //
+    void resetStack()
+    {
+        cwnd        = 1;
+        inflight    = 0;
+        nrtx        = 0;
+    }
 
     //
     //
@@ -503,6 +516,48 @@ public:
         }
     }
 
+
+
+
+
+    //
+    //
+    //
+    void miniweb_timer(void)
+    {
+        timer++;
+
+        if(stateptr != NULL)
+        {
+            if(timer - txtime > 4 &&
+                    stateptr->flag != WAIT)
+            {
+
+                cwnd = 1;
+                inflight = 0;
+                tmpstateptr = stateptr;
+
+                DPRINTF("Retransmitting\n");
+                tcpip_output();
+                nrtx++;
+
+                if(nrtx == 8)
+                {
+                    resetStack();
+                }
+            }
+
+            else if(timer - txtime > 8 &&
+                    stateptr->flag == WAIT)
+            {
+                DPRINTF("Connection dropped\n");
+                stateptr = (tcpip_header*)NULL;
+                resetStack();
+            }
+        }
+    }
+
+
 private:
 
 
@@ -685,45 +740,6 @@ private:
 
     }
 
-
-
-
-    //
-    //
-    //
-    void miniweb_timer(void)
-    {
-        timer++;
-
-        if(stateptr != NULL)
-        {
-            if(timer - txtime > 4 &&
-                    stateptr->flag != WAIT)
-            {
-
-                cwnd = 1;
-                inflight = 0;
-                tmpstateptr = stateptr;
-
-                DPRINTF("Retransmitting\n");
-                tcpip_output();
-                nrtx++;
-
-                if(nrtx == 8)
-                {
-                    miniweb_init();
-                }
-            }
-
-            else if(timer - txtime > 8 &&
-                    stateptr->flag == WAIT)
-            {
-                DPRINTF("Connection dropped\n");
-                stateptr = (tcpip_header*)NULL;
-                miniweb_init();
-            }
-        }
-    }
 
 
 

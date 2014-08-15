@@ -33,7 +33,6 @@ INCLUDES+=-I$(BLOCKWORKS_PLATFORM)/Common
 INCLUDES+=-I$(BLOCKWORKS_PLATFORM)
 
 OBJS=\
-miniweb.o \
 main.o \
 pages.o \
 tun_dev.o
