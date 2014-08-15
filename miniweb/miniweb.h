@@ -12,7 +12,7 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
 #ifndef __MINIWEB_H__
@@ -33,39 +33,41 @@
 
 #define IP_PROTO_TCP 6
 
-enum packetflags {
+enum packetflags
+{
     NONE,
     WAIT
 };
 
-struct tcpip_header {
-  struct tcpip_header *next;
-  enum packetflags flag;
-  unsigned char length;  /* The size of the data contained
+struct tcpip_header
+{
+    struct tcpip_header* next;
+    enum packetflags flag;
+    unsigned char length;  /* The size of the data contained
                                within the packet (i.e., minus TCP and IP
                                headers.) */
-  /* This is the IP header. */
-  unsigned char vhl,  /* IP version and header length. */
-    tos,              /* Type of service. */
-    len[2],           /* Total length. */
-    id[2],            /* IP identification. */
-    ipoffset[2],      /* IP fragmentation offset. */
-    ttl,              /* Time to live. */
-    protocol,         /* Protocol. */
-    ipchksum[2],      /* IP header checksum. */
-    srcipaddr[4];     /* The source IP address. */
+    /* This is the IP header. */
+    unsigned char vhl,  /* IP version and header length. */
+             tos,              /* Type of service. */
+             len[2],           /* Total length. */
+             id[2],            /* IP identification. */
+             ipoffset[2],      /* IP fragmentation offset. */
+             ttl,              /* Time to live. */
+             protocol,         /* Protocol. */
+             ipchksum[2],      /* IP header checksum. */
+             srcipaddr[4];     /* The source IP address. */
     /* destipaddr[4]     We don't store the destination IP address here. */
-  /* This is the TCP header. */
-  unsigned char srcport[2],  /* TCP source port. */
-    /* destport[2]       We don't store the destination TCP port here. */
-    seqno[4],         /* TCP sequence number. */
-    /* ackno[4]          We don't store acknowledgement number here. */
-    tcpoffset,        /* 4 unused bits and TCP data offset. */
-    flags,            /* TCP flags. */
-    wnd[2],           /* Advertised receiver's window. */
-    tcpchksum[2],     /* TCP checksum. */
-    urgp[2];          /* Urgent pointer. */
-  unsigned char data[0];
+    /* This is the TCP header. */
+    unsigned char srcport[2],  /* TCP source port. */
+             /* destport[2]       We don't store the destination TCP port here. */
+             seqno[4],         /* TCP sequence number. */
+             /* ackno[4]          We don't store acknowledgement number here. */
+             tcpoffset,        /* 4 unused bits and TCP data offset. */
+             flags,            /* TCP flags. */
+             wnd[2],           /* Advertised receiver's window. */
+             tcpchksum[2],     /* TCP checksum. */
+             urgp[2];          /* Urgent pointer. */
+    unsigned char data[0];
 };
 
 void miniweb_main_loop(void);
