@@ -100,62 +100,6 @@ class MiniWebServer
     typedef typename IPStackType::PacketGeneratorType   PacketGeneratorType;
 
 
-    uint8_t DEV_GETC()
-    {
-        return dev_getc();
-    }   
-
-    void DEV_DROP()
-    {
-        packetInterface.dev_drop();
-    }   
-
-    void DEV_DONE()
-    {
-       packetInterface.dev_done();    
-    }   
-
-
-    void DEV_PUT(uint8_t x)
-    {
-       packetInterface.dev_put(x);    
-    }   
-
-
-    uint8_t DEV_WAIT() 
-    {
-        return packetInterface.dev_wait();    
-    } 
-
-    uint8_t DEV_GET()
-    {
-        return packetInterface.dev_get();    
-    }   
-
-
-    void ADD_CHK1(uint8_t x)
-    {
-        ADC(chksum[0], c, x);
-    }     
-
-
-    void ADD_CHK2(uint8_t x)
-    {
-        ADC(chksum[1], c, x);
-    }     
-
-
-    void ADC(uint8_t a, uint8_t c, uint8_t x)
-    {
-        adc(&a, &c, x);    
-    }    
-
-
-    void ADD_CHK(uint8_t x)
-    {
-        add_chk(x);
-    }   
-
 
 public:
 
@@ -628,6 +572,85 @@ public:
 
 private:
 
+    //
+    //
+    //
+    uint8_t DEV_GETC()
+    {
+        return dev_getc();
+    }   
+
+    //
+    //
+    //
+    void DEV_DROP()
+    {
+        packetInterface.dev_drop();
+    }   
+
+    //
+    //
+    //
+    void DEV_DONE()
+    {
+       packetInterface.dev_done();    
+    }   
+
+    //
+    //
+    //
+    void DEV_PUT(uint8_t x)
+    {
+       packetInterface.dev_put(x);    
+    }   
+
+    //
+    //
+    //
+    uint8_t DEV_WAIT() 
+    {
+        return packetInterface.dev_wait();    
+    } 
+
+    //
+    //
+    //
+    uint8_t DEV_GET()
+    {
+        return packetInterface.dev_get();    
+    }   
+
+    //
+    //
+    //
+    void ADD_CHK1(uint8_t x)
+    {
+        ADC(chksum[0], c, x);
+    }     
+
+    //
+    //
+    //
+    void ADD_CHK2(uint8_t x)
+    {
+        ADC(chksum[1], c, x);
+    }     
+
+    //
+    //
+    //
+    void ADC(uint8_t a, uint8_t c, uint8_t x)
+    {
+        adc(&a, &c, x);    
+    }    
+
+    //
+    //
+    //
+    void ADD_CHK(uint8_t x)
+    {
+        add_chk(x);
+    }   
 
     //
     //
@@ -641,7 +664,6 @@ private:
         *c = tmp >> 8;
     }
 
-
     //
     //
     //
@@ -650,7 +672,6 @@ private:
         ADC(chksum[(chksumflags & CHKSUMFLAG_BYTE) >> 1], c, x);
         chksumflags ^= CHKSUMFLAG_BYTE;
     }
-
 
     //
     //
