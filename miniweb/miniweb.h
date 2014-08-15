@@ -174,7 +174,7 @@ public:
         while(true)
         {
     drop:
-            DEV_DROP();
+            packetInterface.dev_drop();
 
 
             /* The content of the y register signals whether we should send
@@ -201,20 +201,20 @@ public:
             }
 
             /* IP Type of Service field, discard. */
-            a  = DEV_GETC();
+            a  = dev_getc();
 
             /* IP packet length. */
-            a  = DEV_GETC();
+            a  = dev_getc();
             len = a << 8;
-            a  = DEV_GETC();
+            a  = dev_getc();
             len |= a;
 
             /* IP ID, discard. */
-            a  = DEV_GETC();
-            a  = DEV_GETC();
+            a  = dev_getc();
+            a  = dev_getc();
 
             /* Fragmentation offset. */
-            a  = DEV_GETC();
+            a  = dev_getc();
 
             if((a & 0x20) || (a & 0x1f) != 0)
             {
@@ -222,7 +222,7 @@ public:
                 goto drop;
             }
 
-            a  = DEV_GETC();
+            a  = dev_getc();
 
             if(a != 0)
             {
@@ -231,11 +231,11 @@ public:
             }
 
             /* TTL, discard. */
-            a  = DEV_GETC();
+            a  = dev_getc();
 
             /* Get the IP protocol field. If this isn't a TCP packet, we drop
                it. */
-            a  = DEV_GETC();
+            a  = dev_getc();
 
             if(a != IP_PROTO_TCP)
             {
@@ -244,25 +244,25 @@ public:
             }
 
             /* Get the IP checksum field, and discard it. */
-            a  = DEV_GETC();
-            a  = DEV_GETC();
+            a  = dev_getc();
+            a  = dev_getc();
 
             /* Get the source address of the packet, which we will use as the
                destination address for our replies. */
-            a  = DEV_GETC();
+            a  = dev_getc();
             ipaddr[0] = a;
-            a  = DEV_GETC();
+            a  = dev_getc();
             ipaddr[1] = a;
-            a  = DEV_GETC();
+            a  = dev_getc();
             ipaddr[2] = a;
-            a  = DEV_GETC();
+            a  = dev_getc();
             ipaddr[3] = a;
 
             /* And we discard the destination IP address. */
-            a  = DEV_GETC();
-            a  = DEV_GETC();
-            a  = DEV_GETC();
-            a  = DEV_GETC();
+            a  = dev_getc();
+            a  = dev_getc();
+            a  = dev_getc();
+            a  = dev_getc();
 
             /* Check the computed IP header checksum. If it fails, we go ahead
                and drop the packet. */
@@ -285,7 +285,7 @@ public:
             chksumflags = 0;
             /* Get the source TCP port and store it for our replies. */
 
-            a  = DEV_GETC();
+            a  = dev_getc();
 
             if(tcpstate == LISTEN || tcpstate == TIME_WAIT)
             {
@@ -297,7 +297,7 @@ public:
                 goto drop;
             }
 
-            a  = DEV_GETC();
+            a  = dev_getc();
 
             if(tcpstate == LISTEN || tcpstate == TIME_WAIT)
             {
@@ -312,8 +312,8 @@ public:
 
 
             /* Get the TCP destination port. */
-            a  = DEV_GETC();
-            a  = DEV_GETC();
+            a  = dev_getc();
+            a  = dev_getc();
 
 
             if(tcpstate == LISTEN || tcpstate == TIME_WAIT)
@@ -330,13 +330,13 @@ public:
             }
 
             /* Get the TCP sequence number. */
-            a  = DEV_GETC();
+            a  = dev_getc();
             seqno[0] = a;
-            a  = DEV_GETC();
+            a  = dev_getc();
             seqno[1] = a;
-            a  = DEV_GETC();
+            a  = dev_getc();
             seqno[2] = a;
-            a  = DEV_GETC();
+            a  = dev_getc();
             seqno[3] = a;
 
             /* Next, check the acknowledgement. If it acknowledges outstanding
@@ -353,7 +353,7 @@ public:
 
                 for(x = 0; x < 4; x ++)
                 {
-                    a  = DEV_GETC();
+                    a  = dev_getc();
 
                     while(stateptr != NULL && a > stateptr->seqno[x])
                     {
@@ -379,14 +379,14 @@ public:
             {
                 for(x = 0; x < 4; x++)
                 {
-                    a  = DEV_GETC();
+                    a  = dev_getc();
                 }
             }
 
 
 
             /* Get the TCP offset and use it in the following computation. */
-            a  = DEV_GETC();
+            a  = dev_getc();
 
             /* If this segment contains TCP data, we increase the sequence
                number we acknowledge by the size of this data. */
@@ -405,7 +405,7 @@ public:
             }
 
             /* TCP flags. */
-            a  = DEV_GETC();
+            a  = dev_getc();
 
             if(a & TCP_RST)
             {
@@ -458,7 +458,7 @@ public:
 
             /* Get the high byte of the TCP window and limit our sending rate
                if needed. */
-            a  = DEV_GETC();
+            a  = dev_getc();
 
 
             if(a < cwnd + inflight)
@@ -473,7 +473,7 @@ public:
                pointer. */
             for(x = 0; x < 5; x ++)
             {
-                a  = DEV_GETC();
+                a  = dev_getc();
             }
 
             /* We continue checksumming the rest of the packet. */
@@ -488,7 +488,7 @@ public:
 
             for(len = len - 40; len > 0; len--)
             {
-                a  = DEV_GETC();
+                a  = dev_getc();
             }
 
             while(c)
@@ -571,38 +571,6 @@ public:
 
 
 private:
-
-    //
-    //
-    //
-    uint8_t DEV_GETC()
-    {
-        return dev_getc();
-    }   
-
-    //
-    //
-    //
-    void DEV_DROP()
-    {
-        packetInterface.dev_drop();
-    }   
-
-    //
-    //
-    //
-    void DEV_DONE()
-    {
-       packetInterface.dev_done();    
-    }   
-
-    //
-    //
-    //
-    void DEV_PUT(uint8_t x)
-    {
-       packetInterface.dev_put(x);    
-    }   
 
     //
     //
@@ -707,7 +675,7 @@ private:
             /* Send vhl, tos, len, id, ipoffset, ttl and protocol. */
             for(x = 0; x < 10; x++)
             {
-                DEV_PUT(*(tmpptr++));
+                packetInterface.dev_put(*(tmpptr++));
             }
 
             /* Fiddle with the checksum. This can be done more efficiently
@@ -729,48 +697,48 @@ private:
 
             /* Send bytes. */
             a = ~(chksum[1]);
-            DEV_PUT(a);
+            packetInterface.dev_put(a);
             a = ~(chksum[0]);
-            DEV_PUT(a);
+            packetInterface.dev_put(a);
 
             /* Send source IP address. */
             for(x = 4; x > 0; x--)
             {
-                DEV_PUT(*(tmpptr++));
+                packetInterface.dev_put(*(tmpptr++));
             }
 
             /* Send destination address. */
             for(; x < 4; x++)
             {
-                DEV_PUT(ipaddr[x]);
+                packetInterface.dev_put(ipaddr[x]);
             }
 
             /* Send TCP source port. */
             for(x = 0; x < 2; x++)
             {
-                DEV_PUT(*(tmpptr++));
+                packetInterface.dev_put(*(tmpptr++));
             }
 
             /* Send TCP destination port. */
-            DEV_PUT(srcport[0]);
-            DEV_PUT(srcport[1]);
+            packetInterface.dev_put(srcport[0]);
+            packetInterface.dev_put(srcport[1]);
             /* Send TCP sequence number. */
-            DEV_PUT(*(tmpptr++));
-            DEV_PUT(*(tmpptr++));
-            DEV_PUT(*(tmpptr++));
-            DEV_PUT(*(tmpptr++));
+            packetInterface.dev_put(*(tmpptr++));
+            packetInterface.dev_put(*(tmpptr++));
+            packetInterface.dev_put(*(tmpptr++));
+            packetInterface.dev_put(*(tmpptr++));
 
             /* Send TCP acknowledgement number. */
-            DEV_PUT(seqno[0]);
-            DEV_PUT(seqno[1]);
-            DEV_PUT(seqno[2]);
-            DEV_PUT(seqno[3]);
+            packetInterface.dev_put(seqno[0]);
+            packetInterface.dev_put(seqno[1]);
+            packetInterface.dev_put(seqno[2]);
+            packetInterface.dev_put(seqno[3]);
 
             /* Send offset, flags and window. */
-            DEV_PUT(*(tmpptr++));
-            DEV_PUT(*(tmpptr++));
-            DEV_PUT(*(tmpptr++));
-            DEV_PUT(*(tmpptr++));
+            packetInterface.dev_put(*(tmpptr++));
+            packetInterface.dev_put(*(tmpptr++));
+            packetInterface.dev_put(*(tmpptr++));
+            packetInterface.dev_put(*(tmpptr++));
 
             /* Fiddle with the checksum. This can be done more efficiently
                in assembler, where we have the option of adding with
@@ -799,14 +767,14 @@ private:
 
             /* Send bytes. */
             a = ~(chksum[1]);
-            DEV_PUT(a);
+            packetInterface.dev_put(a);
             a = ~(chksum[0]);
-            DEV_PUT(a);
+            packetInterface.dev_put(a);
 
             /* Send urgent pointer. */
             for(x = 0; x < 2; x++)
             {
-                DEV_PUT(*(tmpptr++));
+                packetInterface.dev_put(*(tmpptr++));
             }
 
             /* Send the rest of the packet. */
@@ -814,11 +782,11 @@ private:
 
             for(x = 0; x < tmpstateptr->length; x++)
             {
-                DEV_PUT(*(tmpptr++));
+                packetInterface.dev_put(*(tmpptr++));
             }
 
 
-            DEV_DONE();
+            packetInterface.dev_done();
 
             inflight++;
             tmpstateptr = tmpstateptr->next;
