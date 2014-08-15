@@ -16,7 +16,7 @@
  *
  */
 
-#define STATEFUL
+
 
 #include <stdio.h>
 #include "dev.h"
@@ -37,12 +37,12 @@ static struct tcpip_header* stateptr;
 static unsigned char chksum[2];
 static unsigned short len;
 static unsigned char* tmpptr;
-#ifdef STATEFUL
+
 static struct tcpip_header* tmpstateptr;
 static unsigned char cwnd;
 static unsigned char tcpstate;
 static unsigned char inflight;
-#endif /* STATEFUL */
+
 
 /* These actually only need four bits each. */
 static unsigned char timer, txtime, nrtx;
@@ -127,11 +127,11 @@ void
 miniweb_init(void)
 {
     nrtx = 0;
-#ifdef STATEFUL
+
     tcpstate = LISTEN;
     cwnd = 1;
     inflight = 0;
-#endif /* STATEFUL */
+
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -142,13 +142,13 @@ miniweb_main_loop(void)
 drop:
         DEV_DROP();
 
-#ifdef STATEFUL
+
         /* The content of the y register signals whether we should send
            out a new packet once the input processing is done. y = 0 means
            that we should not send out a packet and y != 0 means that we
            should send out a packet. */
         y = Y_NORESPONSE;
-#endif /* STATEFUL */
+
 
         chksum[0] = chksum[1] = 0;
         chksumflags = 0;
@@ -249,7 +249,7 @@ drop:
         c = 0;
         chksumflags = 0;
         /* Get the source TCP port and store it for our replies. */
-#ifdef STATEFUL
+
         DEV_GETC(a);
 
         if(tcpstate == LISTEN || tcpstate == TIME_WAIT)
@@ -276,26 +276,19 @@ drop:
             goto drop;
         }
 
-#else /* STATEFUL */
-        DEV_GETC(a);
-        srcport[0] = a;
-        DEV_GETC(a);
-        srcport[1] = a;
-#endif /* STATEFUL */
+
 
         /* Get the TCP destination port. */
         DEV_GETC(a);
         DEV_GETC(a);
-#ifdef STATEFUL
+
 
         if(tcpstate == LISTEN || tcpstate == TIME_WAIT)
         {
             port = a;
         }
 
-#else /* STATEFUL */
-        port = a;
-#endif /* STATEFUL */
+
 
         if(port < PORTLOW || port >= PORTHIGH)
         {
@@ -318,15 +311,12 @@ drop:
            massive assembler optimizations.) Since we never send out any
            sequence numbers that wrap, we can use standard arithmetic
            here. */
-#ifndef STATEFUL
-        stateptr = pages[port - PORTLOW];
-#endif /* STATEFUL */
 
-#ifdef STATEFUL
+
 
         if(tcpstate != LISTEN)
         {
-#endif /* STATEFUL */
+
 
             for(x = 0; x < 4; x ++)
             {
@@ -335,26 +325,22 @@ drop:
                 while(stateptr != NULL && a > stateptr->seqno[x])
                 {
                     stateptr = stateptr->next;
-#ifdef STATEFUL
+
                     y = Y_RESPONSE;
                     inflight--;
-#endif /* STATEFUL */
+
                 }
 
                 if(stateptr == NULL)
                 {
-#ifdef STATEFUL
+
                     y = Y_NORESPONSE;
                     tcpstate = LISTEN;
                     printf("Stateptr == NULL, connection dropped\n");
-#else /* STATEFUL */
-                    printf("Stateptr == NULL, dropping packet\n");
-                    goto drop;
-#endif /* STATEFUL */
                 }
             }
 
-#ifdef STATEFUL
+
         }
 
         else
@@ -365,7 +351,7 @@ drop:
             }
         }
 
-#endif /* STATEFUL */
+
 
         /* Get the TCP offset and use it in the following computation. */
         DEV_GETC(a);
@@ -381,9 +367,9 @@ drop:
             ADC(seqno[1], c, 0);
             ADC(seqno[0], c, 0);
             c = chksumflags & CHKSUMFLAG_CARRY;
-#ifdef STATEFUL
+
             y = Y_NEWDATA;
-#endif /* STATEFUL */
+
         }
 
         /* TCP flags. */
@@ -395,7 +381,7 @@ drop:
             goto drop;
         }
 
-#ifdef STATEFUL
+
 
         /* If this is an ACK, increase congestion window by one segment
            (this is slow start). */
@@ -404,21 +390,12 @@ drop:
             cwnd++;
         }
 
-#endif /* STATEFUL */
 
-#ifndef STATEFUL
 
-        if(a & TCP_SYN)
-        {
-            stateptr = pages[port - PORTLOW];
-            printf("Connection to port %d\n", port);
-        }
-
-#endif /* STATEFUL */
 
         if(a & TCP_SYN || a & TCP_FIN)
         {
-#ifdef STATEFUL
+
             cwnd = 1;
 
             if(a & TCP_FIN)
@@ -437,7 +414,7 @@ drop:
             }
 
             y = Y_NEWDATA;
-#endif /* STATEFUL */
+
             /* Increase the seqno we acknowledge by 1 */
             chksumflags = (chksumflags & CHKSUMFLAG_BYTE) | (c & 1);
             c = 0;
@@ -451,7 +428,7 @@ drop:
         /* Get the high byte of the TCP window and limit our sending rate
            if needed. */
         DEV_GETC(a);
-#ifdef STATEFUL
+
 
         if(a < cwnd + inflight)
         {
@@ -459,7 +436,7 @@ drop:
             cwnd = a - inflight;
         }
 
-#endif /* STATEFUL */
+
 
         /* Discard the low byte of the TCP window, checksum and the urgent
            pointer. */
@@ -494,7 +471,7 @@ drop:
            pseudo header checksum. If they don't match, don't send. */
         if(chksum[0] == TCP_CHECK0 && chksum[1] == TCP_CHECK1)
         {
-#ifdef STATEFUL
+
 
             /* If y is larger than Y_RESPONSE, we should send a packet in
                response to the incoming one. If we are told to wait for new
@@ -510,10 +487,6 @@ drop:
 
             }
 
-#else /* STATEFUL */
-            nrtx = 0;
-            tcpip_output();
-#endif /* STATEFUL */
         }
 
         else
@@ -528,7 +501,7 @@ tcpip_output(void)
 {
     txtime = timer;
 
-#ifdef STATEFUL
+
 
     if(tmpstateptr == NULL)
     {
@@ -539,9 +512,6 @@ tcpip_output(void)
     do
     {
         tmpptr = &(tmpstateptr->vhl);
-#else /* STATEFUL */
-    tmpptr = &(stateptr->vhl);
-#endif /* STATEFUL */
 
         /* Send vhl, tos, len, id, ipoffset, ttl and protocol. */
         for(x = 0; x < 10; x++)
@@ -649,31 +619,23 @@ tcpip_output(void)
         }
 
         /* Send the rest of the packet. */
-#ifdef STATEFUL
+
 
         for(x = 0; x < tmpstateptr->length; x++)
         {
             DEV_PUT(*(tmpptr++));
         }
 
-#else /* STATEFUL */
-
-        for(x = 0; x < stateptr->length; x++)
-        {
-            DEV_PUT(*(tmpptr++));
-        }
-
-#endif /* STATEFUL */
 
         DEV_DONE();
-#ifdef STATEFUL
+
         inflight++;
         tmpstateptr = tmpstateptr->next;
     }
     while(inflight < cwnd && tmpstateptr != NULL &&
             tmpstateptr->flag != WAIT);
 
-#endif /* STATEFUL */
+
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -686,11 +648,11 @@ miniweb_timer(void)
         if(timer - txtime > 4 &&
                 stateptr->flag != WAIT)
         {
-#ifdef STATEFUL
+
             cwnd = 1;
             inflight = 0;
             tmpstateptr = stateptr;
-#endif /* STATEFUL */
+
             printf("Retransmitting\n");
             tcpip_output();
             nrtx++;
