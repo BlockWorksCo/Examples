@@ -134,13 +134,12 @@ class MiniWebServer
 {
 
 public:
-    MiniWebServer(struct tcpip_header* _pages[], struct tcpip_header _reset) :
-        pages(_pages),
-        reset(_reset),
-        nrtx(0),
-        tcpstate(LISTEN),
+    MiniWebServer(struct tcpip_header** _pages) :
         cwnd(1),
-        inflight(0)
+        tcpstate(LISTEN),
+        inflight(0),
+        nrtx(0),
+        pages(_pages)
     {
     }
 
@@ -761,8 +760,7 @@ private:
 
 
     /* This is just a declaration, and does not use RAM. */
-    struct tcpip_header* pages[];
-    struct tcpip_header  reset;
+    struct tcpip_header** pages;
 
 
 
