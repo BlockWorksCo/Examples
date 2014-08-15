@@ -31,7 +31,8 @@
 #include <sys/uio.h>
 #include <sys/socket.h>
 
-#include <net/if_tun.h>
+#include <linux/if_tun.h>
+#include <netinet/in.h>
 
 static int drop = 0;
 
@@ -63,100 +64,29 @@ struct tcpip_hdr {
   unsigned char data[0];
 
 };
-/*-----------------------------------------------------------------------------------*/
-static unsigned short
-chksum(void *data, int len)
-{
-  unsigned short *sdata = data;
-  unsigned short acc;
-  unsigned int sum;
-    
-  for(acc = 0; len > 1; len -= 2) {
-    acc += *sdata++;
-  }
 
-  /* add up any odd byte */
-  if(len == 1) {
-    acc += (unsigned short)(*(unsigned char *)sdata);
-  }
-
-  sum = (acc & 0xffff) + (acc >> 16);
-  sum += (sum >> 16);
-  
-  return ~(sum & 0xffff);
-}
-/*-----------------------------------------------------------------------------------*/
-static unsigned short
-chksum_pseudo(void *data, int len, unsigned long ipaddr1,
-              unsigned long ipaddr2,
-              unsigned char proto,
-              unsigned short protolen)
-{
-  unsigned int sum;
-  unsigned short *sdata = data;
-  
-  for(sum = 0; len > 1; len -= 2) {
-    sum += *sdata++;
-  }
-
-  /* add up any odd byte */
-  if(len == 1) {
-    sum += (unsigned short)(*(unsigned char *)sdata);
-  }
-
-  sum += (ipaddr1 & 0xffff);
-  sum += ((ipaddr1 >> 16) & 0xffff);
-  sum += (ipaddr2 & 0xffff);
-  sum += ((ipaddr2 >> 16) & 0xffff);
-  sum += (unsigned short)htons((unsigned short)proto);
-  sum += (unsigned short)htons(protolen);
-  
-  while(sum >> 16) {
-    sum = (sum & 0xffff) + (sum >> 16);
-  }
-  
-  return ~sum & 0xffff;
-}
-/*-----------------------------------------------------------------------------------*/
-static void
-check_checksum(void *data, int len)
-{
-  struct tcpip_hdr *hdr;
-  unsigned short sum;
-  
-  hdr = data;
-
-  sum = chksum(data, 20);  
-  printf("IP header checksum check 0x%x\n", sum);
-  
-  sum = chksum_pseudo(&(hdr->srcport[0]), len - 20,
-                      hdr->srcipaddr, hdr->destipaddr,
-                      hdr->proto, len - 20);  
-  printf("TCP checksum check 0x%x len %d protolen %d\n", sum, len,
-         len - 20);
-  
-}
 /*-----------------------------------------------------------------------------------*/
 void
 dev_init(void)
 {
-  int val;
+/*  int val;*/
   fd = open("/dev/tun0", O_RDWR);
   if(fd == -1) {
     perror("tun_dev: dev_init: open");
     exit(1);
   }
 #ifdef linux
-  system("ifconfig tun0 inet 192.168.0.2 192.168.0.1");
+  int r=system("ifconfig tun0 inet 192.168.0.2 192.168.0.1");
   
-  system("route add -net 192.168.0.0 netmask 255.255.255.0 dev tun0");
+  r=system("route add -net 192.168.0.0 netmask 255.255.255.0 dev tun0");
+  r++;
 #else
   /*  system("ifconfig tun0 inet sidewalker rallarsnus");  */
   system("ifconfig tun0 inet 192.168.0.1 192.168.0.2");
 #endif /* linux */
 
-  val = 0;
-  ioctl(fd, TUNSIFHEAD, &val);
+  /* val = 0;
+   ioctl(fd, TUNSIFHEAD, &val); */
   bytes_left = 0;
   outptr = 0;
 }

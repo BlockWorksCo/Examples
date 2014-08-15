@@ -13,22 +13,33 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
+
+
+
+
+
+
 #
-CFLAGS=-Wall -g -O -fpack-struct
+#
+#
+BLOCKWORKS_PLATFORM=$(BLOCKWORKS_PLATFORM_BASE)/$(PLATFORM)
 
 
-miniweb: miniweb.o dev.o main.o pages.o
+#
+#
+#
+INCLUDES=-I./$(PLATFORM)
+INCLUDES+=-I$(BLOCKWORKS_PLATFORM)/Common
+INCLUDES+=-I$(BLOCKWORKS_PLATFORM)
 
-main.o: main.c
+OBJS=\
+miniweb.o \
+main.o \
+pages.o \
+tun_dev.o
 
-miniweb.o: miniweb.c
 
-dev.o: tun_dev.c
-	gcc $(CFLAGS) -c -o dev.o tun_dev.c
-pages.o: pages.c
-
-clean:
-	rm -f *.o *~ *core miniweb mstack
+include $(BLOCKWORKS_PLATFORM)/Makefile
 
 
 

@@ -18,6 +18,7 @@
 
 #define STATEFUL
 
+#include <stdio.h>
 #include "dev.h"
 
 #include "miniweb.h"
@@ -59,7 +60,6 @@ extern struct tcpip_header reset;
 
 static void tcpip_output(void);
 
-#define NULL (void *)0
 
 #define Y_NORESPONSE 0
 #define Y_RESPONSE 1
@@ -340,7 +340,7 @@ miniweb_main_loop(void)
     /* TCP flags. */
     DEV_GETC(a);   
     if(a & TCP_RST) {
-      stateptr = NULL;
+      stateptr = (tcpip_header*)NULL;
       goto drop;
     }
 
@@ -587,7 +587,7 @@ miniweb_timer(void)
     } else if(timer - txtime > 8 &&
 	      stateptr->flag == WAIT) {
       printf("Connection dropped\n");
-      stateptr = NULL;
+      stateptr = (tcpip_header*)NULL;
       miniweb_init();
     }
   }
