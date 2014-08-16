@@ -73,9 +73,6 @@ const uint8_t TCP_CHECK0        = 0x3f;
 const uint8_t TCP_CHECK1        = 0x63;
 
 
-const uint8_t PORTHIGH          = 85;
-const uint8_t PORTLOW           = 80;
-
 const uint8_t IP_PROTO_TCP      = 6;
 
 
@@ -319,7 +316,7 @@ public:
 
 
 
-        if(port < PORTLOW || port >= PORTHIGH)
+        if(packetGenerator.isPortAccepted(port) == true)
         {
             printf("Port outside range %d\n", port);
             goto drop;

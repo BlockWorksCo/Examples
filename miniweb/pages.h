@@ -21,6 +21,9 @@
 
 
 
+const uint8_t PORTHIGH          = 85;
+const uint8_t PORTLOW           = 80;
+
 
 
 //
@@ -48,6 +51,18 @@ public:
 
 	}
 
+	//
+	//
+	//
+	bool isPortAccepted(uint8_t portNumber)
+	{
+        if(portNumber < PORTLOW || portNumber >= PORTHIGH)
+        {
+        	return false;
+        }
+
+        return true;
+	}
 
 	//
 	//
