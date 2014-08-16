@@ -199,20 +199,21 @@ public:
         }
 
         /* IP Type of Service field, discard. */
-        a  = nextByteIn();
+        a  = next<uint8_t>();
 
         /* IP packet length. */
-        a  = nextByteIn();
-        len = a << 8;
-        a  = nextByteIn();
-        len |= a;
+        //a  = nextByteIn();
+        //len = a << 8;
+        //a  = nextByteIn();
+        //len |= a;
+        next<uint16_t>();
 
         /* IP ID, discard. */
-        a  = nextByteIn();
-        a  = nextByteIn();
+        a  = next<uint8_t>();
+        a  = next<uint8_t>();
 
         /* Fragmentation offset. */
-        a  = nextByteIn();
+        a  = next<uint8_t>();
 
         if((a & 0x20) || (a & 0x1f) != 0)
         {
@@ -220,7 +221,7 @@ public:
             goto drop;
         }
 
-        a  = nextByteIn();
+        a  = next<uint8_t>();
 
         if(a != 0)
         {
@@ -229,11 +230,11 @@ public:
         }
 
         /* TTL, discard. */
-        a  = nextByteIn();
+        a  = next<uint8_t>();
 
         /* Get the IP protocol field. If this isn't a TCP packet, we drop
            it. */
-        a  = nextByteIn();
+        a  = next<uint8_t>();
 
         if(a != IP_PROTO_TCP)
         {
@@ -242,25 +243,28 @@ public:
         }
 
         /* Get the IP checksum field, and discard it. */
-        a  = nextByteIn();
-        a  = nextByteIn();
+        //a  = nextByteIn();
+        //a  = nextByteIn();
+        next<uint16_t>();
 
         /* Get the source address of the packet, which we will use as the
            destination address for our replies. */
-        a  = nextByteIn();
+        a  = next<uint8_t>();
         ipaddr[0] = a;
-        a  = nextByteIn();
+        a  = next<uint8_t>();
         ipaddr[1] = a;
-        a  = nextByteIn();
+        a  = next<uint8_t>();
         ipaddr[2] = a;
-        a  = nextByteIn();
+        a  = next<uint8_t>();
         ipaddr[3] = a;
+        //uint32_t ipAddr_new = next<uint32_t>();
 
         /* And we discard the destination IP address. */
-        a  = nextByteIn();
-        a  = nextByteIn();
-        a  = nextByteIn();
-        a  = nextByteIn();
+        //a  = nextByteIn();
+        //a  = nextByteIn();
+        //a  = nextByteIn();
+        //a  = nextByteIn();
+        next<uint32_t>();
 
         /* Check the computed IP header checksum. If it fails, we go ahead
            and drop the packet. */
@@ -283,7 +287,7 @@ public:
         chksumflags = 0;
         /* Get the source TCP port and store it for our replies. */
 
-        a  = nextByteIn();
+        a  = next<uint8_t>();
 
         if(tcpstate == LISTEN || tcpstate == TIME_WAIT)
         {
@@ -295,7 +299,7 @@ public:
             goto drop;
         }
 
-        a  = nextByteIn();
+        a  = next<uint8_t>();
 
         if(tcpstate == LISTEN || tcpstate == TIME_WAIT)
         {
@@ -310,8 +314,8 @@ public:
 
 
         /* Get the TCP destination port. */
-        a  = nextByteIn();
-        a  = nextByteIn();
+        a  = next<uint8_t>();
+        a  = next<uint8_t>();
 
 
         if(tcpstate == LISTEN || tcpstate == TIME_WAIT)
@@ -328,14 +332,15 @@ public:
         }
 
         /* Get the TCP sequence number. */
-        a  = nextByteIn();
+        a  = next<uint8_t>();
         seqno[0] = a;
-        a  = nextByteIn();
+        a  = next<uint8_t>();
         seqno[1] = a;
-        a  = nextByteIn();
+        a  = next<uint8_t>();
         seqno[2] = a;
-        a  = nextByteIn();
+        a  = next<uint8_t>();
         seqno[3] = a;
+        //uint32_t seqNum = next<uint32_t>();
 
         /* Next, check the acknowledgement. If it acknowledges outstanding
            data, we move the state pointer upwards. (This has room for
@@ -351,7 +356,7 @@ public:
 
             for(x = 0; x < 4; x ++)
             {
-                a  = nextByteIn();
+                a  = next<uint8_t>();
 
                 while(stateptr != NULL && a > stateptr->seqno[x])
                 {
@@ -377,14 +382,14 @@ public:
         {
             for(x = 0; x < 4; x++)
             {
-                a  = nextByteIn();
+                a  = next<uint8_t>();
             }
         }
 
 
 
         /* Get the TCP offset and use it in the following computation. */
-        a  = nextByteIn();
+        a  = next<uint8_t>();
 
         /* If this segment contains TCP data, we increase the sequence
            number we acknowledge by the size of this data. */
@@ -403,7 +408,7 @@ public:
         }
 
         /* TCP flags. */
-        a  = nextByteIn();
+        a  = next<uint8_t>();
 
         if(a & TCP_RST)
         {
@@ -456,7 +461,7 @@ public:
 
         /* Get the high byte of the TCP window and limit our sending rate
            if needed. */
-        a  = nextByteIn();
+        a  = next<uint8_t>();
 
 
         if(a < cwnd + inflight)
@@ -471,7 +476,7 @@ public:
            pointer. */
         for(x = 0; x < 5; x ++)
         {
-            a  = nextByteIn();
+            a  = next<uint8_t>();
         }
 
         /* We continue checksumming the rest of the packet. */
@@ -486,7 +491,7 @@ public:
 
         for(len = len - 40; len > 0; len--)
         {
-            a  = nextByteIn();
+            a  = next<uint8_t>();
         }
 
         while(c)
@@ -621,17 +626,6 @@ private:
     {
         ADC(chksum[(chksumflags & CHKSUMFLAG_BYTE) >> 1], c, x);
         chksumflags ^= CHKSUMFLAG_BYTE;
-    }
-
-    //
-    //
-    //
-    uint8_t nextByteIn(void)
-    {
-        uint8_t x;
-        x  = packetInterface.get();
-        ADD_CHK(x);
-        return x;
     }
 
     //
