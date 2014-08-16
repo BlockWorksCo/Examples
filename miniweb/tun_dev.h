@@ -38,32 +38,6 @@
 #include <netinet/in.h>
 
 
-struct tcpip_hdr
-{
-    unsigned char vhl,
-             tos,
-             len[2],
-             id[2],
-             ipoffset[2],
-             ttl,
-             proto;
-    unsigned short ipchksum;
-    unsigned long srcipaddr,
-             destipaddr;
-    unsigned char srcport[2],
-             destport[2],
-             seqno[4],
-             ackno[4],
-             tcpoffset,
-             flags,
-             wnd[2],
-             tcpchksum[2],
-             urgp[2];
-    unsigned char data[0];
-
-};
-
-
 
 
 
@@ -78,24 +52,12 @@ class TUNPacketInterface
     typedef typename IPStackType::PacketGeneratorType   PacketGeneratorType;
 
 
+
 public:
 
     TUNPacketInterface(WebServerType& _webServer) :
         webServer(_webServer),
         dropFlag(0)
-    {
-        init();
-    }
-
-public:
-
-
-
-
-    //
-    //
-    //
-    void init(void)
     {
         /*  int val;*/
         fd = open("/dev/tun0", O_RDWR);
@@ -106,15 +68,10 @@ public:
             exit(1);
         }
 
-    #ifdef linux
         int r = system("ifconfig tun0 inet 192.168.0.2 192.168.0.1");
 
         r = system("route add -net 192.168.0.0 netmask 255.255.255.0 dev tun0");
         r++;
-    #else
-        /*  system("ifconfig tun0 inet sidewalker rallarsnus");  */
-        system("ifconfig tun0 inet 192.168.0.1 192.168.0.2");
-    #endif /* linux */
 
         /* val = 0;
          ioctl(fd, TUNSIFHEAD, &val); */
