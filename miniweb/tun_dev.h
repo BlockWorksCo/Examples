@@ -38,13 +38,6 @@
 #include <netinet/in.h>
 
 
-static int drop = 0;
-
-static int fd;
-static int bytes_left;
-static char inbuf[2048], outbuf[2048];
-static int inptr, outptr;
-
 struct tcpip_hdr
 {
     unsigned char vhl,
@@ -88,19 +81,21 @@ class TUNPacketInterface
 public:
 
     TUNPacketInterface(WebServerType& _webServer) :
-        webServer(_webServer)
+        webServer(_webServer),
+        drop(0)
     {
         
     }
 
 public:
 
-    WebServerType&  webServer;
 
 
-    /*-----------------------------------------------------------------------------------*/
-    void
-    dev_init(void)
+
+    //
+    //
+    //
+    void dev_init(void)
     {
         /*  int val;*/
         fd = open("/dev/tun0", O_RDWR);
@@ -126,9 +121,12 @@ public:
         bytes_left = 0;
         outptr = 0;
     }
-    /*-----------------------------------------------------------------------------------*/
-    unsigned char
-    dev_wait(void)
+
+
+    //
+    //
+    //
+    unsigned char dev_wait(void)
     {
         fd_set fdset;
         struct timeval tv;
@@ -160,9 +158,12 @@ public:
 
         return dev_get();
     }
-    /*-----------------------------------------------------------------------------------*/
-    unsigned char
-    dev_get(void)
+
+
+    //
+    //
+    //
+    unsigned char dev_get(void)
     {
         if(bytes_left > 0)
         {
@@ -173,23 +174,32 @@ public:
 
         return 0;
     }
-    /*-----------------------------------------------------------------------------------*/
-    void
-    dev_put(unsigned char byte)
+
+
+    //
+    //
+    //
+    void dev_put(unsigned char byte)
     {
         /*  printf("0x%02x ", byte); */
         outbuf[outptr++] = byte;
     }
-    /*-----------------------------------------------------------------------------------*/
-    void
-    dev_drop(void)
+
+
+    //
+    //
+    //
+    void dev_drop(void)
     {
         /*  printf("\n");*/
         bytes_left = 0;
     }
-    /*-----------------------------------------------------------------------------------*/
-    void
-    dev_done(void)
+
+
+    //
+    //
+    //
+    void dev_done(void)
     {
         int ret;
 
@@ -216,6 +226,18 @@ public:
         /*  printf("\n");*/
     }
 
+
+private:
+
+    WebServerType&  webServer;
+    
+    int             drop;
+    int             fd;
+    int             bytes_left;
+    char            inbuf[2048];
+    char            outbuf[2048];
+    int             inptr;
+    int             outptr;
 };
 
 
