@@ -660,7 +660,8 @@ private:
             /* Send vhl, tos, len, id, ipoffset, ttl and protocol. */
             for(x = 0; x < 10; x++)
             {
-                packetInterface.put(*(tmpptr++));
+                uint8_t value = *(tmpptr++);
+                packetInterface.template put<uint8_t>(value);
             }
 
             /* Fiddle with the checksum. This can be done more efficiently
@@ -682,48 +683,48 @@ private:
 
             /* Send bytes. */
             a = ~(chksum[1]);
-            packetInterface.put(a);
+            packetInterface.template put<uint8_t>(a);
             a = ~(chksum[0]);
-            packetInterface.put(a);
+            packetInterface.template put<uint8_t>(a);
 
             /* Send source IP address. */
             for(x = 4; x > 0; x--)
             {
-                packetInterface.put(*(tmpptr++));
+                packetInterface.template put<uint8_t>(*(tmpptr++));
             }
 
             /* Send destination address. */
             for(; x < 4; x++)
             {
-                packetInterface.put(ipaddr[x]);
+                packetInterface.template put<uint8_t>(ipaddr[x]);
             }
 
             /* Send TCP source port. */
             for(x = 0; x < 2; x++)
             {
-                packetInterface.put(*(tmpptr++));
+                packetInterface.template put<uint8_t>(*(tmpptr++));
             }
 
             /* Send TCP destination port. */
-            packetInterface.put(srcport[0]);
-            packetInterface.put(srcport[1]);
+            packetInterface.template put<uint8_t>(srcport[0]);
+            packetInterface.template put<uint8_t>(srcport[1]);
             /* Send TCP sequence number. */
-            packetInterface.put(*(tmpptr++));
-            packetInterface.put(*(tmpptr++));
-            packetInterface.put(*(tmpptr++));
-            packetInterface.put(*(tmpptr++));
+            packetInterface.template put<uint8_t>(*(tmpptr++));
+            packetInterface.template put<uint8_t>(*(tmpptr++));
+            packetInterface.template put<uint8_t>(*(tmpptr++));
+            packetInterface.template put<uint8_t>(*(tmpptr++));
 
             /* Send TCP acknowledgement number. */
-            packetInterface.put(seqno[0]);
-            packetInterface.put(seqno[1]);
-            packetInterface.put(seqno[2]);
-            packetInterface.put(seqno[3]);
+            packetInterface.template put<uint8_t>(seqno[0]);
+            packetInterface.template put<uint8_t>(seqno[1]);
+            packetInterface.template put<uint8_t>(seqno[2]);
+            packetInterface.template put<uint8_t>(seqno[3]);
 
             /* Send offset, flags and window. */
-            packetInterface.put(*(tmpptr++));
-            packetInterface.put(*(tmpptr++));
-            packetInterface.put(*(tmpptr++));
-            packetInterface.put(*(tmpptr++));
+            packetInterface.template put<uint8_t>(*(tmpptr++));
+            packetInterface.template put<uint8_t>(*(tmpptr++));
+            packetInterface.template put<uint8_t>(*(tmpptr++));
+            packetInterface.template put<uint8_t>(*(tmpptr++));
 
             /* Fiddle with the checksum. This can be done more efficiently
                in assembler, where we have the option of adding with
@@ -752,14 +753,14 @@ private:
 
             /* Send bytes. */
             a = ~(chksum[1]);
-            packetInterface.put(a);
+            packetInterface.template put<uint8_t>(a);
             a = ~(chksum[0]);
-            packetInterface.put(a);
+            packetInterface.template put<uint8_t>(a);
 
             /* Send urgent pointer. */
             for(x = 0; x < 2; x++)
             {
-                packetInterface.put(*(tmpptr++));
+                packetInterface.template put<uint8_t>(*(tmpptr++));
             }
 
             /* Send the rest of the packet. */
@@ -767,7 +768,7 @@ private:
 
             for(x = 0; x < tmpstateptr->length; x++)
             {
-                packetInterface.put(*(tmpptr++));
+                packetInterface.template put<uint8_t>(*(tmpptr++));
             }
 
 

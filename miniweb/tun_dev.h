@@ -136,10 +136,26 @@ public:
     //
     //
     //
+#if 0    
     void put(unsigned char byte)
     {
         /*  printf("0x%02x ", byte); */
         outbuf[outptr++] = byte;
+    }
+#endif
+
+    //
+    //
+    //
+    template <typename T> void put(T data)
+    {
+        uint8_t*    byte    = &data;
+
+        for(uint8_t i=0; i<sizeof(T); i++)
+        {
+            /*  printf("0x%02x ", byte); */
+            outbuf[outptr++] = *byte;
+        }
     }
 
 
