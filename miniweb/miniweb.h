@@ -169,360 +169,357 @@ public:
     //
     //
     //
-    void miniweb_main_loop(void)
+    void Iterate(void)
     {
-        while(true)
-        {
     drop:
-            packetInterface.dev_drop();
+        packetInterface.dev_drop();
 
 
-            /* The content of the y register signals whether we should send
-               out a new packet once the input processing is done. y = 0 means
-               that we should not send out a packet and y != 0 means that we
-               should send out a packet. */
-            y = Y_NORESPONSE;
+        /* The content of the y register signals whether we should send
+           out a new packet once the input processing is done. y = 0 means
+           that we should not send out a packet and y != 0 means that we
+           should send out a packet. */
+        y = Y_NORESPONSE;
 
 
-            chksum[0] = chksum[1] = 0;
-            chksumflags = 0;
+        chksum[0] = chksum[1] = 0;
+        chksumflags = 0;
 
-            /* Get first byte of IP packet, which is the IP version number and
-               IP header length. */
-            a   = packetInterface.dev_wait();
-            ADD_CHK(x);
+        /* Get first byte of IP packet, which is the IP version number and
+           IP header length. */
+        a   = packetInterface.dev_wait();
+        ADD_CHK(x);
 
-            /* We discard every packet that isn't IP version 4 and that has IP
-               options. */
-            if(a != 0x45)
+        /* We discard every packet that isn't IP version 4 and that has IP
+           options. */
+        if(a != 0x45)
+        {
+            DPRINTF("Packet dropped due to options or version mismatch\n");
+            goto drop;
+        }
+
+        /* IP Type of Service field, discard. */
+        a  = dev_getc();
+
+        /* IP packet length. */
+        a  = dev_getc();
+        len = a << 8;
+        a  = dev_getc();
+        len |= a;
+
+        /* IP ID, discard. */
+        a  = dev_getc();
+        a  = dev_getc();
+
+        /* Fragmentation offset. */
+        a  = dev_getc();
+
+        if((a & 0x20) || (a & 0x1f) != 0)
+        {
+            DPRINTF("Got IP fragment, dropping\n");
+            goto drop;
+        }
+
+        a  = dev_getc();
+
+        if(a != 0)
+        {
+            DPRINTF("Got IP fragment, dropping\n");
+            goto drop;
+        }
+
+        /* TTL, discard. */
+        a  = dev_getc();
+
+        /* Get the IP protocol field. If this isn't a TCP packet, we drop
+           it. */
+        a  = dev_getc();
+
+        if(a != IP_PROTO_TCP)
+        {
+            DPRINTF("Not a TCP packet, dropping\n");
+            goto drop;
+        }
+
+        /* Get the IP checksum field, and discard it. */
+        a  = dev_getc();
+        a  = dev_getc();
+
+        /* Get the source address of the packet, which we will use as the
+           destination address for our replies. */
+        a  = dev_getc();
+        ipaddr[0] = a;
+        a  = dev_getc();
+        ipaddr[1] = a;
+        a  = dev_getc();
+        ipaddr[2] = a;
+        a  = dev_getc();
+        ipaddr[3] = a;
+
+        /* And we discard the destination IP address. */
+        a  = dev_getc();
+        a  = dev_getc();
+        a  = dev_getc();
+        a  = dev_getc();
+
+        /* Check the computed IP header checksum. If it fails, we go ahead
+           and drop the packet. */
+        while(c)
+        {
+            ADD_CHK(0);
+        }
+
+        if(chksum[0] != 0xff || chksum[1] != 0xff)
+        {
+            DPRINTF("Failed IP header checksum, dropping\n");
+            goto drop;
+        }
+
+        /* Thus the IP processing is done with, and we carry on with the
+           TCP layer. */
+
+        chksum[0] = chksum[1] = 0;
+        c = 0;
+        chksumflags = 0;
+        /* Get the source TCP port and store it for our replies. */
+
+        a  = dev_getc();
+
+        if(tcpstate == LISTEN || tcpstate == TIME_WAIT)
+        {
+            srcport[0] = a;
+        }
+        else if(srcport[0] != a)
+        {
+            DPRINTF("Got new port and not in LISTEN or TIME_WAIT, dropping packet\n");
+            goto drop;
+        }
+
+        a  = dev_getc();
+
+        if(tcpstate == LISTEN || tcpstate == TIME_WAIT)
+        {
+            srcport[1] = a;
+        }
+        else if(srcport[1] != a)
+        {
+            DPRINTF("Got new port and not in LISTEN or TIME_WAIT, dropping packet\n");
+            goto drop;
+        }
+
+
+
+        /* Get the TCP destination port. */
+        a  = dev_getc();
+        a  = dev_getc();
+
+
+        if(tcpstate == LISTEN || tcpstate == TIME_WAIT)
+        {
+            port = a;
+        }
+
+
+
+        if(port < PORTLOW || port >= PORTHIGH)
+        {
+            DPRINTF("Port outside range %d\n", port);
+            goto drop;
+        }
+
+        /* Get the TCP sequence number. */
+        a  = dev_getc();
+        seqno[0] = a;
+        a  = dev_getc();
+        seqno[1] = a;
+        a  = dev_getc();
+        seqno[2] = a;
+        a  = dev_getc();
+        seqno[3] = a;
+
+        /* Next, check the acknowledgement. If it acknowledges outstanding
+           data, we move the state pointer upwards. (This has room for
+           massive assembler optimizations.) Since we never send out any
+           sequence numbers that wrap, we can use standard arithmetic
+           here. */
+
+
+
+        if(tcpstate != LISTEN)
+        {
+
+
+            for(x = 0; x < 4; x ++)
             {
-                DPRINTF("Packet dropped due to options or version mismatch\n");
-                goto drop;
+                a  = dev_getc();
+
+                while(stateptr != NULL && a > stateptr->seqno[x])
+                {
+                    stateptr = stateptr->next;
+
+                    y = Y_RESPONSE;
+                    inflight--;
+
+                }
+
+                if(stateptr == NULL)
+                {
+
+                    y = Y_NORESPONSE;
+                    tcpstate = LISTEN;
+                    DPRINTF("Stateptr == NULL, connection dropped\n");
+                }
             }
 
-            /* IP Type of Service field, discard. */
-            a  = dev_getc();
 
-            /* IP packet length. */
-            a  = dev_getc();
-            len = a << 8;
-            a  = dev_getc();
-            len |= a;
-
-            /* IP ID, discard. */
-            a  = dev_getc();
-            a  = dev_getc();
-
-            /* Fragmentation offset. */
-            a  = dev_getc();
-
-            if((a & 0x20) || (a & 0x1f) != 0)
+        }
+        else
+        {
+            for(x = 0; x < 4; x++)
             {
-                DPRINTF("Got IP fragment, dropping\n");
-                goto drop;
+                a  = dev_getc();
             }
+        }
 
-            a  = dev_getc();
 
-            if(a != 0)
-            {
-                DPRINTF("Got IP fragment, dropping\n");
-                goto drop;
-            }
 
-            /* TTL, discard. */
-            a  = dev_getc();
+        /* Get the TCP offset and use it in the following computation. */
+        a  = dev_getc();
 
-            /* Get the IP protocol field. If this isn't a TCP packet, we drop
-               it. */
-            a  = dev_getc();
-
-            if(a != IP_PROTO_TCP)
-            {
-                DPRINTF("Not a TCP packet, dropping\n");
-                goto drop;
-            }
-
-            /* Get the IP checksum field, and discard it. */
-            a  = dev_getc();
-            a  = dev_getc();
-
-            /* Get the source address of the packet, which we will use as the
-               destination address for our replies. */
-            a  = dev_getc();
-            ipaddr[0] = a;
-            a  = dev_getc();
-            ipaddr[1] = a;
-            a  = dev_getc();
-            ipaddr[2] = a;
-            a  = dev_getc();
-            ipaddr[3] = a;
-
-            /* And we discard the destination IP address. */
-            a  = dev_getc();
-            a  = dev_getc();
-            a  = dev_getc();
-            a  = dev_getc();
-
-            /* Check the computed IP header checksum. If it fails, we go ahead
-               and drop the packet. */
-            while(c)
-            {
-                ADD_CHK(0);
-            }
-
-            if(chksum[0] != 0xff || chksum[1] != 0xff)
-            {
-                DPRINTF("Failed IP header checksum, dropping\n");
-                goto drop;
-            }
-
-            /* Thus the IP processing is done with, and we carry on with the
-               TCP layer. */
-
-            chksum[0] = chksum[1] = 0;
+        /* If this segment contains TCP data, we increase the sequence
+           number we acknowledge by the size of this data. */
+        if(len - 20 - (a >> 4) * 4 > 0)   /* a is the TCP data offset. */
+        {
+            chksumflags = (chksumflags & CHKSUMFLAG_BYTE) | (c & 1);
             c = 0;
-            chksumflags = 0;
-            /* Get the source TCP port and store it for our replies. */
+            ADC(seqno[3], c, (len - 20 - (a >> 4) * 4) & 0xff);
+            ADC(seqno[2], c, (len - 20 - (a >> 4) * 4) >> 8);
+            ADC(seqno[1], c, 0);
+            ADC(seqno[0], c, 0);
+            c = chksumflags & CHKSUMFLAG_CARRY;
 
-            a  = dev_getc();
+            y = Y_NEWDATA;
 
-            if(tcpstate == LISTEN || tcpstate == TIME_WAIT)
+        }
+
+        /* TCP flags. */
+        a  = dev_getc();
+
+        if(a & TCP_RST)
+        {
+            stateptr = (tcpip_header*)NULL;
+            goto drop;
+        }
+
+
+
+        /* If this is an ACK, increase congestion window by one segment
+           (this is slow start). */
+        if(y == 1 && (a & TCP_ACK))
+        {
+            cwnd++;
+        }
+
+
+
+
+        if(a & TCP_SYN || a & TCP_FIN)
+        {
+
+            cwnd = 1;
+
+            if(a & TCP_FIN)
             {
-                srcport[0] = a;
+                tcpstate = TIME_WAIT;
             }
-            else if(srcport[0] != a)
+            else if(a & TCP_SYN)
             {
-                DPRINTF("Got new port and not in LISTEN or TIME_WAIT, dropping packet\n");
-                goto drop;
+                tcpstate = ESTABLISHED;
+                tmpstateptr = stateptr = pages[port - PORTLOW];
+                DPRINTF("New connection from %d.%d.%d.%d:%d\n",
+                       ipaddr[0], ipaddr[1], ipaddr[2], ipaddr[3],
+                       (srcport[0] << 8) + srcport[1]);
+                inflight = 0;
             }
 
-            a  = dev_getc();
+            y = Y_NEWDATA;
 
-            if(tcpstate == LISTEN || tcpstate == TIME_WAIT)
+            /* Increase the seqno we acknowledge by 1 */
+            chksumflags = (chksumflags & CHKSUMFLAG_BYTE) | (c & 1);
+            c = 0;
+            ADC(seqno[3], c, 1);
+            ADC(seqno[2], c, 0);
+            ADC(seqno[1], c, 0);
+            ADC(seqno[0], c, 0);
+            c = chksumflags & CHKSUMFLAG_CARRY;
+        }
+
+        /* Get the high byte of the TCP window and limit our sending rate
+           if needed. */
+        a  = dev_getc();
+
+
+        if(a < cwnd + inflight)
+        {
+            /*      DPRINTF("Limited by receiver's window %d new window %d.\n", a, a - inflight);*/
+            cwnd = a - inflight;
+        }
+
+
+
+        /* Discard the low byte of the TCP window, checksum and the urgent
+           pointer. */
+        for(x = 0; x < 5; x ++)
+        {
+            a  = dev_getc();
+        }
+
+        /* We continue checksumming the rest of the packet. */
+
+        /* Add the changing part of the pseudo checksum. */
+        ADD_CHK1(ipaddr[0]);
+        ADD_CHK2(ipaddr[1]);
+        ADD_CHK1(ipaddr[2]);
+        ADD_CHK2(ipaddr[3]);
+        ADD_CHK1((len >> 8) & 0xff);
+        ADD_CHK2(len & 0xff);
+
+        for(len = len - 40; len > 0; len--)
+        {
+            a  = dev_getc();
+        }
+
+        while(c)
+        {
+            ADD_CHK(0);
+        }
+
+        /*    DPRINTF("TCP checksum 0x%02x%02x\n", chksum[0], chksum[1]);*/
+
+        /* We compare the calculated checksum with the precalculated
+           pseudo header checksum. If they don't match, don't send. */
+        if(chksum[0] == TCP_CHECK0 && chksum[1] == TCP_CHECK1)
+        {
+
+
+            /* If y is larger than Y_RESPONSE, we should send a packet in
+               response to the incoming one. If we are told to wait for new
+               data (as indicated by stateptr->flag == WAIT), y has to be set
+               to Y_NEWDATA in order for us to respond. */
+            if(tmpstateptr != NULL && y >= Y_RESPONSE)
             {
-                srcport[1] = a;
-            }
-            else if(srcport[1] != a)
-            {
-                DPRINTF("Got new port and not in LISTEN or TIME_WAIT, dropping packet\n");
-                goto drop;
-            }
-
-
-
-            /* Get the TCP destination port. */
-            a  = dev_getc();
-            a  = dev_getc();
-
-
-            if(tcpstate == LISTEN || tcpstate == TIME_WAIT)
-            {
-                port = a;
-            }
-
-
-
-            if(port < PORTLOW || port >= PORTHIGH)
-            {
-                DPRINTF("Port outside range %d\n", port);
-                goto drop;
-            }
-
-            /* Get the TCP sequence number. */
-            a  = dev_getc();
-            seqno[0] = a;
-            a  = dev_getc();
-            seqno[1] = a;
-            a  = dev_getc();
-            seqno[2] = a;
-            a  = dev_getc();
-            seqno[3] = a;
-
-            /* Next, check the acknowledgement. If it acknowledges outstanding
-               data, we move the state pointer upwards. (This has room for
-               massive assembler optimizations.) Since we never send out any
-               sequence numbers that wrap, we can use standard arithmetic
-               here. */
-
-
-
-            if(tcpstate != LISTEN)
-            {
-
-
-                for(x = 0; x < 4; x ++)
+                if(tmpstateptr->flag != WAIT || y == Y_NEWDATA )
                 {
-                    a  = dev_getc();
-
-                    while(stateptr != NULL && a > stateptr->seqno[x])
-                    {
-                        stateptr = stateptr->next;
-
-                        y = Y_RESPONSE;
-                        inflight--;
-
-                    }
-
-                    if(stateptr == NULL)
-                    {
-
-                        y = Y_NORESPONSE;
-                        tcpstate = LISTEN;
-                        DPRINTF("Stateptr == NULL, connection dropped\n");
-                    }
-                }
-
-
-            }
-            else
-            {
-                for(x = 0; x < 4; x++)
-                {
-                    a  = dev_getc();
-                }
-            }
-
-
-
-            /* Get the TCP offset and use it in the following computation. */
-            a  = dev_getc();
-
-            /* If this segment contains TCP data, we increase the sequence
-               number we acknowledge by the size of this data. */
-            if(len - 20 - (a >> 4) * 4 > 0)   /* a is the TCP data offset. */
-            {
-                chksumflags = (chksumflags & CHKSUMFLAG_BYTE) | (c & 1);
-                c = 0;
-                ADC(seqno[3], c, (len - 20 - (a >> 4) * 4) & 0xff);
-                ADC(seqno[2], c, (len - 20 - (a >> 4) * 4) >> 8);
-                ADC(seqno[1], c, 0);
-                ADC(seqno[0], c, 0);
-                c = chksumflags & CHKSUMFLAG_CARRY;
-
-                y = Y_NEWDATA;
-
-            }
-
-            /* TCP flags. */
-            a  = dev_getc();
-
-            if(a & TCP_RST)
-            {
-                stateptr = (tcpip_header*)NULL;
-                goto drop;
-            }
-
-
-
-            /* If this is an ACK, increase congestion window by one segment
-               (this is slow start). */
-            if(y == 1 && (a & TCP_ACK))
-            {
-                cwnd++;
-            }
-
-
-
-
-            if(a & TCP_SYN || a & TCP_FIN)
-            {
-
-                cwnd = 1;
-
-                if(a & TCP_FIN)
-                {
-                    tcpstate = TIME_WAIT;
-                }
-                else if(a & TCP_SYN)
-                {
-                    tcpstate = ESTABLISHED;
-                    tmpstateptr = stateptr = pages[port - PORTLOW];
-                    DPRINTF("New connection from %d.%d.%d.%d:%d\n",
-                           ipaddr[0], ipaddr[1], ipaddr[2], ipaddr[3],
-                           (srcport[0] << 8) + srcport[1]);
-                    inflight = 0;
-                }
-
-                y = Y_NEWDATA;
-
-                /* Increase the seqno we acknowledge by 1 */
-                chksumflags = (chksumflags & CHKSUMFLAG_BYTE) | (c & 1);
-                c = 0;
-                ADC(seqno[3], c, 1);
-                ADC(seqno[2], c, 0);
-                ADC(seqno[1], c, 0);
-                ADC(seqno[0], c, 0);
-                c = chksumflags & CHKSUMFLAG_CARRY;
-            }
-
-            /* Get the high byte of the TCP window and limit our sending rate
-               if needed. */
-            a  = dev_getc();
-
-
-            if(a < cwnd + inflight)
-            {
-                /*      DPRINTF("Limited by receiver's window %d new window %d.\n", a, a - inflight);*/
-                cwnd = a - inflight;
-            }
-
-
-
-            /* Discard the low byte of the TCP window, checksum and the urgent
-               pointer. */
-            for(x = 0; x < 5; x ++)
-            {
-                a  = dev_getc();
-            }
-
-            /* We continue checksumming the rest of the packet. */
-
-            /* Add the changing part of the pseudo checksum. */
-            ADD_CHK1(ipaddr[0]);
-            ADD_CHK2(ipaddr[1]);
-            ADD_CHK1(ipaddr[2]);
-            ADD_CHK2(ipaddr[3]);
-            ADD_CHK1((len >> 8) & 0xff);
-            ADD_CHK2(len & 0xff);
-
-            for(len = len - 40; len > 0; len--)
-            {
-                a  = dev_getc();
-            }
-
-            while(c)
-            {
-                ADD_CHK(0);
-            }
-
-            /*    DPRINTF("TCP checksum 0x%02x%02x\n", chksum[0], chksum[1]);*/
-
-            /* We compare the calculated checksum with the precalculated
-               pseudo header checksum. If they don't match, don't send. */
-            if(chksum[0] == TCP_CHECK0 && chksum[1] == TCP_CHECK1)
-            {
-
-
-                /* If y is larger than Y_RESPONSE, we should send a packet in
-                   response to the incoming one. If we are told to wait for new
-                   data (as indicated by stateptr->flag == WAIT), y has to be set
-                   to Y_NEWDATA in order for us to respond. */
-                if(tmpstateptr != NULL && y >= Y_RESPONSE)
-                {
-                    if(tmpstateptr->flag != WAIT || y == Y_NEWDATA )
-                    {
-                        nrtx = 0;
-                        tcpip_output();
-                    }
-
+                    nrtx = 0;
+                    tcpip_output();
                 }
 
             }
-            else
-            {
-                DPRINTF("Packet dropped due to failing TCP checksum.\n");
-            }
+
+        }
+        else
+        {
+            DPRINTF("Packet dropped due to failing TCP checksum.\n");
         }
     }
 
@@ -533,7 +530,7 @@ public:
     //
     //
     //
-    void miniweb_timer(void)
+    void timerTick(void)
     {
         timer++;
 

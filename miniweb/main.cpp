@@ -34,7 +34,10 @@ TUNPacketInterface<IPStackType>                     tunPacketInterface(webServer
 //
 int main(int argc, char **argv)
 {
-    webServer.miniweb_main_loop();
+    while(true)
+    {
+        webServer.Iterate();    
+    }
 
     return 0;
 }
