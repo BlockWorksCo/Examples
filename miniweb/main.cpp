@@ -21,11 +21,12 @@
 
 
 extern IPStackType::WebServerType::tcpip_header*    pages[];
-extern TUNPacketInterface<IPStackType>              tunPacketInterface;
 
-IPStackType::PacketGeneratorType                    packetGenerator;
-MiniWebServer<IPStackType>                          webServer(pages, tunPacketInterface, packetGenerator);
-TUNPacketInterface<IPStackType>                     tunPacketInterface(webServer);
+IPStackType::PacketGeneratorType                    packetGenerator(pages);
+extern IPStackType::PacketInterfaceType             packetInterface;
+
+MiniWebServer<IPStackType>                          webServer(packetInterface, packetGenerator);
+TUNPacketInterface<IPStackType>                     packetInterface(webServer);
 
 
 

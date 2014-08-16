@@ -20,16 +20,11 @@
 
 
 
-
-
 #include <stdio.h>
-#include <stdint.h>
 
 
-#define IPADDR          htonl((IPADDR0 << 24) + (IPADDR1 << 16) + (IPADDR2 << 8) + IPADDR3)
-#define DPRINTF         printf
 
-
+#define IPADDR          htonl((IPADDR0 << 24) + (IPADDR1 << 16) + (IPADDR2 << 8) + IPADDR3)       
 
 
 
@@ -145,14 +140,13 @@ public:
     //
     //
     //
-    MiniWebServer( tcpip_header** _pages, PacketInterfaceType& _packetInterface, PacketGeneratorType& _packetGenerator) :
-        packetInterface(_packetInterface),
+    MiniWebServer( PacketInterfaceType& _packetInterface, PacketGeneratorType& _packetGenerator) :
         cwnd(1),
         tcpstate(LISTEN),
         inflight(0),
         nrtx(0),
-        pages(_pages),
-        packetGenerator(_packetGenerator)
+        packetGenerator(_packetGenerator),
+        packetInterface(_packetInterface)
     {
     }
 
@@ -194,7 +188,7 @@ public:
            options. */
         if(a != 0x45)
         {
-            DPRINTF("Packet dropped due to options or version mismatch\n");
+            printf("Packet dropped due to options or version mismatch\n");
             goto drop;
         }
 
@@ -217,7 +211,7 @@ public:
 
         if((a & 0x20) || (a & 0x1f) != 0)
         {
-            DPRINTF("Got IP fragment, dropping\n");
+            printf("Got IP fragment, dropping\n");
             goto drop;
         }
 
@@ -225,7 +219,7 @@ public:
 
         if(a != 0)
         {
-            DPRINTF("Got IP fragment, dropping\n");
+            printf("Got IP fragment, dropping\n");
             goto drop;
         }
 
@@ -238,7 +232,7 @@ public:
 
         if(a != IP_PROTO_TCP)
         {
-            DPRINTF("Not a TCP packet, dropping\n");
+            printf("Not a TCP packet, dropping\n");
             goto drop;
         }
 
@@ -275,7 +269,7 @@ public:
 
         if(chksum[0] != 0xff || chksum[1] != 0xff)
         {
-            DPRINTF("Failed IP header checksum, dropping\n");
+            printf("Failed IP header checksum, dropping\n");
             goto drop;
         }
 
@@ -295,7 +289,7 @@ public:
         }
         else if(srcport[0] != a)
         {
-            DPRINTF("Got new port and not in LISTEN or TIME_WAIT, dropping packet\n");
+            printf("Got new port and not in LISTEN or TIME_WAIT, dropping packet\n");
             goto drop;
         }
 
@@ -307,7 +301,7 @@ public:
         }
         else if(srcport[1] != a)
         {
-            DPRINTF("Got new port and not in LISTEN or TIME_WAIT, dropping packet\n");
+            printf("Got new port and not in LISTEN or TIME_WAIT, dropping packet\n");
             goto drop;
         }
 
@@ -327,7 +321,7 @@ public:
 
         if(port < PORTLOW || port >= PORTHIGH)
         {
-            DPRINTF("Port outside range %d\n", port);
+            printf("Port outside range %d\n", port);
             goto drop;
         }
 
@@ -372,7 +366,7 @@ public:
 
                     y = Y_NORESPONSE;
                     tcpstate = LISTEN;
-                    DPRINTF("Stateptr == NULL, connection dropped\n");
+                    printf("Stateptr == NULL, connection dropped\n");
                 }
             }
 
@@ -440,10 +434,10 @@ public:
             else if(a & TCP_SYN)
             {
                 tcpstate = ESTABLISHED;
-                tmpstateptr = stateptr = pages[port - PORTLOW];
-                DPRINTF("New connection from %d.%d.%d.%d:%d\n",
-                       ipaddr[0], ipaddr[1], ipaddr[2], ipaddr[3],
-                       (srcport[0] << 8) + srcport[1]);
+                //stateptr = pages[port - PORTLOW];
+                stateptr    = packetGenerator.packetForPort(port);
+                tmpstateptr = stateptr;
+                printf("New connection from %d.%d.%d.%d:%d\n", ipaddr[0], ipaddr[1], ipaddr[2], ipaddr[3], (srcport[0] << 8) + srcport[1]);
                 inflight = 0;
             }
 
@@ -466,7 +460,7 @@ public:
 
         if(a < cwnd + inflight)
         {
-            /*      DPRINTF("Limited by receiver's window %d new window %d.\n", a, a - inflight);*/
+            /*      printf("Limited by receiver's window %d new window %d.\n", a, a - inflight);*/
             cwnd = a - inflight;
         }
 
@@ -499,7 +493,7 @@ public:
             ADD_CHK(0);
         }
 
-        /*    DPRINTF("TCP checksum 0x%02x%02x\n", chksum[0], chksum[1]);*/
+        /*    printf("TCP checksum 0x%02x%02x\n", chksum[0], chksum[1]);*/
 
         /* We compare the calculated checksum with the precalculated
            pseudo header checksum. If they don't match, don't send. */
@@ -524,7 +518,7 @@ public:
         }
         else
         {
-            DPRINTF("Packet dropped due to failing TCP checksum.\n");
+            printf("Packet dropped due to failing TCP checksum.\n");
         }
     }
 
@@ -549,7 +543,7 @@ public:
                 inflight = 0;
                 tmpstateptr = stateptr;
 
-                DPRINTF("Retransmitting\n");
+                printf("Retransmitting\n");
                 tcpip_output();
                 nrtx++;
 
@@ -562,7 +556,7 @@ public:
             else if(timer - txtime > 8 &&
                     stateptr->flag == WAIT)
             {
-                DPRINTF("Connection dropped\n");
+                printf("Connection dropped\n");
                 stateptr = (tcpip_header*)NULL;
                 resetStack();
             }
@@ -658,7 +652,7 @@ private:
 
         if(tmpstateptr == NULL)
         {
-            DPRINTF("tmpstateptr == NULL!\n");
+            printf("tmpstateptr == NULL!\n");
             return;
         }
 
@@ -798,9 +792,6 @@ private:
     //
     //
     //
-    PacketInterfaceType&  packetInterface;
-
-
     /* These are kept in CPU registers. */
     uint8_t               a;
     uint8_t               x;
@@ -832,10 +823,10 @@ private:
     uint8_t               chksumflags;
 
 
-    /* This is just a declaration, and does not use RAM. */
-    tcpip_header**        pages;
-
     PacketGeneratorType&  packetGenerator;
+    PacketInterfaceType&  packetInterface;
+
+
 
 };
 

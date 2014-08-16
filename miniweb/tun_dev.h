@@ -20,8 +20,6 @@
 #define __TUN_DEV_H__
 
 
-#include "miniweb.h"
-
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -40,7 +38,9 @@
 
 
 
-
+//
+//
+//
 template < typename IPStackType >
 class TUNPacketInterface
 {

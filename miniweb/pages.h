@@ -16,9 +16,16 @@
  *
  */
 
-#ifndef __PAGES_H__
-#define __PAGES_H__
+#ifndef __PACKETGENERATOR_H__
+#define __PACKETGENERATOR_H__
 
+
+
+
+
+//
+//
+//
 template < typename IPStackType >
 class PacketGenerator
 {
@@ -32,14 +39,29 @@ class PacketGenerator
 
 public:
 
-	PacketGenerator()
+	//
+	//
+	//
+	PacketGenerator( typename WebServerType::tcpip_header* _pages[] ) :
+	        pages(_pages)
 	{
 
 	}
 
 
+	//
+	//
+	//
+	typename WebServerType::tcpip_header* packetForPort(uint8_t portNumber)
+	{
+		return pages[portNumber - PORTLOW];
+	}
 
 private:
+
+    /* This is just a declaration, and does not use RAM. */
+    typename WebServerType::tcpip_header**        pages;
+
 
 };
 

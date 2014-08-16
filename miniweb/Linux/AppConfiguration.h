@@ -5,9 +5,12 @@
 #define __APPCONFIGURATION_H__
 
 
+#include <stdint.h>
+
 #include "miniweb.h"
 #include "tun_dev.h"
 #include "pages.h"
+
 
 
 
