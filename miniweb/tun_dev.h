@@ -82,9 +82,9 @@ public:
 
     TUNPacketInterface(WebServerType& _webServer) :
         webServer(_webServer),
-        drop(0)
+        dropFlag(0)
     {
-        
+        init();
     }
 
 public:
@@ -95,7 +95,7 @@ public:
     //
     //
     //
-    void dev_init(void)
+    void init(void)
     {
         /*  int val;*/
         fd = open("/dev/tun0", O_RDWR);
@@ -126,7 +126,7 @@ public:
     //
     //
     //
-    unsigned char dev_wait(void)
+    unsigned char wait(void)
     {
         fd_set fdset;
         struct timeval tv;
@@ -156,14 +156,14 @@ public:
         /*    printf("tun_dev: dev_get: read %d bytes\n", bytes_left);*/
         inptr = 0;
 
-        return dev_get();
+        return get();
     }
 
 
     //
     //
     //
-    unsigned char dev_get(void)
+    unsigned char get(void)
     {
         if(bytes_left > 0)
         {
@@ -179,7 +179,7 @@ public:
     //
     //
     //
-    void dev_put(unsigned char byte)
+    void put(unsigned char byte)
     {
         /*  printf("0x%02x ", byte); */
         outbuf[outptr++] = byte;
@@ -189,7 +189,7 @@ public:
     //
     //
     //
-    void dev_drop(void)
+    void drop(void)
     {
         /*  printf("\n");*/
         bytes_left = 0;
@@ -199,16 +199,16 @@ public:
     //
     //
     //
-    void dev_done(void)
+    void done(void)
     {
         int ret;
 
         /*  check_checksum(outbuf, outptr);*/
 
         /*  drop++;*/
-        if(drop % 9 == 1)
+        if(dropFlag % 9 == 1)
         {
-            drop = 0;
+            dropFlag = 0;
             /*    printf("Dropped a packet!\n");*/
             outptr = 0;
             return;
@@ -230,8 +230,8 @@ public:
 private:
 
     WebServerType&  webServer;
-    
-    int             drop;
+
+    int             dropFlag;
     int             fd;
     int             bytes_left;
     char            inbuf[2048];

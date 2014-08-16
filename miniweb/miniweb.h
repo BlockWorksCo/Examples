@@ -172,7 +172,7 @@ public:
     void Iterate(void)
     {
     drop:
-        packetInterface.dev_drop();
+        packetInterface.drop();
 
 
         /* The content of the y register signals whether we should send
@@ -187,7 +187,7 @@ public:
 
         /* Get first byte of IP packet, which is the IP version number and
            IP header length. */
-        a   = packetInterface.dev_wait();
+        a   = packetInterface.wait();
         ADD_CHK(x);
 
         /* We discard every packet that isn't IP version 4 and that has IP
@@ -629,7 +629,7 @@ private:
     uint8_t dev_getc(void)
     {
         uint8_t x;
-        x  = packetInterface.dev_get();
+        x  = packetInterface.get();
         ADD_CHK(x);
         return x;
     }
@@ -657,7 +657,7 @@ private:
             /* Send vhl, tos, len, id, ipoffset, ttl and protocol. */
             for(x = 0; x < 10; x++)
             {
-                packetInterface.dev_put(*(tmpptr++));
+                packetInterface.put(*(tmpptr++));
             }
 
             /* Fiddle with the checksum. This can be done more efficiently
@@ -679,48 +679,48 @@ private:
 
             /* Send bytes. */
             a = ~(chksum[1]);
-            packetInterface.dev_put(a);
+            packetInterface.put(a);
             a = ~(chksum[0]);
-            packetInterface.dev_put(a);
+            packetInterface.put(a);
 
             /* Send source IP address. */
             for(x = 4; x > 0; x--)
             {
-                packetInterface.dev_put(*(tmpptr++));
+                packetInterface.put(*(tmpptr++));
             }
 
             /* Send destination address. */
             for(; x < 4; x++)
             {
-                packetInterface.dev_put(ipaddr[x]);
+                packetInterface.put(ipaddr[x]);
             }
 
             /* Send TCP source port. */
             for(x = 0; x < 2; x++)
             {
-                packetInterface.dev_put(*(tmpptr++));
+                packetInterface.put(*(tmpptr++));
             }
 
             /* Send TCP destination port. */
-            packetInterface.dev_put(srcport[0]);
-            packetInterface.dev_put(srcport[1]);
+            packetInterface.put(srcport[0]);
+            packetInterface.put(srcport[1]);
             /* Send TCP sequence number. */
-            packetInterface.dev_put(*(tmpptr++));
-            packetInterface.dev_put(*(tmpptr++));
-            packetInterface.dev_put(*(tmpptr++));
-            packetInterface.dev_put(*(tmpptr++));
+            packetInterface.put(*(tmpptr++));
+            packetInterface.put(*(tmpptr++));
+            packetInterface.put(*(tmpptr++));
+            packetInterface.put(*(tmpptr++));
 
             /* Send TCP acknowledgement number. */
-            packetInterface.dev_put(seqno[0]);
-            packetInterface.dev_put(seqno[1]);
-            packetInterface.dev_put(seqno[2]);
-            packetInterface.dev_put(seqno[3]);
+            packetInterface.put(seqno[0]);
+            packetInterface.put(seqno[1]);
+            packetInterface.put(seqno[2]);
+            packetInterface.put(seqno[3]);
 
             /* Send offset, flags and window. */
-            packetInterface.dev_put(*(tmpptr++));
-            packetInterface.dev_put(*(tmpptr++));
-            packetInterface.dev_put(*(tmpptr++));
-            packetInterface.dev_put(*(tmpptr++));
+            packetInterface.put(*(tmpptr++));
+            packetInterface.put(*(tmpptr++));
+            packetInterface.put(*(tmpptr++));
+            packetInterface.put(*(tmpptr++));
 
             /* Fiddle with the checksum. This can be done more efficiently
                in assembler, where we have the option of adding with
@@ -749,14 +749,14 @@ private:
 
             /* Send bytes. */
             a = ~(chksum[1]);
-            packetInterface.dev_put(a);
+            packetInterface.put(a);
             a = ~(chksum[0]);
-            packetInterface.dev_put(a);
+            packetInterface.put(a);
 
             /* Send urgent pointer. */
             for(x = 0; x < 2; x++)
             {
-                packetInterface.dev_put(*(tmpptr++));
+                packetInterface.put(*(tmpptr++));
             }
 
             /* Send the rest of the packet. */
@@ -764,11 +764,11 @@ private:
 
             for(x = 0; x < tmpstateptr->length; x++)
             {
-                packetInterface.dev_put(*(tmpptr++));
+                packetInterface.put(*(tmpptr++));
             }
 
 
-            packetInterface.dev_done();
+            packetInterface.done();
 
             inflight++;
             tmpstateptr = tmpstateptr->next;
