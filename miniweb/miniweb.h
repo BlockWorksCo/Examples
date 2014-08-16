@@ -199,20 +199,20 @@ public:
         }
 
         /* IP Type of Service field, discard. */
-        a  = dev_getc();
+        a  = nextByteIn();
 
         /* IP packet length. */
-        a  = dev_getc();
+        a  = nextByteIn();
         len = a << 8;
-        a  = dev_getc();
+        a  = nextByteIn();
         len |= a;
 
         /* IP ID, discard. */
-        a  = dev_getc();
-        a  = dev_getc();
+        a  = nextByteIn();
+        a  = nextByteIn();
 
         /* Fragmentation offset. */
-        a  = dev_getc();
+        a  = nextByteIn();
 
         if((a & 0x20) || (a & 0x1f) != 0)
         {
@@ -220,7 +220,7 @@ public:
             goto drop;
         }
 
-        a  = dev_getc();
+        a  = nextByteIn();
 
         if(a != 0)
         {
@@ -229,11 +229,11 @@ public:
         }
 
         /* TTL, discard. */
-        a  = dev_getc();
+        a  = nextByteIn();
 
         /* Get the IP protocol field. If this isn't a TCP packet, we drop
            it. */
-        a  = dev_getc();
+        a  = nextByteIn();
 
         if(a != IP_PROTO_TCP)
         {
@@ -242,25 +242,25 @@ public:
         }
 
         /* Get the IP checksum field, and discard it. */
-        a  = dev_getc();
-        a  = dev_getc();
+        a  = nextByteIn();
+        a  = nextByteIn();
 
         /* Get the source address of the packet, which we will use as the
            destination address for our replies. */
-        a  = dev_getc();
+        a  = nextByteIn();
         ipaddr[0] = a;
-        a  = dev_getc();
+        a  = nextByteIn();
         ipaddr[1] = a;
-        a  = dev_getc();
+        a  = nextByteIn();
         ipaddr[2] = a;
-        a  = dev_getc();
+        a  = nextByteIn();
         ipaddr[3] = a;
 
         /* And we discard the destination IP address. */
-        a  = dev_getc();
-        a  = dev_getc();
-        a  = dev_getc();
-        a  = dev_getc();
+        a  = nextByteIn();
+        a  = nextByteIn();
+        a  = nextByteIn();
+        a  = nextByteIn();
 
         /* Check the computed IP header checksum. If it fails, we go ahead
            and drop the packet. */
@@ -283,7 +283,7 @@ public:
         chksumflags = 0;
         /* Get the source TCP port and store it for our replies. */
 
-        a  = dev_getc();
+        a  = nextByteIn();
 
         if(tcpstate == LISTEN || tcpstate == TIME_WAIT)
         {
@@ -295,7 +295,7 @@ public:
             goto drop;
         }
 
-        a  = dev_getc();
+        a  = nextByteIn();
 
         if(tcpstate == LISTEN || tcpstate == TIME_WAIT)
         {
@@ -310,8 +310,8 @@ public:
 
 
         /* Get the TCP destination port. */
-        a  = dev_getc();
-        a  = dev_getc();
+        a  = nextByteIn();
+        a  = nextByteIn();
 
 
         if(tcpstate == LISTEN || tcpstate == TIME_WAIT)
@@ -328,13 +328,13 @@ public:
         }
 
         /* Get the TCP sequence number. */
-        a  = dev_getc();
+        a  = nextByteIn();
         seqno[0] = a;
-        a  = dev_getc();
+        a  = nextByteIn();
         seqno[1] = a;
-        a  = dev_getc();
+        a  = nextByteIn();
         seqno[2] = a;
-        a  = dev_getc();
+        a  = nextByteIn();
         seqno[3] = a;
 
         /* Next, check the acknowledgement. If it acknowledges outstanding
@@ -351,7 +351,7 @@ public:
 
             for(x = 0; x < 4; x ++)
             {
-                a  = dev_getc();
+                a  = nextByteIn();
 
                 while(stateptr != NULL && a > stateptr->seqno[x])
                 {
@@ -377,14 +377,14 @@ public:
         {
             for(x = 0; x < 4; x++)
             {
-                a  = dev_getc();
+                a  = nextByteIn();
             }
         }
 
 
 
         /* Get the TCP offset and use it in the following computation. */
-        a  = dev_getc();
+        a  = nextByteIn();
 
         /* If this segment contains TCP data, we increase the sequence
            number we acknowledge by the size of this data. */
@@ -403,7 +403,7 @@ public:
         }
 
         /* TCP flags. */
-        a  = dev_getc();
+        a  = nextByteIn();
 
         if(a & TCP_RST)
         {
@@ -456,7 +456,7 @@ public:
 
         /* Get the high byte of the TCP window and limit our sending rate
            if needed. */
-        a  = dev_getc();
+        a  = nextByteIn();
 
 
         if(a < cwnd + inflight)
@@ -471,7 +471,7 @@ public:
            pointer. */
         for(x = 0; x < 5; x ++)
         {
-            a  = dev_getc();
+            a  = nextByteIn();
         }
 
         /* We continue checksumming the rest of the packet. */
@@ -486,7 +486,7 @@ public:
 
         for(len = len - 40; len > 0; len--)
         {
-            a  = dev_getc();
+            a  = nextByteIn();
         }
 
         while(c)
@@ -626,12 +626,30 @@ private:
     //
     //
     //
-    uint8_t dev_getc(void)
+    uint8_t nextByteIn(void)
     {
         uint8_t x;
         x  = packetInterface.get();
         ADD_CHK(x);
         return x;
+    }
+
+    //
+    //
+    //
+    template <typename T> T next(void)
+    {
+        T   value;
+        uint8_t*    ptr     = (uint8_t*)&value;
+
+        for(uint8_t i=0; i<sizeof(T); i++)
+        {
+            *ptr  = packetInterface.get();
+            ADD_CHK( *ptr );
+            ptr++;
+        }
+
+        return value;
     }
 
 
