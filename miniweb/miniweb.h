@@ -24,38 +24,10 @@
 
 
 
-#define IPADDR          htonl((IPADDR0 << 24) + (IPADDR1 << 16) + (IPADDR2 << 8) + IPADDR3)       
-
-
-
-
-
-
-
 
 
 const uint8_t TCP_MSS           = 200;
 const uint16_t TCP_WIN          = 4096;
-
-const uint8_t TCP_FIN           = 0x01;
-const uint8_t TCP_SYN           = 0x02;
-const uint8_t TCP_RST           = 0x04;
-const uint8_t TCP_PSH           = 0x08;
-const uint8_t TCP_ACK           = 0x10;
-const uint8_t TCP_URG           = 0x20;
-
-const uint8_t CLOSED            = 0;
-const uint8_t LISTEN            = 1;
-const uint8_t SYN_SENT          = 2;
-const uint8_t SYN_RCVD          = 3;
-const uint8_t ESTABLISHED       = 4;
-const uint8_t FIN_WAIT_1        = 5;
-const uint8_t FIN_WAIT_2        = 6;
-const uint8_t CLOSE_WAIT        = 7;
-const uint8_t CLOSING           = 8;
-const uint8_t LAST_ACK          = 9;
-const uint8_t TIME_WAIT         = 10;
-
 
 const uint8_t CHKSUMFLAG_BYTE   = 2;
 const uint8_t CHKSUMFLAG_CARRY  = 1;
@@ -71,7 +43,6 @@ const uint8_t IPADDR3           = 2;
 
 const uint8_t TCP_CHECK0        = 0x3f;
 const uint8_t TCP_CHECK1        = 0x63;
-
 
 const uint8_t IP_PROTO_TCP      = 6;
 
@@ -100,6 +71,34 @@ public:
         NONE,
         WAIT
     } packetflags;
+
+
+    typedef enum
+    {
+        TCP_FIN           = 0x01,
+        TCP_SYN           = 0x02,
+        TCP_RST           = 0x04,
+        TCP_PSH           = 0x08,
+        TCP_ACK           = 0x10,
+        TCP_URG           = 0x20,        
+    } TCPFlags;
+
+
+    typedef enum
+    {
+        CLOSED            = 0,
+        LISTEN            = 1,
+        SYN_SENT          = 2,
+        SYN_RCVD          = 3,
+        ESTABLISHED       = 4,
+        FIN_WAIT_1        = 5,
+        FIN_WAIT_2        = 6,
+        CLOSE_WAIT        = 7,
+        CLOSING           = 8,
+        LAST_ACK          = 9,
+        TIME_WAIT         = 10,    
+    } TCPState;
+
 
     typedef struct _tcpip_header
     {
@@ -240,6 +239,7 @@ public:
 
         /* Get the source address of the packet, which we will use as the
            destination address for our replies. */
+#if 1
         a  = next<uint8_t>();
         ipaddr[0] = a;
         a  = next<uint8_t>();
@@ -248,7 +248,9 @@ public:
         ipaddr[2] = a;
         a  = next<uint8_t>();
         ipaddr[3] = a;
-        //uint32_t ipAddr_new = next<uint32_t>();
+#else        
+        uint32_t ipaddr = next<uint32_t>();
+#endif        
 
         /* And we discard the destination IP address. */
         //a  = nextByteIn();
@@ -434,7 +436,11 @@ public:
                 //stateptr = pages[port - PORTLOW];
                 stateptr    = packetGenerator.packetForPort(port);
                 tmpstateptr = stateptr;
+#if 1
                 printf("New connection from %d.%d.%d.%d:%d\n", ipaddr[0], ipaddr[1], ipaddr[2], ipaddr[3], (srcport[0] << 8) + srcport[1]);
+#else
+                printf("New connection from %08x:%d\n", ipaddr, (srcport[0] << 8) + srcport[1]);
+#endif                
                 inflight = 0;
             }
 
