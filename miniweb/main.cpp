@@ -18,6 +18,7 @@
 
 #include "AppConfiguration.h"
 
+#define NUMBER_OF_ELEMENTS(a)       ( sizeof(a)/sizeof(a[0]) )
 
 
 extern IPStackType::WebServerType::tcpip_header*    pages[];
@@ -29,12 +30,31 @@ MiniWebServer<IPStackType>                          webServer(packetInterface, p
 TUNPacketInterface<IPStackType>                     packetInterface(webServer);
 
 
+IPStackType::PacketGeneratorType                    packetGenerator1(pages);
+IPStackType::PacketGeneratorType                    packetGenerator2(pages);
+IPStackType::PacketGeneratorType                    packetGenerator3(pages);
+IPStackType::PacketGeneratorType                    packetGenerator4(pages);
+IPStackType::PacketGeneratorType*                   generatorList[]     =
+{
+    &packetGenerator1,
+    &packetGenerator2,
+    &packetGenerator3,
+    &packetGenerator4,
+};
+
 
 //
 //
 //
 int main(int argc, char **argv)
 {
+    for(int i=0; i<4; i++)
+    {
+        printf("%d\n", generatorList[i]->isPortAccepted(80) );
+    }
+
+
+
     while(true)
     {
         webServer.Iterate();    
