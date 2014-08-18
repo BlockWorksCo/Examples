@@ -479,12 +479,12 @@ public:
         /* We continue checksumming the rest of the packet. */
 
         /* Add the changing part of the pseudo checksum. */
-        ADD_CHK1(ipaddr[0]);
-        ADD_CHK2(ipaddr[1]);
-        ADD_CHK1(ipaddr[2]);
-        ADD_CHK2(ipaddr[3]);
-        ADD_CHK1((len >> 8) & 0xff);
-        ADD_CHK2(len & 0xff);
+        ADC(chksum[0], c, ipaddr[0]);
+        ADC(chksum[1], c, ipaddr[1]);
+        ADC(chksum[0], c, ipaddr[2]);
+        ADC(chksum[1], c, ipaddr[3]);
+        ADC(chksum[0], c, (len >> 8) & 0xff);
+        ADC(chksum[1], c, len & 0xff);
 
         for(len = len - 40; len > 0; len--)
         {
@@ -571,22 +571,6 @@ public:
 
 private:
   
-
-    //
-    //
-    //
-    void ADD_CHK1(uint8_t x)
-    {
-        ADC(chksum[0], c, x);
-    }     
-
-    //
-    //
-    //
-    void ADD_CHK2(uint8_t x)
-    {
-        ADC(chksum[1], c, x);
-    }     
 
     //
     //
@@ -685,15 +669,15 @@ private:
             chksum[1] = *(tmpptr++);
             chksum[0] = *(tmpptr++);
             c = 0;
-            ADD_CHK1(ipaddr[3]);
-            ADD_CHK2(ipaddr[2]);
-            ADD_CHK1(ipaddr[1]);
-            ADD_CHK2(ipaddr[0]);
+            ADC(chksum[0], c, ipaddr[3]);
+            ADC(chksum[1], c, ipaddr[2]);
+            ADC(chksum[0], c, ipaddr[1]);
+            ADC(chksum[1], c, ipaddr[0]);
 
             while(c)
             {
-                ADD_CHK1(0);
-                ADD_CHK2(0);
+                ADC(chksum[0], c, 0);
+                ADC(chksum[1], c, 0);
             }
 
             /* Send bytes. */
@@ -747,23 +731,23 @@ private:
             chksum[1] = *(tmpptr++);
             chksum[0] = *(tmpptr++);
             c = 0;
-            ADD_CHK1(ipaddr[3]);
-            ADD_CHK2(ipaddr[2]);
-            ADD_CHK1(ipaddr[1]);
-            ADD_CHK2(ipaddr[0]);
+            ADC(chksum[0], c, ipaddr[3]);
+            ADC(chksum[1], c, ipaddr[2]);
+            ADC(chksum[0], c, ipaddr[1]);
+            ADC(chksum[1], c, ipaddr[0]);
 
-            ADD_CHK1(srcport[1]);
-            ADD_CHK2(srcport[0]);
+            ADC(chksum[0], c, srcport[1]);
+            ADC(chksum[1], c, srcport[0]);
 
-            ADD_CHK1(seqno[3]);
-            ADD_CHK2(seqno[2]);
-            ADD_CHK1(seqno[1]);
-            ADD_CHK2(seqno[0]);
+            ADC(chksum[0], c, seqno[3]);
+            ADC(chksum[1], c, seqno[2]);
+            ADC(chksum[0], c, seqno[1]);
+            ADC(chksum[1], c, seqno[0]);
 
             while(c)
             {
-                ADD_CHK1(0);
-                ADD_CHK2(0);
+                ADC(chksum[0], c, 0);
+                ADC(chksum[1], c, 0);
             }
 
             /* Send bytes. */
