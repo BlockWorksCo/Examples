@@ -571,23 +571,31 @@ public:
 
 private:
   
-
+#if 1
     //
     //
     //
     void ADC(uint8_t a, uint8_t c, uint8_t x)
     {
-        adc(&a, &c, x);    
-    }    
+        uint16_t tmp;
 
+        //adc(&a, &c, x);    
+        tmp = a + x + c;
+        a = tmp & 0xff;
+        c = tmp >> 8;
+    }    
+#endif
+    
     //
     //
     //
     void ADD_CHK(uint8_t x)
     {
-        add_chk(x);
-    }   
+        ADC(chksum[(chksumflags & CHKSUMFLAG_BYTE) >> 1], c, x);
+        chksumflags ^= CHKSUMFLAG_BYTE;
+    }
 
+#if 0
     //
     //
     //
@@ -599,15 +607,7 @@ private:
         *a = tmp & 0xff;
         *c = tmp >> 8;
     }
-
-    //
-    //
-    //
-    void add_chk(uint8_t x)
-    {
-        ADC(chksum[(chksumflags & CHKSUMFLAG_BYTE) >> 1], c, x);
-        chksumflags ^= CHKSUMFLAG_BYTE;
-    }
+#endif
 
     //
     //

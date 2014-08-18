@@ -68,6 +68,12 @@ public:
             exit(1);
         }
 
+
+        //
+        // sudo ip tuntap add dev tun0 mode tun
+        // sudo ip link set tun0 up
+        // sudo ifconfig tun0 192.168.4.1 up
+        //
         int r = system("ifconfig tun0 inet 192.168.0.2 192.168.0.1");
 
         r = system("route add -net 192.168.0.0 netmask 255.255.255.0 dev tun0");
