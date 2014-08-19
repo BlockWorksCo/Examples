@@ -51,9 +51,12 @@ class TUNPacketInterface
     //
     // Break out the CombinationTypes for this class.
     //
-    typedef typename IPStackType::WebServerType         WebServerType;
-    typedef typename IPStackType::PacketInterfaceType   PacketInterfaceType;
-    typedef typename IPStackType::PacketGeneratorType   PacketGeneratorType;
+    typedef typename IPStackType::WebServerType             WebServerType;
+    typedef typename IPStackType::PacketInterfaceType       PacketInterfaceType;
+    typedef typename IPStackType::PacketGeneratorType       PacketGeneratorType;
+    typedef typename IPStackType::PortType                  PortType;
+    typedef typename IPStackType::PortToPageIndexHashType   PortToPageIndexHashType;
+    typedef typename IPStackType::PortToPageMapType         PortToPageMapType;
 
 
 
@@ -68,11 +71,6 @@ public:
 
         strcpy(tun_name, "tun0");
         fd = tun_alloc(tun_name, IFF_TUN);  /* tun interface */
-
-        /*  int val;*/
-#if 0        
-        fd = open("/dev/tun0", O_RDWR);
-#endif
         if(fd == -1)
         {
             perror("tun_dev: dev_init: open");
@@ -89,8 +87,6 @@ public:
         r = system("route add -net 192.168.0.0 netmask 255.255.255.0 dev tun0");
         r++;
 
-        /* val = 0;
-         ioctl(fd, TUNSIFHEAD, &val); */
         bytes_left = 0;
         outptr = 0;
     }

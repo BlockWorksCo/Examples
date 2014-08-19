@@ -58,9 +58,12 @@ class MiniWebServer
     //
     // Break out the CombinationTypes for this class.
     //
-    typedef typename IPStackType::WebServerType         WebServerType;
-    typedef typename IPStackType::PacketInterfaceType   PacketInterfaceType;
-    typedef typename IPStackType::PacketGeneratorType   PacketGeneratorType;
+    typedef typename IPStackType::WebServerType             WebServerType;
+    typedef typename IPStackType::PacketInterfaceType       PacketInterfaceType;
+    typedef typename IPStackType::PacketGeneratorType       PacketGeneratorType;
+    typedef typename IPStackType::PortType                  PortType;
+    typedef typename IPStackType::PortToPageIndexHashType   PortToPageIndexHashType;
+    typedef typename IPStackType::PortToPageMapType         PortToPageMapType;
 
 
 
@@ -136,13 +139,14 @@ public:
     //
     //
     //
-    MiniWebServer( PacketInterfaceType& _packetInterface, PacketGeneratorType& _packetGenerator) :
+    MiniWebServer( PacketInterfaceType& _packetInterface, PacketGeneratorType& _packetGenerator, PortToPageMapType& _pageMap) :
         cwnd(1),
         tcpstate(LISTEN),
         inflight(0),
         nrtx(0),
         packetGenerator(_packetGenerator),
-        packetInterface(_packetInterface)
+        packetInterface(_packetInterface),
+        pageMap(_pageMap)
     {
     }
 
@@ -163,8 +167,6 @@ public:
     {
     drop:
         packetInterface.drop();
-
-
         /* The content of the y register signals whether we should send
            out a new packet once the input processing is done. y = 0 means
            that we should not send out a packet and y != 0 means that we
@@ -178,13 +180,22 @@ public:
         /* Get first byte of IP packet, which is the IP version number and
            IP header length. */
         a   = packetInterface.wait();
+
+        //
+        // there seems to be 4 bytes before the 0x45 IPv4 marker.
+        //
+        //a = next<uint8_t>();
+        //a = next<uint8_t>();
+        //a = next<uint8_t>();
+        //a = next<uint8_t>();
+
         ADD_CHK(x);
 
         /* We discard every packet that isn't IP version 4 and that has IP
            options. */
         if(a != 0x45)
         {
-            printf("Packet dropped due to options or version mismatch\n");
+            printf("\nPacket dropped due to options or version mismatch\n");
             goto drop;
         }
 
@@ -207,7 +218,7 @@ public:
 
         if((a & 0x20) || (a & 0x1f) != 0)
         {
-            printf("Got IP fragment, dropping\n");
+            printf("\nGot IP fragment, dropping\n");
             goto drop;
         }
 
@@ -215,7 +226,7 @@ public:
 
         if(a != 0)
         {
-            printf("Got IP fragment, dropping\n");
+            printf("\nGot IP fragment, dropping\n");
             goto drop;
         }
 
@@ -228,7 +239,7 @@ public:
 
         if(a != IP_PROTO_TCP)
         {
-            printf("Not a TCP packet, dropping\n");
+            printf("\nNot a TCP packet, dropping\n");
             goto drop;
         }
 
@@ -253,11 +264,11 @@ public:
 #endif        
 
         /* And we discard the destination IP address. */
-        //a  = nextByteIn();
-        //a  = nextByteIn();
-        //a  = nextByteIn();
-        //a  = nextByteIn();
-        next<uint32_t>();
+        a  = next<uint8_t>();
+        a  = next<uint8_t>();
+        a  = next<uint8_t>();
+        a  = next<uint8_t>();
+        //next<uint32_t>();
 
         /* Check the computed IP header checksum. If it fails, we go ahead
            and drop the packet. */
@@ -265,13 +276,13 @@ public:
         {
             ADD_CHK(0);
         }
-
+#if 1
         if(chksum[0] != 0xff || chksum[1] != 0xff)
         {
-            printf("Failed IP header checksum, dropping\n");
+            printf("\nFailed IP header checksum, dropping\n");
             goto drop;
         }
-
+#endif
         /* Thus the IP processing is done with, and we carry on with the
            TCP layer. */
 
@@ -288,7 +299,7 @@ public:
         }
         else if(srcport[0] != a)
         {
-            printf("Got new port and not in LISTEN or TIME_WAIT, dropping packet\n");
+            printf("\nGot new port and not in LISTEN or TIME_WAIT, dropping packet\n");
             goto drop;
         }
 
@@ -300,7 +311,7 @@ public:
         }
         else if(srcport[1] != a)
         {
-            printf("Got new port and not in LISTEN or TIME_WAIT, dropping packet\n");
+            printf("\nGot new port and not in LISTEN or TIME_WAIT, dropping packet\n");
             goto drop;
         }
 
@@ -318,9 +329,9 @@ public:
 
 
 
-        if(packetGenerator.isPortAccepted(port) == true)
+        if(packetGenerator.isPortAccepted(port) == false)
         {
-            printf("Port outside range %d\n", port);
+            printf("\nPort outside range %d\n", port);
             goto drop;
         }
 
@@ -341,12 +352,8 @@ public:
            sequence numbers that wrap, we can use standard arithmetic
            here. */
 
-
-
         if(tcpstate != LISTEN)
         {
-
-
             for(x = 0; x < 4; x ++)
             {
                 a  = next<uint8_t>();
@@ -365,7 +372,7 @@ public:
 
                     y = Y_NORESPONSE;
                     tcpstate = LISTEN;
-                    printf("Stateptr == NULL, connection dropped\n");
+                    printf("\nStateptr == NULL, connection dropped\n");
                 }
             }
 
@@ -432,14 +439,13 @@ public:
             }
             else if(a & TCP_SYN)
             {
-                tcpstate = ESTABLISHED;
-                //stateptr = pages[port - PORTLOW];
-                stateptr    = packetGenerator.packetForPort(port);
+                tcpstate    = ESTABLISHED;
+                stateptr    = pageMap.Lookup(port).packetForPort(port);
                 tmpstateptr = stateptr;
 #if 1
-                printf("New connection from %d.%d.%d.%d:%d\n", ipaddr[0], ipaddr[1], ipaddr[2], ipaddr[3], (srcport[0] << 8) + srcport[1]);
+                printf("\nNew connection from %d.%d.%d.%d:%d\n", ipaddr[0], ipaddr[1], ipaddr[2], ipaddr[3], (srcport[0] << 8) + srcport[1]);
 #else
-                printf("New connection from %08x:%d\n", ipaddr, (srcport[0] << 8) + srcport[1]);
+                printf("\nNew connection from %08x:%d\n", ipaddr, (srcport[0] << 8) + srcport[1]);
 #endif                
                 inflight = 0;
             }
@@ -585,7 +591,7 @@ private:
         c = tmp >> 8;
     }    
 #endif
-    
+
     //
     //
     //
@@ -620,6 +626,7 @@ private:
         for(uint8_t i=0; i<sizeof(T); i++)
         {
             *ptr  = packetInterface.get();
+            printf("<%02x>\n",*ptr);
             ADD_CHK( *ptr );
             ptr++;
         }
@@ -820,9 +827,9 @@ private:
     uint8_t               chksumflags;
 
 
-    PacketGeneratorType&  packetGenerator;
-    PacketInterfaceType&  packetInterface;
-
+    PacketGeneratorType&    packetGenerator;
+    PacketInterfaceType&    packetInterface;
+    PortToPageMapType&      pageMap;
 
 
 };

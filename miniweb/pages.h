@@ -35,9 +35,12 @@ class PacketGenerator
     //
     // Break out the CombinationTypes for this class.
     //
-    typedef typename IPStackType::WebServerType         WebServerType;
-    typedef typename IPStackType::PacketInterfaceType   PacketInterfaceType;
-    typedef typename IPStackType::PacketGeneratorType   PacketGeneratorType;
+    typedef typename IPStackType::WebServerType             WebServerType;
+    typedef typename IPStackType::PacketInterfaceType       PacketInterfaceType;
+    typedef typename IPStackType::PacketGeneratorType       PacketGeneratorType;
+    typedef typename IPStackType::PortType                  PortType;
+    typedef typename IPStackType::PortToPageIndexHashType   PortToPageIndexHashType;
+    typedef typename IPStackType::PortToPageMapType         PortToPageMapType;
 
 
 public:
@@ -56,6 +59,7 @@ public:
 	//
 	bool isPortAccepted(uint8_t portNumber)
 	{
+		printf("\n(%d,%d,%d)\n", portNumber, PORTLOW, PORTHIGH );
         if(portNumber < PORTLOW || portNumber >= PORTHIGH)
         {
         	return false;

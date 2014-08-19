@@ -18,20 +18,15 @@
 
 #include "AppConfiguration.h"
 
-#define NUMBER_OF_ELEMENTS(a)       ( sizeof(a)/sizeof(a[0]) )
-
 
 extern IPStackType::WebServerType::tcpip_header*    pages[];
+extern IPStackType::PortToPageMapType               portToPageMap;
 
 IPStackType::PacketGeneratorType                    packetGenerator(pages);
 extern IPStackType::PacketInterfaceType             packetInterface;
 
-MiniWebServer<IPStackType>                          webServer(packetInterface, packetGenerator);
-TUNPacketInterface<IPStackType>                     packetInterface(webServer);
-
-typedef OffsetHash<uint8_t, uint16_t, 80>           PortToPageIndexHashType;
-typedef Map<IPStackType::PacketGeneratorType, uint16_t, PortToPageIndexHashType>    PortToPageMapType;
-
+IPStackType::WebServerType                          webServer(packetInterface, packetGenerator, portToPageMap);
+IPStackType::PacketInterfaceType                    packetInterface(webServer);
 
 IPStackType::PacketGeneratorType                    packetGenerator1(pages);
 IPStackType::PacketGeneratorType                    packetGenerator2(pages);
@@ -45,9 +40,8 @@ IPStackType::PacketGeneratorType*                   generatorList[]     =
     &packetGenerator4,
 };
 
-PortToPageIndexHashType                             portToPageIndexHash;
-PortToPageMapType                                   portToPageMap(generatorList, portToPageIndexHash);
-
+IPStackType::PortToPageIndexHashType                portToPageIndexHash;
+IPStackType::PortToPageMapType                      portToPageMap(generatorList, portToPageIndexHash);
 
 
 //
@@ -59,7 +53,6 @@ int main(int argc, char **argv)
     {
         printf("%d\n", portToPageMap.Lookup(i).isPortAccepted(80) );
     }
-
 
 
     while(true)
