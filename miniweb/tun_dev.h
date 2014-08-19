@@ -66,7 +66,7 @@ public:
 
         char tun_name[IFNAMSIZ];
 
-        strcpy(tun_name, "tun1");
+        strcpy(tun_name, "tun0");
         fd = tun_alloc(tun_name, IFF_TUN);  /* tun interface */
 
         /*  int val;*/
@@ -82,7 +82,6 @@ public:
 
         //
         // sudo ip tuntap add dev tun0 mode tun
-        // sudo ip link set tun0 up
         // sudo ifconfig tun0 192.168.4.1 up
         //
         int r = system("ifconfig tun0 inet 192.168.0.2 192.168.0.1");
@@ -111,7 +110,9 @@ public:
        */
 
        /* open the clone device */
-       if( (fd = open(clonedev, O_RDWR)) < 0 ) {
+       if( (fd = open(clonedev, O_RDWR)) < 0 ) 
+       {
+         printf("opened clonedev\n");
          return fd;
        }
 
@@ -120,7 +121,9 @@ public:
 
        ifr.ifr_flags = flags;   /* IFF_TUN or IFF_TAP, plus maybe IFF_NO_PI */
 
-       if (*dev) {
+       if (*dev) 
+       {
+         printf("name %s supplied\n",dev);
          /* if a device name was specified, put it in the structure; otherwise,
           * the kernel will try to allocate the "next" device of the
           * specified type */
@@ -128,9 +131,16 @@ public:
        }
 
        /* try to create the device */
-       if( (err = ioctl(fd, TUNSETIFF, (void *) &ifr)) < 0 ) {
+       if( (err = ioctl(fd, TUNSETIFF, (void *) &ifr)) < 0 ) 
+       {
+         printf("ioctl failed. \n");
          close(fd);
+         fd = -1;
          return err;
+       }
+       else
+       {
+         printf("ioctl ok, fd=%d. \n",fd);        
        }
 
       /* if the operation was successful, write back the name of the
@@ -138,6 +148,7 @@ public:
        * it. Note that the caller MUST reserve space in *dev (see calling
        * code below) */
       strcpy(dev, ifr.ifr_name);
+     printf("dev name = %s. \n", dev);
 
       /* this is the special file descriptor that the caller will use to talk
        * with the virtual interface */
@@ -173,6 +184,16 @@ public:
         {
             perror("tun_dev: dev_get: read");
         }
+        else
+        {
+            printf("<got %d bytes:>",bytes_left);
+            printf("<");
+            for(int i=0; i<bytes_left; i++)
+            {
+                printf("%02x ", inbuf[i]);                
+            }
+            printf("<");
+        }
 
         /*    printf("tun_dev: dev_get: read %d bytes\n", bytes_left);*/
         inptr = 0;
@@ -189,7 +210,7 @@ public:
         if(bytes_left > 0)
         {
             bytes_left--;
-            /*    printf("0x%02x ", (unsigned char)inbuf[inptr]); fflush(NULL);*/
+            printf("0x%02x ", (unsigned char)inbuf[inptr]); fflush(NULL);
             return inbuf[inptr++];
         }
 
