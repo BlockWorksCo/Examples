@@ -29,6 +29,9 @@ extern IPStackType::PacketInterfaceType             packetInterface;
 MiniWebServer<IPStackType>                          webServer(packetInterface, packetGenerator);
 TUNPacketInterface<IPStackType>                     packetInterface(webServer);
 
+typedef OffsetHash<uint8_t, uint16_t, 80>           PortToPageIndexHashType;
+typedef Map<IPStackType::PacketGeneratorType, uint16_t, PortToPageIndexHashType>    PortToPageMapType;
+
 
 IPStackType::PacketGeneratorType                    packetGenerator1(pages);
 IPStackType::PacketGeneratorType                    packetGenerator2(pages);
@@ -41,6 +44,10 @@ IPStackType::PacketGeneratorType*                   generatorList[]     =
     &packetGenerator3,
     &packetGenerator4,
 };
+
+PortToPageIndexHashType                             portToPageIndexHash;
+PortToPageMapType                                   portToPageMap(generatorList, portToPageIndexHash);
+
 
 
 //
