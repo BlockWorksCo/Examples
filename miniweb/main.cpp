@@ -55,9 +55,9 @@ PortToPageMapType                                   portToPageMap(generatorList,
 //
 int main(int argc, char **argv)
 {
-    for(int i=0; i<4; i++)
+    for(int i=80; i<84; i++)
     {
-        printf("%d\n", generatorList[i]->isPortAccepted(80) );
+        printf("%d\n", portToPageMap.Lookup(i).isPortAccepted(80) );
     }
 
 
