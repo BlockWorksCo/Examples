@@ -243,6 +243,41 @@ public:
     }
 
 
+    //
+    //
+    //
+    void StateMachine()
+    {
+        TCPState    currentState    = applicationLayer.GetTCPState();
+
+        switch(currentState)
+        {
+            case LISTEN:
+                if( (flags&TCP_SYN) != 0)
+                {
+                    //
+                    // Send a SynAck packet.
+                    //
+                }
+
+                if( (flags&TCP_ACK) != 0)
+                {
+                    //
+                    // Connection established.
+                    //
+                    currentState    = ESTABLISHED;
+                }
+
+                break;
+
+            default:
+                break;
+        }
+
+        applicationLayer.SetTCPState(currentState);
+    }
+
+
 private:
 
     //
