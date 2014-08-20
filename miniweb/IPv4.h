@@ -118,150 +118,132 @@ public:
     //
     void PushInto(uint8_t byte)
     {
-        if(position < 20)
+        //
+        // Header portion of the packet.
+        //
+        switch(position)
         {
-            //
-            // Header portion of the packet.
-            //
-            switch(position)
-            {
-                case 0:
-                    if( byte == 0x45)
-                    {
-                        printf("(IPv4) Claimed, Header Length = %x.\n", byte&0xf);
-                        packetState   = Claimed;
-                    }
-                    else
-                    {
-                        printf("(IPv4) Rejected.\n");
-                        packetState   = Rejected;
-                    }
-                    break;
+            case 0:
+                if( byte == 0x45)
+                {
+                    printf("(IPv4) Claimed, Header Length = %x.\n", byte&0xf);
+                    packetState   = Claimed;
+                }
+                else
+                {
+                    printf("(IPv4) Rejected.\n");
+                    packetState   = Rejected;
+                }
+                break;
 
 
-                case 1:
-                    // DSCP
-                    break;
+            case 1:
+                // DSCP
+                break;
 
-                case 2:
-                    length  = byte<<8;
-                    break;
+            case 2:
+                length  = byte<<8;
+                break;
 
-                case 3:
-                    length  |= byte;
-                    printf("(IPv4) Packet Length = %d\n", length);
-                    break;
+            case 3:
+                length  |= byte;
+                printf("(IPv4) Packet Length = %d\n", length);
+                break;
 
-                case 4:
-                    // Identification field
-                    break;
+            case 4:
+                // Identification field
+                break;
 
-                case 5:
-                    // Identification field
-                    break;
+            case 5:
+                // Identification field
+                break;
 
-                case 6:
-                    fragmentOffset  = (byte & 0x1f) << 8;
-                    fragmentFlags   = (byte & 0xe0) >> 5;
-                    printf("(IPv4) Fragment flags: %d\n", fragmentFlags);
-                    break;
+            case 6:
+                fragmentOffset  = (byte & 0x1f) << 8;
+                fragmentFlags   = (byte & 0xe0) >> 5;
+                printf("(IPv4) Fragment flags: %d\n", fragmentFlags);
+                break;
 
-                case 7:
-                    fragmentOffset    |= byte;                
-                    printf("(IPv4) Fragment offset: %d\n", fragmentOffset);
+            case 7:
+                fragmentOffset    |= byte;                
+                printf("(IPv4) Fragment offset: %d\n", fragmentOffset);
 
-                    if(fragmentFlags != 2)
-                    {
-                        //
-                        // We don't support fragmentation yet...
-                        //
-                        packetState     = Rejected;
-                    }
-                    break;
+                if(fragmentFlags != 2)
+                {
+                    //
+                    // We don't support fragmentation yet...
+                    //
+                    packetState     = Rejected;
+                }
+                break;
 
-                case 8:
-                    printf("(IPv4) TTL: %d\n",byte);
-                    break;
+            case 8:
+                printf("(IPv4) TTL: %d\n",byte);
+                break;
 
-                case 9:
-                    protocol    = byte;
-                    printf("(IPv4) Protocol: %d\n",byte);
-                    break;
+            case 9:
+                protocol    = byte;
+                printf("(IPv4) Protocol: %d\n",byte);
+                break;
 
-                case 10:
-                    headerChecksum  = byte << 8;
-                    break;
+            case 10:
+                headerChecksum  = byte << 8;
+                break;
 
-                case 11:
-                    headerChecksum  |= byte;
-                    printf("(IPv4) headerChecksum: %04x\n", headerChecksum);
-                    break;
+            case 11:
+                headerChecksum  |= byte;
+                printf("(IPv4) headerChecksum: %04x\n", headerChecksum);
+                break;
 
-                case 12:
-                    sourceIP    = byte << 24;
-                    break;
+            case 12:
+                sourceIP    = byte << 24;
+                break;
 
-                case 13:
-                    sourceIP    |= byte<<16;
-                    break;
+            case 13:
+                sourceIP    |= byte<<16;
+                break;
 
-                case 14:
-                    sourceIP    |= byte<<8;
-                    break;
+            case 14:
+                sourceIP    |= byte<<8;
+                break;
 
-                case 15:
-                    sourceIP    |= byte;
-                    printf("(IPv4) SourceIP: %08x\n", sourceIP);
-                    break;
+            case 15:
+                sourceIP    |= byte;
+                printf("(IPv4) SourceIP: %08x\n", sourceIP);
+                break;
 
-                case 16:
-                    // Dest IP.
-                    break;
+            case 16:
+                // Dest IP.
+                break;
 
-                case 17:
-                    // Dest IP.
-                    break;
+            case 17:
+                // Dest IP.
+                break;
 
-                case 18:
-                    // Dest IP.
-                    break;
+            case 18:
+                // Dest IP.
+                break;
 
-                case 19:
-                    // Dest IP.
-                    break;
+            case 19:
+                // Dest IP.
+                break;
 
-                default:
-                    break;
-            }
-            
-        }
-        else
-        {
-            printf("(IPv4) data.\n");
-            
-            if(position == 20)
-            {
-                //
-                // Start of payload data.
-                //
+            case 20:
+                printf("(IPv4) TransportDataStart.\n");
                 tcpLayer.NewPacket();
-            }
+            default:
+                printf("(IPv4) data.\n");
 
-            //
-            // Data portion of the IP packet.
-            //
-            if(tcpLayer.State() != Rejected)
-            {
-                tcpLayer.PushInto(byte);
-            }
-
-
-            #if 0
-            ProtocolDispatch( protocol, 
-                                6,tcpLayer,
-                                17,udpLayer);
-            #endif
+                //
+                // Data portion of the IP packet.
+                //
+                if(tcpLayer.State() != Rejected)
+                {
+                    tcpLayer.PushInto(byte);
+                }
+                break;
         }
+            
 
         //
         // Ready for next byte.

@@ -45,7 +45,7 @@ public:
     //
     void Idle()
     {
-        printf("(IPv4) Idle.\n");
+        printf("(UDP) Idle.\n");
     }
 
     //

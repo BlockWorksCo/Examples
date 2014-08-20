@@ -62,9 +62,10 @@ public:
 
 public:
 
-	TCP() :
+	TCP(ApplicationLayerType& _applicationLayer) :
         position(0),
-        packetState(Unknown)
+        packetState(Unknown),
+        applicationLayer(_applicationLayer)
 	{
 		
 	}
@@ -92,115 +93,116 @@ public:
     //
     void PushInto(uint8_t byte)
     {
-        if(position < 20)
+        //
+        // Header portion of the packet.
+        //
+        switch(position)
         {
-            //
-            // Header portion of the packet.
-            //
-            switch(position)
-            {
-                case 0:
-                    sourcePort  = byte << 8;
-                    break;
+            case 0:
+                sourcePort  = byte << 8;
+                break;
 
-                case 1:
-                    sourcePort  |= byte;
-                    printf("(TCP) sourcePort: %d\n", sourcePort);
-                    break;
+            case 1:
+                sourcePort  |= byte;
+                printf("(TCP) sourcePort: %d\n", sourcePort);
+                break;
 
-                case 2:
-                    destinationPort  = byte << 8;
-                    break;
+            case 2:
+                destinationPort  = byte << 8;
+                break;
 
-                case 3:
-                    destinationPort  |= byte;
-                    printf("(TCP) destinationPort: %d\n", destinationPort);
-                    break;
+            case 3:
+                destinationPort  |= byte;
+                printf("(TCP) destinationPort: %d\n", destinationPort);
+                break;
 
-                case 4:
-                    sequenceNumber  = byte << 24;
-                    break;
+            case 4:
+                sequenceNumber  = byte << 24;
+                break;
 
-                case 5:
-                    sequenceNumber  |= byte << 16;
-                    break;
+            case 5:
+                sequenceNumber  |= byte << 16;
+                break;
 
-                case 6:
-                    sequenceNumber  |= byte << 8;
-                    break;
+            case 6:
+                sequenceNumber  |= byte << 8;
+                break;
 
-                case 7:
-                    sequenceNumber  |= byte;
-                    printf("(TCP) sequenceNumber: %d\n", sequenceNumber);
-                    break;
+            case 7:
+                sequenceNumber  |= byte;
+                printf("(TCP) sequenceNumber: %d\n", sequenceNumber);
+                break;
 
-                case 8:
-                    ackNumber  = byte << 24;
-                    break;
+            case 8:
+                ackNumber  = byte << 24;
+                break;
 
-                case 9:
-                    ackNumber  |= byte << 16;
-                    break;
+            case 9:
+                ackNumber  |= byte << 16;
+                break;
 
-                case 10:
-                    ackNumber  |= byte << 8;
-                    break;
+            case 10:
+                ackNumber  |= byte << 8;
+                break;
 
-                case 11:
-                    ackNumber  |= byte;
-                    printf("(TCP) ackNumber: %d\n", ackNumber);
-                    break;
+            case 11:
+                ackNumber  |= byte;
+                printf("(TCP) ackNumber: %d\n", ackNumber);
+                break;
 
-                case 12:
-                    flags   = byte;
-                    printf("(TCP) Flags: %d\n", flags);
-                    break;
+            case 12:
+                flags   = byte;
+                printf("(TCP) Flags: %d\n", flags);
+                break;
 
-                case 13:
-                    windowSize  = byte << 8;
-                    break;
+            case 13:
+                windowSize  = byte << 8;
+                break;
 
-                case 14:
-                    windowSize  |= byte;
-                    printf("(TCP) windowSize: %d\n", windowSize);
-                    break;
+            case 14:
+                windowSize  |= byte;
+                printf("(TCP) windowSize: %d\n", windowSize);
+                break;
 
-                case 15:
-                    checksum  = byte << 8;
-                    break;
+            case 15:
+                checksum  = byte << 8;
+                break;
 
-                case 16:
-                    checksum  |= byte;
-                    printf("(TCP) checksum: %d\n", checksum);
-                    break;
+            case 16:
+                checksum  |= byte;
+                printf("(TCP) checksum: %d\n", checksum);
+                break;
 
-                case 17:
-                    urgentPointer  = byte << 8;
-                    break;
+            case 17:
+                urgentPointer  = byte << 8;
+                break;
 
-                case 18:
-                    urgentPointer  |= byte;
-                    printf("(TCP) urgentPointer: %d\n", urgentPointer);
-                    break;
+            case 18:
+                urgentPointer  |= byte;
+                printf("(TCP) urgentPointer: %d\n", urgentPointer);
+                break;
 
-                default:
-                    break;
-            }
-            
+            case 19:
+                printf("(TCP) AppDataStart\n");
+                applicationLayer.NewPacket();
+
+            default:
+                //
+                // Data portion of the IP packet.
+                //
+                printf("(TCP) AppData.\n");
+                
+                //
+                // Data portion of the IP packet.
+                //
+                if(applicationLayer.State() != Rejected)
+                {
+                    applicationLayer.PushInto(byte);
+                }
+
+                break;
         }
-        else
-        {
-            //
-            // Data portion of the IP packet.
-            //
-            //tcpLayer.PushInto(byte);
-
-            #if 0
-            ProtocolDispatch( protocol, 
-                                6,tcpLayer,
-                                17,udpLayer);
-            #endif
-        }
+        
 
         //
         // Ready for next byte.
@@ -242,6 +244,8 @@ private:
     uint16_t                windowSize;
     uint16_t                checksum;
     uint16_t                urgentPointer;
+
+    ApplicationLayerType&   applicationLayer;
 
 };
 

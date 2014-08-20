@@ -29,7 +29,8 @@ typedef typename StackType::InternetLayerType       InternetLayerType;
 typedef typename StackType::LinkLayerType           LinkLayerType;
 
 
-TCPTransportLayerType   tcpLayer;
+ApplicationLayerType    tcpApplicationLayer;
+TCPTransportLayerType   tcpLayer(tcpApplicationLayer);
 UDPTransportLayerType   udpLayer;
 InternetLayerType       internetLayer(tcpLayer, udpLayer);
 LinkLayerType           linkLayer(internetLayer);
