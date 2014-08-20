@@ -19,29 +19,21 @@
 #include "AppConfiguration.h"
 
 
-extern IPStackType::WebServerType::tcpip_header*    pages[];
-extern IPStackType::PortToPageMapType               portToPageMap;
+//
+// Break out the CombinationTypes for this class.
+//
+typedef typename StackType::ApplicationLayerType    ApplicationLayerType;
+typedef typename StackType::TCPTransportLayerType   TCPTransportLayerType;
+typedef typename StackType::UDPTransportLayerType   UDPTransportLayerType;
+typedef typename StackType::InternetLayerType       InternetLayerType;
+typedef typename StackType::LinkLayerType           LinkLayerType;
 
-IPStackType::PacketGeneratorType                    packetGenerator(pages);
-extern IPStackType::PacketInterfaceType             packetInterface;
 
-IPStackType::WebServerType                          webServer(packetInterface, packetGenerator, portToPageMap);
-IPStackType::PacketInterfaceType                    packetInterface(webServer);
+TCPTransportLayerType   tcpLayer;
+UDPTransportLayerType   udpLayer;
+InternetLayerType       internetLayer(tcpLayer, udpLayer);
+LinkLayerType           linkLayer(internetLayer);
 
-IPStackType::PacketGeneratorType                    packetGenerator1(pages);
-IPStackType::PacketGeneratorType                    packetGenerator2(pages);
-IPStackType::PacketGeneratorType                    packetGenerator3(pages);
-IPStackType::PacketGeneratorType                    packetGenerator4(pages);
-IPStackType::PacketGeneratorType*                   generatorList[]     =
-{
-    &packetGenerator1,
-    &packetGenerator2,
-    &packetGenerator3,
-    &packetGenerator4,
-};
-
-IPStackType::PortToPageIndexHashType                portToPageIndexHash;
-IPStackType::PortToPageMapType                      portToPageMap(generatorList, portToPageIndexHash);
 
 
 //
@@ -49,15 +41,10 @@ IPStackType::PortToPageMapType                      portToPageMap(generatorList,
 //
 int main(int argc, char **argv)
 {
-    for(int i=80; i<84; i++)
-    {
-        printf("%d\n", portToPageMap.Lookup(i).isPortAccepted(80) );
-    }
-
-
+    printf("\nBLOCK::WORKS IPStack Demo\n");
     while(true)
     {
-        webServer.Iterate();    
+        linkLayer.Iterate();    
     }
 
     return 0;

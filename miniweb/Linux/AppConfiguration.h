@@ -5,27 +5,38 @@
 #define __APPCONFIGURATION_H__
 
 
+
+
+
+//
+// TODO: put somewhere proper.
+//
+typedef enum 
+{
+    Unknown,
+    Claimed,
+    Rejected,
+
+} PacketProcessingState;
+
+
 #include <stdint.h>
 
-#include "miniweb.h"
-#include "tun_dev.h"
-#include "pages.h"
-#include "Map.h"
+#include "TUN.h"
+#include "IPv4.h"
+#include "TCP.h"
+#include "UDP.h"
+#include "HelloWorldPageGenerator.h"
 
 
 
-struct IPStackType
+struct StackType
 {
-    typedef MiniWebServer<IPStackType>                                                          WebServerType;
-    typedef TUNPacketInterface<IPStackType>                                                     PacketInterfaceType;
-    typedef PacketGenerator<IPStackType>                                                        PacketGeneratorType;
-    typedef uint16_t                                                                            PortType;
-    typedef OffsetHash<uint8_t, PortType, 80>                                                   PortToPageIndexHashType;
-    typedef Map<IPStackType::PacketGeneratorType, PortType, PortToPageIndexHashType>            PortToPageMapType;
-
-    typedef OffsetHash<uint8_t, PortType, 80>                                                   PacketTypeToProtocolIndexHashType;
-    typedef Map<IPStackType::PacketGeneratorType, PortType, PacketTypeToProtocolIndexHashType>  PacketTypeToProtocolMapType;
-
+    typedef HelloWorldPageGenerator<StackType>  ApplicationLayerType;
+    typedef TCP<StackType>                      TCPTransportLayerType;
+    typedef UDP<StackType>                      UDPTransportLayerType;
+    typedef IPv4<StackType>                     InternetLayerType;
+    typedef TUN<StackType>                      LinkLayerType;
 };
 
 

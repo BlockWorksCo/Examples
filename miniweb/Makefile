@@ -33,9 +33,7 @@ INCLUDES+=-I$(BLOCKWORKS_PLATFORM)/Common
 INCLUDES+=-I$(BLOCKWORKS_PLATFORM)
 
 OBJS=\
-main.o \
-pages.o
-
+main.o
 
 include $(BLOCKWORKS_PLATFORM)/Makefile
 
