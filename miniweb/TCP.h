@@ -86,6 +86,7 @@ public:
     {
         position        = 0;
         packetState     = Unknown;
+        dataOffset      = 20;   // 5 words minimum.
     }
 
     //
@@ -151,53 +152,67 @@ public:
                 break;
 
             case 12:
+                dataOffset  = byte >> 4;
+                dataOffset  *= 4;
+                printf("(TCP) dataOffset: %d\n", dataOffset);
+                break;
+
+            case 13:
                 flags   = byte;
                 printf("(TCP) Flags: %d\n", flags);
                 break;
 
-            case 13:
+            case 14:
                 windowSize  = byte << 8;
                 break;
 
-            case 14:
+            case 15:
                 windowSize  |= byte;
                 printf("(TCP) windowSize: %d\n", windowSize);
                 break;
 
-            case 15:
+            case 16:
                 checksum  = byte << 8;
                 break;
 
-            case 16:
+            case 17:
                 checksum  |= byte;
                 printf("(TCP) checksum: %d\n", checksum);
                 break;
 
-            case 17:
+            case 18:
                 urgentPointer  = byte << 8;
                 break;
 
-            case 18:
+            case 19:
                 urgentPointer  |= byte;
                 printf("(TCP) urgentPointer: %d\n", urgentPointer);
                 break;
 
-            case 19:
+            case 20:
                 printf("(TCP) AppDataStart\n");
                 applicationLayer.NewPacket();
 
             default:
-                //
-                // Data portion of the IP packet.
-                //
-                printf("(TCP) AppData.\n");
-                
-                //
-                // Data portion of the IP packet.
-                //
-                if(applicationLayer.State() != Rejected)
+
+                if(position >= dataOffset)
                 {
-                    applicationLayer.PushInto(byte);
+                    printf("(TCP) AppData.\n");
+                    
+                    //
+                    // Data portion of the IP packet.
+                    //
+                    if(applicationLayer.State() != Rejected)
+                    {
+                        applicationLayer.PushInto(byte);
+                    }                    
+                }
+                else
+                {
+                    //
+                    // Variable length option data.
+                    //
+                    printf("(TCP) OptionData.\n");
                 }
 
                 break;
@@ -244,6 +259,7 @@ private:
     uint16_t                windowSize;
     uint16_t                checksum;
     uint16_t                urgentPointer;
+    uint8_t                 dataOffset;
 
     ApplicationLayerType&   applicationLayer;
 
