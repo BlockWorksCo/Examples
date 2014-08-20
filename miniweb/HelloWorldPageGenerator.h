@@ -26,13 +26,16 @@ class HelloWorldPageGenerator
     typedef typename StackType::InternetLayerType       InternetLayerType;
     typedef typename StackType::LinkLayerType           LinkLayerType;
 
+    typedef typename TCPTransportLayerType::TCPState 	TCPState;
+
 
 
 public:
 
 	HelloWorldPageGenerator() :
         position(0),
-        packetState(Unknown)
+        packetState(Unknown),
+        tcpState(TCPTransportLayerType::LISTEN)
 	{
 		
 	}
@@ -86,6 +89,19 @@ public:
     }
 
 
+    //
+    //
+    //
+    TCPState GetTCPState()
+    {
+    	return tcpState;
+    }
+
+    void SetTCPState(TCPState newState)
+    {
+    	tcpState 	= newState;
+    }
+
 private:
 
     //
@@ -93,6 +109,7 @@ private:
     //
     uint16_t                position;
     PacketProcessingState   packetState;
+    TCPState 				tcpState;
 
 };
 
