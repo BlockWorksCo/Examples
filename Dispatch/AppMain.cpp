@@ -2,11 +2,11 @@
 
 
 #include <stdint.h>
+#include "Utilities.h"
+#include "Dispatch.h"
 
 
 
-
-#define NUMBER_OF_ELEMENTS(a)   sizeof(a)/sizeof(a[0])
 
 
 
@@ -16,6 +16,13 @@ void PutString(const char* string)
 	static volatile char* output = (volatile char*)string;
 	output = output;
 }
+
+
+
+
+
+
+
 
 
 class One
@@ -57,34 +64,6 @@ public:
 
 
 
-template <typename First, typename EnumerationType> void EnumeratedDispatch(const EnumerationType enumeration, const EnumerationType firstEnumeration, First first) 
-{
-    if(enumeration == firstEnumeration)
-    {
-        first();
-    }
-}
-
-template <typename First, typename EnumerationType, typename... Rest> void EnumeratedDispatch(const EnumerationType enumeration, const EnumerationType firstEnumeration, First& first, Rest... rest) 
-{
-    if(enumeration == firstEnumeration)
-    {
-        first();
-    }
-    EnumeratedDispatch(enumeration, rest...);
-}
-
-
-
-
-
-
-
-
-
-
-#define NUMBER_OF_ELEMENTS(a)   sizeof(a)/sizeof(a[0])
-
 
 
 typedef enum 
@@ -94,7 +73,17 @@ typedef enum
     eThree,
 } ObjectType;
 
-int test()
+
+
+//
+// Entry point for the application.
+// 
+// Note1: The main application object is created static within main instead
+// of being global in order to control initialisation-time.
+// Note2: 'Run' methods are one-shot. The loop is implicit to allow for transition
+// between threaded and non-threaded mechanisms.
+//
+extern "C" void AppMain()
 {
     One     one;
     Two     two;
@@ -112,26 +101,7 @@ int test()
                                         eThree, three);
 
     }
-    return 0;
+
 }
-
-
-//
-// Entry point for the application.
-// 
-// Note1: The main application object is created static within main instead
-// of being global in order to control initialisation-time.
-// Note2: 'Run' methods are one-shot. The loop is implicit to allow for transition
-// between threaded and non-threaded mechanisms.
-//
-extern "C" void AppMain()
-{
-	test();
-    while(true)
-    {
-    }
-}
-
-
 
 
