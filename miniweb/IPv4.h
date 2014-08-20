@@ -237,10 +237,24 @@ public:
         }
         else
         {
+            printf("(IPv4) data.\n");
+            
+            if(position == 20)
+            {
+                //
+                // Start of payload data.
+                //
+                tcpLayer.NewPacket();
+            }
+
             //
             // Data portion of the IP packet.
             //
-            tcpLayer.PushInto(byte);
+            if(tcpLayer.State() != Rejected)
+            {
+                tcpLayer.PushInto(byte);
+            }
+
 
             #if 0
             ProtocolDispatch( protocol, 

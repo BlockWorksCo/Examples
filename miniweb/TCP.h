@@ -28,13 +28,6 @@ class TCP
 
 public:
 
-    typedef enum 
-    {
-        NONE,
-        WAIT
-    } packetflags;
-
-
     typedef enum
     {
         TCP_FIN           = 0x01,
@@ -43,6 +36,10 @@ public:
         TCP_PSH           = 0x08,
         TCP_ACK           = 0x10,
         TCP_URG           = 0x20,        
+
+        TCP_ECE           = 0x40,        
+        TCP_CWR           = 0x80,        
+
     } TCPFlags;
 
 
@@ -59,39 +56,9 @@ public:
         CLOSING           = 8,
         LAST_ACK          = 9,
         TIME_WAIT         = 10,    
+
     } TCPState;
 
-
-    typedef struct _tcpip_header
-    {
-        struct _tcpip_header*   next;
-        packetflags     flag;
-        uint8_t         length;  /* The size of the data contained
-                                   within the packet (i.e., minus TCP and IP
-                                   headers.) */
-        /* This is the IP header. */
-        uint8_t         vhl;  /* IP version and header length. */
-        uint8_t         tos;              /* Type of service. */
-        uint8_t         len[2];           /* Total length. */
-        uint8_t         id[2];            /* IP identification. */
-        uint8_t         ipoffset[2];      /* IP fragmentation offset. */
-        uint8_t         ttl;              /* Time to live. */
-        uint8_t         protocol;         /* Protocol. */
-        uint8_t         ipchksum[2];      /* IP header checksum. */
-        uint8_t         srcipaddr[4];     /* The source IP address. */
-        /* destipaddr[4]     We don't store the destination IP address here. */
-        /* This is the TCP header. */
-        uint8_t         srcport[2];  /* TCP source port. */
-                 /* destport[2]       We don't store the destination TCP port here. */
-        uint8_t         seqno[4];         /* TCP sequence number. */
-                 /* ackno[4]          We don't store acknowledgement number here. */
-        uint8_t         tcpoffset;        /* 4 unused bits and TCP data offset. */
-        uint8_t         flags;            /* TCP flags. */
-        uint8_t         wnd[2];          /* Advertised receiver's window. */
-        uint8_t         tcpchksum[2];     /* TCP checksum. */
-        uint8_t         urgp[2];          /* Urgent pointer. */
-        uint8_t         data[0];
-    } tcpip_header;
 
 public:
 
@@ -125,7 +92,120 @@ public:
     //
     void PushInto(uint8_t byte)
     {
-        printf("(TCP)\n");
+        if(position < 20)
+        {
+            //
+            // Header portion of the packet.
+            //
+            switch(position)
+            {
+                case 0:
+                    sourcePort  = byte << 8;
+                    break;
+
+                case 1:
+                    sourcePort  |= byte;
+                    printf("(TCP) sourcePort: %d\n", sourcePort);
+                    break;
+
+                case 2:
+                    destinationPort  = byte << 8;
+                    break;
+
+                case 3:
+                    destinationPort  |= byte;
+                    printf("(TCP) destinationPort: %d\n", destinationPort);
+                    break;
+
+                case 4:
+                    sequenceNumber  = byte << 24;
+                    break;
+
+                case 5:
+                    sequenceNumber  |= byte << 16;
+                    break;
+
+                case 6:
+                    sequenceNumber  |= byte << 8;
+                    break;
+
+                case 7:
+                    sequenceNumber  |= byte;
+                    printf("(TCP) sequenceNumber: %d\n", sequenceNumber);
+                    break;
+
+                case 8:
+                    ackNumber  = byte << 24;
+                    break;
+
+                case 9:
+                    ackNumber  |= byte << 16;
+                    break;
+
+                case 10:
+                    ackNumber  |= byte << 8;
+                    break;
+
+                case 11:
+                    ackNumber  |= byte;
+                    printf("(TCP) ackNumber: %d\n", ackNumber);
+                    break;
+
+                case 12:
+                    flags   = byte;
+                    printf("(TCP) Flags: %d\n", flags);
+                    break;
+
+                case 13:
+                    windowSize  = byte << 8;
+                    break;
+
+                case 14:
+                    windowSize  |= byte;
+                    printf("(TCP) windowSize: %d\n", windowSize);
+                    break;
+
+                case 15:
+                    checksum  = byte << 8;
+                    break;
+
+                case 16:
+                    checksum  |= byte;
+                    printf("(TCP) checksum: %d\n", checksum);
+                    break;
+
+                case 17:
+                    urgentPointer  = byte << 8;
+                    break;
+
+                case 18:
+                    urgentPointer  |= byte;
+                    printf("(TCP) urgentPointer: %d\n", urgentPointer);
+                    break;
+
+                default:
+                    break;
+            }
+            
+        }
+        else
+        {
+            //
+            // Data portion of the IP packet.
+            //
+            //tcpLayer.PushInto(byte);
+
+            #if 0
+            ProtocolDispatch( protocol, 
+                                6,tcpLayer,
+                                17,udpLayer);
+            #endif
+        }
+
+        //
+        // Ready for next byte.
+        //
+        position++;
     }
 
 
@@ -154,7 +234,14 @@ private:
     uint16_t                position;
     PacketProcessingState   packetState;
 
-
+    uint16_t                sourcePort;
+    uint16_t                destinationPort;
+    uint32_t                sequenceNumber;
+    uint32_t                ackNumber;
+    uint8_t                 flags;
+    uint16_t                windowSize;
+    uint16_t                checksum;
+    uint16_t                urgentPointer;
 
 };
 
