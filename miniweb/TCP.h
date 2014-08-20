@@ -277,6 +277,16 @@ public:
         applicationLayer.SetTCPState(currentState);
     }
 
+    //
+    // Pull some packet data out of the processor for transmission.
+    //
+    uint8_t PullFrom(bool& dataAvailable)
+    {
+        //
+        // TODO: Pull from all upper layers, one whole packet at a time.
+        //
+        return applicationLayer.PullFrom( dataAvailable );
+    }
 
 private:
 

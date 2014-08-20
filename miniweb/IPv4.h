@@ -262,9 +262,12 @@ public:
     //
     // Pull some packet data out of the processor for transmission.
     //
-    uint8_t PullFrom()
+    uint8_t PullFrom(bool& dataAvailable)
     {
-        return 0;
+        //
+        // TODO: Pull from all upper layers, one whole packet at a time.
+        //
+        return tcpLayer.PullFrom( dataAvailable );
     }
 
 private:

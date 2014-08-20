@@ -115,6 +115,12 @@ public:
             //
             // Timeout.
             //
+
+            //
+            // Send any packets that may have been produced.
+            //
+            PullFromStackAndSend();
+
             internetLayer.Idle();
         }
         else
@@ -125,11 +131,14 @@ public:
 
             bytes_left = read(fd, inbuf, sizeof(inbuf));
             if(bytes_left == -1)
-            {
+            {   
                 perror("tun_dev: dev_get: read\n");
             }
             else
             {
+                //
+                // Packet received, send it up the stack.
+                //
                 printf("<got %d bytes from tun>\n",bytes_left);
                 printf("<");
                 internetLayer.NewPacket();
@@ -139,13 +148,35 @@ public:
                     {
                         internetLayer.PushInto( inbuf[i] );                        
                     }
-                    
+
                     printf("%02x ", inbuf[i]);                
                 }
                 printf(">\n");
+
+                //
+                // Send any packets that may have been produced.
+                //
+                PullFromStackAndSend();
             }
 
         }
+    }
+
+
+    //
+    //
+    //
+    void PullFromStackAndSend()
+    {
+        uint16_t    i               = 0;
+        bool        dataAvailable   = false;
+
+        do
+        {
+            outbuf[i]   = internetLayer.PullFrom( dataAvailable );
+            i++;
+
+        } while(dataAvailable == true);
     }
 
 
