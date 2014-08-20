@@ -171,12 +171,38 @@ public:
         uint16_t    i               = 0;
         bool        dataAvailable   = false;
 
+        //
+        // While there are still packets in the stack...
+        //
         do
         {
-            outbuf[i]   = internetLayer.PullFrom( dataAvailable );
-            i++;
+            //
+            // Form the new packet.
+            //
+            do
+            {
+                outbuf[i]   = internetLayer.PullFrom( dataAvailable );
+                if(dataAvailable == true)
+                {
+                    i++;
+                }
 
-        } while(dataAvailable == true);
+            } while(dataAvailable == true);
+
+            //
+            // Send the new packet.
+            //
+            if(i>0)
+            {
+                size_t  bytesWritten    = write(fd, outbuf, i);
+                if(bytesWritten != i)
+                {
+                    printf("(TUN) not all bytes written!\n");
+                }
+            }
+
+        } while(i > 0);
+
     }
 
 
