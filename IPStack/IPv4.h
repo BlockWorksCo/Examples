@@ -11,21 +11,18 @@
 
 #ifdef PREPROCESSOR
 
+
 def ObjectSelect(objectList, fn):
     """
-    ObjectSelect([(33,'tcp'),(22,'udp'),(11,'arp'),(44,'icmp')], 'PushInto(byte)')
+    ObjectSelect([(6,'tcp'),(17,'udp'),(11,'arp'),(44,'icmp')], 'PushInto(byte)')
     """
-    return "switch(protocol)\n{\n"+"".join(['case %s: %s.%s;break;\n'%(id,obj,fn) for id,obj in objectList])+"}\n"
+    return "\nswitch(protocol)\n{\n"+"".join(['case %s: %s.%s;break;\n'%(id,obj,fn) for id,obj in objectList])+"}\n"
 
 
 def Process(sourceText):
     """
     """
-    macros  = re.compile('!(.*?)!').findall(sourceText)
-    for macro in macros:
-        print(macro)
-
-    return sourceText + str(macros)
+    return sourceText
 
 #endif
 
@@ -55,7 +52,11 @@ public:
         icmpLayer(_icmpLayer),
         arpLayer(_arpLayer)
     {
-        !layerList   = "tcpLayer,udpLayer,icmpLayer,arpLayer"
+        -x=2!
+        !str(3+4)!
+        -layerList = [(6,'tcp'),(17,'udp'),(11,'arp'),(44,'icmp')]!
+        -str(layerList)!
+        -ObjectSelect(layerList, 'PushInto(byte)')!
     }
 
     //
@@ -199,9 +200,9 @@ public:
                 //
                 // Data portion of the IP packet.
                 //
-                if(ObjectSelect(protocolIndex, !layerList ).State() != Rejected)
+                if(ObjectSelect(protocolIndex, layerList ).State() != Rejected)
                 {
-                    !ObjectSelect([(33,'tcp'),(22,'udp'),(11,'arp'),(44,'icmp')], 'PushInto(byte)')!
+                    -ObjectSelect([(33,'tcp'),(22,'udp'),(11,'arp'),(44,'icmp')], 'PushInto(byte)')-
                 }
                 
                 break;
