@@ -4,8 +4,8 @@
 
 
 
-#ifndef __UDP_H__
-#define __UDP_H__
+#ifndef __ARP_H__
+#define __ARP_H__
 
 
 
@@ -15,19 +15,21 @@
 //
 //
 template < typename StackType >
-class UDP
+class ARP
 {
+
     //
     // Break out the StackType helper types.
     //
     STACK_TYPES_BREAKOUT;
 
 
+
 public:
 
 
 
-	UDP() :
+	ARP() :
         position(0),
         packetState(Unknown)
 	{
@@ -40,7 +42,7 @@ public:
     //
     void Idle()
     {
-        printf("(UDP) Idle.\n");
+        printf("(ARP) Idle.\n");
     }
 
     //
@@ -57,7 +59,7 @@ public:
     //
     void PushInto(uint8_t byte)
     {
-        printf("(UDP)\n");
+        printf("(ARP)\n");
     }
 
 

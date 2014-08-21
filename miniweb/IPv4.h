@@ -43,29 +43,6 @@ template <typename First, typename EnumerationType, typename... Rest> void Proto
 
 
 
-const uint8_t TCP_MSS           = 200;
-const uint16_t TCP_WIN          = 4096;
-
-const uint8_t CHKSUMFLAG_BYTE   = 2;
-const uint8_t CHKSUMFLAG_CARRY  = 1;
-
-const uint8_t Y_NORESPONSE      = 0;
-const uint8_t Y_RESPONSE        = 1;
-const uint8_t Y_NEWDATA         = 2;
-
-const uint8_t IPADDR0           = 192;
-const uint8_t IPADDR1           = 168;
-const uint8_t IPADDR2           = 0;
-const uint8_t IPADDR3           = 2;
-
-const uint8_t TCP_CHECK0        = 0x3f;
-const uint8_t TCP_CHECK1        = 0x63;
-
-const uint8_t IP_PROTO_TCP      = 6;
-
-
-
-
 //
 //
 //
@@ -73,14 +50,9 @@ template < typename StackType >
 class IPv4
 {
     //
-    // Break out the CombinationTypes for this class.
+    // Break out the StackType helper types.
     //
-    typedef typename StackType::ApplicationLayerType    ApplicationLayerType;
-    typedef typename StackType::TCPTransportLayerType   TCPTransportLayerType;
-    typedef typename StackType::UDPTransportLayerType   UDPTransportLayerType;
-    typedef typename StackType::InternetLayerType       InternetLayerType;
-    typedef typename StackType::LinkLayerType           LinkLayerType;
-
+    STACK_TYPES_BREAKOUT;
 
 
 public:

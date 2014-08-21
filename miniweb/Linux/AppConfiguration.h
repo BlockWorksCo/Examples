@@ -26,6 +26,8 @@ typedef enum
 #include "IPv4.h"
 #include "TCP.h"
 #include "UDP.h"
+#include "ARP.h"
+#include "ICMP.h"
 #include "HelloWorldPageGenerator.h"
 
 
@@ -37,8 +39,9 @@ struct StackType
     typedef UDP<StackType>                      UDPTransportLayerType;
     typedef IPv4<StackType>                     InternetLayerType;
     typedef TUN<StackType>                      LinkLayerType;
+    typedef ARP<StackType>                      ARPTransportLayerType;
+    typedef ICMP<StackType>                     ICMPTransportLayerType;
 };
-
 
 
 

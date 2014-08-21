@@ -16,14 +16,9 @@ template < typename StackType >
 class TCP
 {
     //
-    // Break out the CombinationTypes for this class.
+    // Break out the StackType helper types.
     //
-    typedef typename StackType::ApplicationLayerType    ApplicationLayerType;
-    typedef typename StackType::TCPTransportLayerType   TCPTransportLayerType;
-    typedef typename StackType::UDPTransportLayerType   UDPTransportLayerType;
-    typedef typename StackType::InternetLayerType       InternetLayerType;
-    typedef typename StackType::LinkLayerType           LinkLayerType;
-
+    STACK_TYPES_BREAKOUT;
 
 
 public:
