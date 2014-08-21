@@ -204,7 +204,7 @@ public:
 
             case 20:
                 printf("(IPv4) TransportDataStart.\n");
-                tcpLayer.NewPacket();
+                ObjectSelect(protocolIndex, layerList, protocolIndex ).NewPacket();
             default:
                 printf("(IPv4) data.\n");
 
@@ -213,8 +213,21 @@ public:
                 //
                 if(tcpLayer.State() != Rejected)
                 {
-                    tcpLayer.PushInto(byte);
+                    //PushInto(byte, protocol, tcpLayer,udpLayer,icmpLayer,arpLayer);
+                    ObjectSelect!(protocolIndex, layerList, protocolIndex ).PushInto(byte);
                 }
+
+                //
+                // Macro:
+                // ObjectList()
+                //
+                layerList   = "tcpLayer,udpLayer,icmpLayer,arpLayer";
+
+                //
+                // Macro:
+                // ObjectSelect()
+                //
+                
                 break;
         }
             
@@ -245,6 +258,34 @@ public:
     }
 
 private:
+
+    //
+    //
+    //
+    template < typename T0, typename T1, typename T2, typename T3 > void PushInto(uint8_t byte, uint8_t index,  T0 p0, T1 p1, T2 p2, T3 p3 )
+    {
+        switch(index)
+        {
+            case 6:
+                p0.PushInto(byte);
+                break;
+
+            case 17:
+                p1.PushInto(byte);
+                break;
+
+            case 1:
+                p2.PushInto(byte);
+                break;
+
+            case 54:
+                p3.PushInto(byte);
+                break;
+        }
+    }
+
+
+
 
     //
     //
