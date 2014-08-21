@@ -9,37 +9,18 @@
 
 
 
+#ifdef PREPROCESSOR
 
+def Process(sourceText):
+    """
+    """
+    macros  = re.compile('!(\w+)\((.*?)\)(.*);').findall(sourceText)
+    for macro in macros:
+        print(macro)
 
+    return sourceText
 
-
-
-
-
-//
-// EnumeratedDispatch
-//
-
-template <typename First, typename EnumerationType> void ProtocolDispatch(const EnumerationType enumeration, const EnumerationType firstEnumeration, First first) 
-{
-    if(enumeration == firstEnumeration)
-    {
-        first();
-    }
-}
-
-template <typename First, typename EnumerationType, typename... Rest> void ProtocolDispatch(const EnumerationType enumeration, const EnumerationType firstEnumeration, First& first, Rest... rest) 
-{
-    if(enumeration == firstEnumeration)
-    {
-        first();
-    }
-    ProtocolDispatch(enumeration, rest...);
-}
-
-
-
-
+#endif
 
 
 
@@ -204,24 +185,24 @@ public:
 
             case 20:
                 printf("(IPv4) TransportDataStart.\n");
-                ObjectSelect(protocolIndex, layerList, protocolIndex ).NewPacket();
+                !ObjectSelect(protocolIndex, layerList ).NewPacket();
             default:
                 printf("(IPv4) data.\n");
 
                 //
                 // Data portion of the IP packet.
                 //
-                if(tcpLayer.State() != Rejected)
+                if(!ObjectSelect(protocolIndex, layerList ).State() != Rejected)
                 {
                     //PushInto(byte, protocol, tcpLayer,udpLayer,icmpLayer,arpLayer);
-                    ObjectSelect!(protocolIndex, layerList, protocolIndex ).PushInto(byte);
+                    !ObjectSelect(protocolIndex, layerList).PushInto(byte);
                 }
 
                 //
                 // Macro:
                 // ObjectList()
                 //
-                layerList   = "tcpLayer,udpLayer,icmpLayer,arpLayer";
+                layerList   = !ObjectList("tcpLayer,udpLayer,icmpLayer,arpLayer");
 
                 //
                 // Macro:
@@ -258,33 +239,6 @@ public:
     }
 
 private:
-
-    //
-    //
-    //
-    template < typename T0, typename T1, typename T2, typename T3 > void PushInto(uint8_t byte, uint8_t index,  T0 p0, T1 p1, T2 p2, T3 p3 )
-    {
-        switch(index)
-        {
-            case 6:
-                p0.PushInto(byte);
-                break;
-
-            case 17:
-                p1.PushInto(byte);
-                break;
-
-            case 1:
-                p2.PushInto(byte);
-                break;
-
-            case 54:
-                p3.PushInto(byte);
-                break;
-        }
-    }
-
-
 
 
     //
