@@ -11,14 +11,21 @@
 
 #ifdef PREPROCESSOR
 
+def ObjectSelect(objectList, fn):
+    """
+    ObjectSelect([(33,'tcp'),(22,'udp'),(11,'arp'),(44,'icmp')], 'PushInto(byte)')
+    """
+    return "switch(protocol)\n{\n"+"".join(['case %s: %s.%s;break;\n'%(id,obj,fn) for id,obj in objectList])+"}\n"
+
+
 def Process(sourceText):
     """
     """
-    macros  = re.compile('!(\w+)\((.*?)\)(.*);').findall(sourceText)
+    macros  = re.compile('!(.*?)!').findall(sourceText)
     for macro in macros:
         print(macro)
 
-    return sourceText
+    return sourceText + str(macros)
 
 #endif
 
@@ -48,7 +55,7 @@ public:
         icmpLayer(_icmpLayer),
         arpLayer(_arpLayer)
     {
-
+        !layerList   = "tcpLayer,udpLayer,icmpLayer,arpLayer"
     }
 
     //
@@ -185,29 +192,17 @@ public:
 
             case 20:
                 printf("(IPv4) TransportDataStart.\n");
-                !ObjectSelect(protocolIndex, layerList ).NewPacket();
+                ObjectSelect(protocolIndex, layerList ).NewPacket();
             default:
                 printf("(IPv4) data.\n");
 
                 //
                 // Data portion of the IP packet.
                 //
-                if(!ObjectSelect(protocolIndex, layerList ).State() != Rejected)
+                if(ObjectSelect(protocolIndex, !layerList ).State() != Rejected)
                 {
-                    //PushInto(byte, protocol, tcpLayer,udpLayer,icmpLayer,arpLayer);
-                    !ObjectSelect(protocolIndex, layerList).PushInto(byte);
+                    !ObjectSelect([(33,'tcp'),(22,'udp'),(11,'arp'),(44,'icmp')], 'PushInto(byte)')!
                 }
-
-                //
-                // Macro:
-                // ObjectList()
-                //
-                layerList   = !ObjectList("tcpLayer,udpLayer,icmpLayer,arpLayer");
-
-                //
-                // Macro:
-                // ObjectSelect()
-                //
                 
                 break;
         }
