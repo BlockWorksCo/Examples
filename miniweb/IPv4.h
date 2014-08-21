@@ -60,10 +60,12 @@ public:
     //
     //
     //
-    IPv4(TCPTransportLayerType& _tcpLayer, UDPTransportLayerType _udpLayer) :
+    IPv4(TCPTransportLayerType& _tcpLayer, UDPTransportLayerType _udpLayer, ICMPTransportLayerType& _icmpLayer, ARPTransportLayerType& _arpLayer) :
         packetState(Unknown),
         tcpLayer(_tcpLayer),
-        udpLayer(_udpLayer)
+        udpLayer(_udpLayer),
+        icmpLayer(_icmpLayer),
+        arpLayer(_arpLayer)
     {
 
     }
@@ -259,6 +261,8 @@ private:
 
     TCPTransportLayerType&  tcpLayer;
     UDPTransportLayerType&  udpLayer;
+    ICMPTransportLayerType& icmpLayer;
+    ARPTransportLayerType&  arpLayer;
 
 };
 

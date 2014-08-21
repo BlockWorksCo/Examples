@@ -27,7 +27,9 @@ STACK_TYPES_BREAKOUT;
 ApplicationLayerType    tcpApplicationLayer;
 TCPTransportLayerType   tcpLayer(tcpApplicationLayer);
 UDPTransportLayerType   udpLayer;
-InternetLayerType       internetLayer(tcpLayer, udpLayer);
+ARPTransportLayerType	arpLayer;
+ICMPTransportLayerType	icmpLayer;
+InternetLayerType       internetLayer(tcpLayer, udpLayer, icmpLayer, arpLayer);
 LinkLayerType           linkLayer(internetLayer);
 
 
