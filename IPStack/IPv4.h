@@ -14,7 +14,6 @@
 
 def ObjectSelect(objectList, fn):
     """
-    ObjectSelect([(6,'tcp'),(17,'udp'),(11,'arp'),(44,'icmp')], 'PushInto(byte)')
     """
     return "\nswitch(protocol)\n{\n"+"".join(['case %s: %s.%s;break;\n'%(id,obj,fn) for id,obj in objectList])+"}\n"
 
@@ -52,11 +51,12 @@ public:
         icmpLayer(_icmpLayer),
         arpLayer(_arpLayer)
     {
-        -x=2!
-        !str(3+4)!
-        -layerList = [(6,'tcp'),(17,'udp'),(11,'arp'),(44,'icmp')]!
-        -str(layerList)!
-        -ObjectSelect(layerList, 'PushInto(byte)')!
+        !x=2!
+        !str(x+4)!
+        !layerList = [(6,'tcp'),(17,'udp'),(11,'arp'),(44,'icmp')]!
+        !str(layerList)!
+        !locals()!
+        !ObjectSelect(layerList, 'PushInto(byte)')!
     }
 
     //
