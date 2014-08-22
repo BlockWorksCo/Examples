@@ -15,17 +15,25 @@
 def ObjectSelect(objectList, fn):
     """
     """
-    return "\nswitch(protocol)\n{\n"+"".join(['case %s: %s.%s;break;\n'%(id,obj,fn) for id,obj in objectList])+"}\n"
+    return  "\nswitch(protocol)\n{\n" + \
+            "".join( ["  case %s: %s.%s;break;\n"%(id,obj,fn) for id,obj in objectList] ) + \
+            "}\n"
 
 
-def Process(sourceText):
-    """
-    """
-    return sourceText
 
 #endif
 
+#ifdef PREPROCESSOR
 
+import re
+
+def ReplaceObjectSelect(matchobj):
+    text    = ObjectSelect( matchobj.group(3), matchobj.group(2) )
+    return text
+
+sourceText = re.sub('(\s*\w+\s*=\s*)ObjectSelect\((.*?),(.*?)\)(.*?);', ReplaceObjectSelect, sourceText)
+
+#endif
 
 //
 //
@@ -51,8 +59,7 @@ public:
         icmpLayer(_icmpLayer),
         arpLayer(_arpLayer)
     {
-        !layerList = [(6,'tcp'),(17,'udp'),(11,'arp'),(44,'icmp')]!
-        !ObjectSelect(layerList, 'PushInto(byte)')!
+        !layerList = [(6,'tcpLayer'),(17,'udpLayer'),(11,'arpLayer'),(44,'icmpLayer')]!
     }
 
     //
@@ -189,16 +196,18 @@ public:
 
             case 20:
                 printf("(IPv4) TransportDataStart.\n");
-                ObjectSelect(protocolIndex, layerList ).NewPacket();
+                ObjectSelect(layerList).NewPacket();
             default:
                 printf("(IPv4) data.\n");
 
                 //
                 // Data portion of the IP packet.
                 //
-                if(ObjectSelect(protocolIndex, layerList ).State() != Rejected)
+                state   = (filter layerList by protocolIndex).State();
+                state = ObjectSelect(protocolIndex, layerList ).State();
+                if(state != Rejected)
                 {
-                    -ObjectSelect([(33,'tcp'),(22,'udp'),(11,'arp'),(44,'icmp')], 'PushInto(byte)')-
+                    ObjectSelect(layerList).PushInto(byte);
                 }
                 
                 break;

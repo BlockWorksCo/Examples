@@ -7,10 +7,13 @@ g={}
 l={}
 
 def Run(pythonText):
-    global g
-    global l
     exec(compile(pythonText, '<EmbeddedPython>','exec'),g,l)
-    return str(l['t'])
+    try:
+        result  = str(l['t'])
+    except KeyError:
+        result  = l['sourceText']
+    return result
+
 
 def ReplaceEmbeddedPython(matchobj):
     pythonText  = 't='+matchobj.group(1)
@@ -18,9 +21,12 @@ def ReplaceEmbeddedPython(matchobj):
 
 sourceText  = open(sys.argv[1]).read()
 
-macros      = re.compile('#ifdef\s+PREPROCESSOR(.*?)#endif',re.MULTILINE|re.DOTALL).findall(sourceText)[0]
-sourceText  = re.sub('#ifdef\s+PREPROCESSOR[\d\D]*?#endif','#define PREPROCESSED',sourceText, re.DOTALL|re.MULTILINE)
-Run("\nt=''\n"+macros)
+macros              = re.compile('#ifdef\s+PREPROCESSOR(.*?)#endif',re.MULTILINE|re.DOTALL).findall(sourceText)
+macros              = ''.join(macros)
+sourceText          = re.sub('#ifdef\s+PREPROCESSOR[\d\D]*?#endif','#define PREPROCESSED',sourceText, re.DOTALL|re.MULTILINE)
 
-sourceText  = re.sub('!(.*?)!', ReplaceEmbeddedPython, sourceText)
+l['sourceText']     = sourceText
+sourceText          = Run(macros)
+sourceText          = re.sub('!(.*?)!', ReplaceEmbeddedPython, sourceText)
+
 print(sourceText)
