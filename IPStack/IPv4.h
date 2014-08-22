@@ -56,7 +56,7 @@ public:
         !layerList = [(6,'tcp'),(17,'udp'),(11,'arp'),(44,'icmp')]!
         !str(layerList)!
         !locals()!
-        !ObjectSelect(layerList, 'PushInto(byte)')!
+        -ObjectSelect(layerList, 'PushInto(byte)')!
     }
 
     //
