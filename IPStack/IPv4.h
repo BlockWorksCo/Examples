@@ -8,6 +8,11 @@
 
 
 
+#ifdef PREPROCESSOR
+def xxx():
+    return 33
+#endif
+
 
 #ifdef PREPROCESSOR
 
@@ -23,16 +28,18 @@ def Blaa(objectList, fn):
     #        "}\n"
 
 
-def xxx():
-    return 33
 
-def ReplaceObjectSelect(matchobj):
-    text    = Blaa( matchobj.group(3), matchobj.group(2) )
-    return text
+def ReplaceFn(matchobj):
+    if matchobj.group(2) == 'layerList':
+        layerList = [(6,'tcpLayer'),(17,'udpLayer'),(11,'arpLayer'),(44,'icmpLayer')]
+        body    = ['case %s: %s = %s%s\n'%(str(id), matchobj.group(1),str(layer), matchobj.group(4)) for id,layer in layerList]
+        return '\nswitch(%s)\n{\n%s\n}\n'%(matchobj.group(2), body)
+    else:
+        return matchobj.group(0)
 
 x = 2
 
-sourceText = re.sub('(\s*\w+\s*=\s*)ObjectSelect\((.*?),(.*?)\)(.*?);', ReplaceObjectSelect, sourceText)
+sourceText = re.sub('(\w+?)\s*?\=\s*?(\w+)\[(.*?)\](.*?);', ReplaceFn, sourceText)
 
 #endif
 
@@ -64,6 +71,8 @@ public:
         !y = 4!
         !x * y!
         !xxx()!
+        int     blaa[10] = "abd";
+        x = blaa[2];
     }
 
     //
@@ -200,18 +209,17 @@ public:
 
             case 20:
                 printf("(IPv4) TransportDataStart.\n");
-                ObjectSelect(layerList).NewPacket();
+                layerList[protocolIndex].NewPacket();
             default:
                 printf("(IPv4) data.\n");
 
                 //
                 // Data portion of the IP packet.
                 //
-                state   = (filter layerList by protocolIndex).State();
-                state = ObjectSelect(protocolIndex, layerList ).State();
+                state = layerList[protocolIndex].State();
                 if(state != Rejected)
                 {
-                    ObjectSelect(layerList).PushInto(byte);
+                    layerList[protocolIndex].PushInto(byte);
                 }
                 
                 break;
