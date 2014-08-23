@@ -11,24 +11,20 @@
 
 #ifdef PREPROCESSOR
 
-
-def ObjectSelect(objectList, fn):
-    """
-    """
-    return  "\nswitch(protocol)\n{\n" + \
-            "".join( ["  case %s: %s.%s;break;\n"%(id,obj,fn) for id,obj in objectList] ) + \
-            "}\n"
-
-
-
-#endif
-
-#ifdef PREPROCESSOR
-
 import re
 
+
+def Blaa(objectList, fn):
+    """
+    """
+    return 'blaa'
+    #return  "\nswitch(protocol)\n{\n" + \
+    #        "".join( ["  case %s: %s.%s;break;\n"%(id,obj,fn) for id,obj in objectList] ) + \
+    #        "}\n"
+
+
 def ReplaceObjectSelect(matchobj):
-    text    = ObjectSelect( matchobj.group(3), matchobj.group(2) )
+    text    = Blaa( matchobj.group(3), matchobj.group(2) )
     return text
 
 sourceText = re.sub('(\s*\w+\s*=\s*)ObjectSelect\((.*?),(.*?)\)(.*?);', ReplaceObjectSelect, sourceText)

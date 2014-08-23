@@ -7,11 +7,11 @@ g={}
 l={}
 
 def Run(pythonText):
-    exec(compile(pythonText, '<EmbeddedPython>','exec'),g,l)
+    exec(compile(pythonText, '<EmbeddedPython>','exec'), g)
     try:
-        result  = str(l['t'])
+        result  = str(g['t'])
     except KeyError:
-        result  = l['sourceText']
+        result  = sourceText
     return result
 
 
@@ -25,8 +25,11 @@ macros              = re.compile('#ifdef\s+PREPROCESSOR(.*?)#endif',re.MULTILINE
 macros              = ''.join(macros)
 sourceText          = re.sub('#ifdef\s+PREPROCESSOR[\d\D]*?#endif','#define PREPROCESSED',sourceText, re.DOTALL|re.MULTILINE)
 
-l['sourceText']     = sourceText
-sourceText          = Run(macros)
+print(macros)
+g['sourceText']     = sourceText
+exec(compile(macros, '<EmbeddedPython>','exec'), g)
+sourceText          = g['sourceText']
+#sourceText          = Run(macros)
 sourceText          = re.sub('!(.*?)!', ReplaceEmbeddedPython, sourceText)
 
 print(sourceText)
