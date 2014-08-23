@@ -23,9 +23,14 @@ def Blaa(objectList, fn):
     #        "}\n"
 
 
+def xxx():
+    return 33
+
 def ReplaceObjectSelect(matchobj):
     text    = Blaa( matchobj.group(3), matchobj.group(2) )
     return text
+
+x = 2
 
 sourceText = re.sub('(\s*\w+\s*=\s*)ObjectSelect\((.*?),(.*?)\)(.*?);', ReplaceObjectSelect, sourceText)
 
@@ -56,6 +61,9 @@ public:
         arpLayer(_arpLayer)
     {
         !layerList = [(6,'tcpLayer'),(17,'udpLayer'),(11,'arpLayer'),(44,'icmpLayer')]!
+        !y = 4!
+        !x * y!
+        !xxx()!
     }
 
     //
