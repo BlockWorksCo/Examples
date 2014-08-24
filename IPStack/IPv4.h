@@ -33,6 +33,7 @@ def ReplaceFn(matchobj):
     if matchobj.group(2) == 'layerList':
         layerList = [(6,'tcpLayer'),(17,'udpLayer'),(11,'arpLayer'),(44,'icmpLayer')]
         body    = ['case %s: %s = %s%s\n'%(str(id), matchobj.group(1),str(layer), matchobj.group(4)) for id,layer in layerList]
+        body    = ''.join(body)
         return '\nswitch(%s)\n{\n%s\n}\n'%(matchobj.group(2), body)
     else:
         return matchobj.group(0)
