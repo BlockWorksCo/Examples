@@ -9,8 +9,8 @@
 
 
 #ifdef PREPROCESSOR
-def xxx():
-    return 33
+
+layerList = [(6,'tcpLayer'),(17,'udpLayer'),(11,'arpLayer'),(44,'icmpLayer')]
 #endif
 
 
@@ -19,28 +19,25 @@ def xxx():
 import re
 
 
-def Blaa(objectList, fn):
-    """
-    """
-    return 'blaa'
-    #return  "\nswitch(protocol)\n{\n" + \
-    #        "".join( ["  case %s: %s.%s;break;\n"%(id,obj,fn) for id,obj in objectList] ) + \
-    #        "}\n"
-
-
-
 def ReplaceFn(matchobj):
     if matchobj.group(2) == 'layerList':
-        layerList = [(6,'tcpLayer'),(17,'udpLayer'),(11,'arpLayer'),(44,'icmpLayer')]
-        body    = ['case %s: %s = %s%s\n'%(str(id), matchobj.group(1),str(layer), matchobj.group(4)) for id,layer in layerList]
+        body    = ['case %s: %s = %s%s;break;\n'%(str(id), matchobj.group(1),str(layer), matchobj.group(4)) for id,layer in layerList]
+        body    = ''.join(body)
+        return '\nswitch(%s)\n{\n%s\n}\n'%(matchobj.group(3), body)
+    else:
+        return matchobj.group(0)
+
+def ReplaceFn2(matchobj):
+    if matchobj.group(1) == 'layerList':
+        body    = ['case %s: %s%s;break;\n'%(str(id),str(layer), matchobj.group(3)) for id,layer in layerList]
         body    = ''.join(body)
         return '\nswitch(%s)\n{\n%s\n}\n'%(matchobj.group(2), body)
     else:
         return matchobj.group(0)
 
-x = 2
 
 sourceText = re.sub('(\w+?)\s*?\=\s*?(\w+)\[(.*?)\](.*?);', ReplaceFn, sourceText)
+sourceText = re.sub('(\w+)\[(.*?)\](.*?);', ReplaceFn2, sourceText)
 
 #endif
 
@@ -68,10 +65,6 @@ public:
         icmpLayer(_icmpLayer),
         arpLayer(_arpLayer)
     {
-        !layerList = [(6,'tcpLayer'),(17,'udpLayer'),(11,'arpLayer'),(44,'icmpLayer')]!
-        !y = 4!
-        !x * y!
-        !xxx()!
         int     blaa[10] = "abd";
         x = blaa[2];
     }
