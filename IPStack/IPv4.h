@@ -8,18 +8,23 @@
 
 
 
+
 #ifdef PREPROCESSOR
 
 layerList = [(6,'tcpLayer'),(17,'udpLayer'),(11,'arpLayer'),(44,'icmpLayer')]
-#endif
-
-
-#ifdef PREPROCESSOR
 
 import re
 
 
 def ReplaceFn(matchobj):
+    newDict             = {}
+    newDict['comment']  = matchobj.group(0)
+    newDict['lValue']   = matchobj.group(1)
+    newDict['list']     = matchobj.group(2)
+    newDict['param']    = matchobj.group(3)
+    newDict['rValue']   = matchobj.group(4)
+    fnList.append(newDict)
+
     if matchobj.group(2) == 'layerList':
         body    = ['case %s: %s = %s%s;break;\n'%(str(id), matchobj.group(1),str(layer), matchobj.group(4)) for id,layer in layerList]
         body    = ''.join(body)
@@ -28,6 +33,14 @@ def ReplaceFn(matchobj):
         return matchobj.group(0)
 
 def ReplaceFn2(matchobj):
+    newDict             = {}
+    newDict['lValue']   = ''
+    newDict['comment']  = matchobj.group(0)
+    newDict['list']     = matchobj.group(1)
+    newDict['param']    = matchobj.group(2)
+    newDict['rValue']   = matchobj.group(3)
+    fnList.append(newDict)
+
     if matchobj.group(1) == 'layerList':
         body    = ['case %s: %s%s;break;\n'%(str(id),str(layer), matchobj.group(3)) for id,layer in layerList]
         body    = ''.join(body)
@@ -36,8 +49,17 @@ def ReplaceFn2(matchobj):
         return matchobj.group(0)
 
 
-sourceText = re.sub('(\w+?)\s*?\=\s*?(\w+)\[(.*?)\](.*?);', ReplaceFn, sourceText)
-sourceText = re.sub('(\w+)\[(.*?)\](.*?);', ReplaceFn2, sourceText)
+fnList  = []
+sourceText  = re.sub('(\w+?)\s*?\=\s*?(\w+)\[(.*?)\](.*?);', ReplaceFn, sourceText)
+sourceText  = re.sub('(\w+)\[(.*?)\](.*?);', ReplaceFn2, sourceText)
+
+for fn in fnList:
+    body    = ['    case %s: %s = %s%s;break;\n'%(str(id), fn['lValue'],str(layer),fn['rValue']) for id,layer in layerList]
+    body    = ''.join(body)
+    body    = '\n  switch(%s)\n  {\n%s\n  }\n'%(fn['param'], body)
+    sourceText  = sourceText+'//%s'%(fn['comment']) + '\nvoid Blaa()\n{'+body+'}\n\n'
+
+
 
 #endif
 
