@@ -26,11 +26,12 @@ public:
     //
     //
     //
-    IPv4(TCPTransportLayerType& _tcpLayer, void (*_newPacket)(int), PacketProcessingState (*_layerState)(int)  ) :
+    IPv4(TCPTransportLayerType& _tcpLayer, void (*_newPacket)(int), PacketProcessingState (*_layerState)(int) ,void (*_pushIntoLayer)(int, uint8_t) ) :
         packetState(Unknown),
         tcpLayer(_tcpLayer),
         newPacket(_newPacket),
-        layerState(_layerState)
+        layerState(_layerState),
+        pushIntoLayer(_pushIntoLayer)
     {
     }
 
@@ -179,8 +180,7 @@ public:
                 PacketProcessingState state   = layerState(protocol);
                 if(state != Rejected)
                 {
-                    //sushIntoLayer
-                    //layerList[protocolIndex].PushInto(byte);
+                    pushIntoLayer(protocol, byte);
                 }
                 
                 break;
@@ -231,6 +231,7 @@ private:
     TCPTransportLayerType&  tcpLayer;
     void                    (*newPacket)(int);
     PacketProcessingState   (*layerState)(int);
+    void                    (*pushIntoLayer)(int, uint8_t);
 
 };
 
