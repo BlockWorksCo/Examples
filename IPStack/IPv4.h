@@ -26,12 +26,12 @@ public:
     //
     //
     //
-    IPv4(TCPTransportLayerType& _tcpLayer, void (*_newPacket)(int), PacketProcessingState (*_layerState)(int) ,void (*_pushIntoLayer)(int, uint8_t) ) :
+    IPv4( void (*_newPacket)(int), PacketProcessingState (*_layerState)(int) ,void (*_pushIntoLayer)(int, uint8_t), uint8_t (*_pullFromLayer)(int, bool& ) ) :
         packetState(Unknown),
-        tcpLayer(_tcpLayer),
         newPacket(_newPacket),
         layerState(_layerState),
-        pushIntoLayer(_pushIntoLayer)
+        pushIntoLayer(_pushIntoLayer),
+        pullFromLayer(_pullFromLayer)
     {
     }
 
@@ -209,7 +209,7 @@ public:
         //
         // TODO: Pull from all upper layers, one whole packet at a time.
         //
-        return tcpLayer.PullFrom( dataAvailable );
+        return pullFromLayer(protocol, dataAvailable );
     }
 
 private:
@@ -228,10 +228,10 @@ private:
     uint32_t                sourceIP;
     uint8_t                 protocol;
 
-    TCPTransportLayerType&  tcpLayer;
     void                    (*newPacket)(int);
     PacketProcessingState   (*layerState)(int);
     void                    (*pushIntoLayer)(int, uint8_t);
+    uint8_t                 (*pullFromLayer)(int, bool& );
 
 };
 
