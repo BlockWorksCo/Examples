@@ -31,9 +31,13 @@ public:
 	HelloWorldPageGenerator() :
         position(0),
         packetState(Unknown),
-        tcpState(TCPTransportLayerType::LISTEN)
+        tcpState(TCPTransportLayerType::LISTEN),
+        nextTCPState(TCPTransportLayerType::LISTEN)
 	{
-		
+        //
+        // Close the port to restart in LISTEN/PassiveOpen mode.
+        //
+        Close();
 	}
 
 
@@ -88,9 +92,10 @@ public:
     //
     //
     //
-    TCPState GetTCPState()
+    void GetTCPState(TCPState& currentState, TCPState& nextState)
     {
-    	return tcpState;
+    	currentState       = tcpState;
+        nextState           = nextTCPState;
     }
 
     void SetTCPState(TCPState newState)
@@ -114,12 +119,26 @@ public:
 
 private:
 
+
+    //
+    //
+    //
+    void Close()
+    {
+        //
+        // Start off in the passive-open state.
+        // We wait for a SYN to be received, then send out a SYN packet.
+        //
+        tcpState    = TCPTransportLayerType::LISTEN;    
+    }
+
     //
     //
     //
     uint16_t                position;
     PacketProcessingState   packetState;
     TCPState 				tcpState;
+    TCPState                nextTCPState;
 
 };
 

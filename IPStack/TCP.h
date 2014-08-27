@@ -25,6 +25,8 @@ public:
 
     typedef enum
     {
+        TCP_NONE          = 0x00,
+
         TCP_FIN           = 0x01,
         TCP_SYN           = 0x02,
         TCP_RST           = 0x04,
@@ -60,7 +62,8 @@ public:
 	TCP(ApplicationLayerType& _applicationLayer) :
         position(0),
         packetState(Unknown),
-        applicationLayer(_applicationLayer)
+        applicationLayer(_applicationLayer),
+        packetToSend(TCP_NONE)
 	{
 		
 	}
@@ -210,6 +213,12 @@ public:
                     printf("(TCP) OptionData.\n");
                 }
 
+                //
+                // Walk thru the state machine.
+                //
+                StateMachine();
+
+
                 break;
         }
         
@@ -243,7 +252,10 @@ public:
     //
     void StateMachine()
     {
-        TCPState    currentState    = applicationLayer.GetTCPState();
+        TCPState    currentState;
+        TCPState    nextTCPState;  
+
+        applicationLayer.GetTCPState(currentState, nextTCPState);
 
         switch(currentState)
         {
@@ -253,6 +265,20 @@ public:
                     //
                     // Send a SynAck packet.
                     //
+                    packetToSend    = TCP_ACK | TCP_SYN;
+                    nextTCPState    = SYN_SENT;
+                }
+
+                break;
+
+            case SYN_SENT:
+                if( (flags&TCP_SYN) != 0)
+                {
+                    //
+                    // Send a SynAck packet.
+                    //
+                    packetToSend    = TCP_ACK;
+                    nextTCPState    = SYN_SENT;
                 }
 
                 if( (flags&TCP_ACK) != 0)
@@ -260,6 +286,7 @@ public:
                     //
                     // Connection established.
                     //
+                    packetToSend    = TCP_NONE;
                     currentState    = ESTABLISHED;
                 }
 
@@ -277,10 +304,26 @@ public:
     //
     uint8_t PullFrom(bool& dataAvailable)
     {
+        uint8_t         byteToSend  = 0x00;
+
+        switch(packetToSend)
+        {
+            case TCP_SYN:
+                dataAvailable   = true;
+                byteToSend      = 0xff;
+                break;
+
+            default:
+                dataAvailable   = false;
+                break;
+        }
+
+        //byteToSend  = applicationLayer.PullFrom( dataAvailable );
+
         //
         // TODO: Pull from all upper layers, one whole packet at a time.
         //
-        return applicationLayer.PullFrom( dataAvailable );
+        return byteToSend;
     }
 
 private:
@@ -295,13 +338,14 @@ private:
     uint16_t                destinationPort;
     uint32_t                sequenceNumber;
     uint32_t                ackNumber;
-    uint8_t                 flags;
+    TCPFlags                flags;
     uint16_t                windowSize;
     uint16_t                checksum;
     uint16_t                urgentPointer;
     uint8_t                 dataOffset;
 
     ApplicationLayerType&   applicationLayer;
+    TCPFlags                packetToSend;
 
 };
 
