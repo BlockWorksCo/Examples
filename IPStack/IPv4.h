@@ -176,9 +176,10 @@ public:
                 //
                 // Data portion of the IP packet.
                 //
-                PacketProcessingState state   = State();
+                PacketProcessingState state   = layerState(protocol);
                 if(state != Rejected)
                 {
+                    //sushIntoLayer
                     //layerList[protocolIndex].PushInto(byte);
                 }
                 
