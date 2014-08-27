@@ -9,60 +9,6 @@
 
 
 
-#ifdef PREPROCESSOR
-
-layerList = [(6,'tcpLayer'),(17,'udpLayer'),(11,'arpLayer'),(44,'icmpLayer')]
-
-import re
-
-
-def ReplaceFn(matchobj):
-    newDict             = {}
-    newDict['comment']  = matchobj.group(0)
-    newDict['lValue']   = matchobj.group(1)
-    newDict['list']     = matchobj.group(2)
-    newDict['param']    = matchobj.group(3)
-    newDict['rValue']   = matchobj.group(4)
-    fnList.append(newDict)
-
-    if matchobj.group(2) == 'layerList':
-        body    = ['case %s: %s = %s%s;break;\n'%(str(id), matchobj.group(1),str(layer), matchobj.group(4)) for id,layer in layerList]
-        body    = ''.join(body)
-        return '\nswitch(%s)\n{\n%s\n}\n'%(matchobj.group(3), body)
-    else:
-        return matchobj.group(0)
-
-def ReplaceFn2(matchobj):
-    newDict             = {}
-    newDict['lValue']   = ''
-    newDict['comment']  = matchobj.group(0)
-    newDict['list']     = matchobj.group(1)
-    newDict['param']    = matchobj.group(2)
-    newDict['rValue']   = matchobj.group(3)
-    fnList.append(newDict)
-
-    if matchobj.group(1) == 'layerList':
-        body    = ['case %s: %s%s;break;\n'%(str(id),str(layer), matchobj.group(3)) for id,layer in layerList]
-        body    = ''.join(body)
-        return '\nswitch(%s)\n{\n%s\n}\n'%(matchobj.group(2), body)
-    else:
-        return matchobj.group(0)
-
-
-fnList  = []
-sourceText  = re.sub('(\w+?)\s*?\=\s*?(\w+)\[(.*?)\](.*?);', ReplaceFn, sourceText)
-sourceText  = re.sub('(\w+)\[(.*?)\](.*?);', ReplaceFn2, sourceText)
-
-for fn in fnList:
-    body    = ['    case %s: %s = %s%s;break;\n'%(str(id), fn['lValue'],str(layer),fn['rValue']) for id,layer in layerList]
-    body    = ''.join(body)
-    body    = '\n  switch(%s)\n  {\n%s\n  }\n'%(fn['param'], body)
-    sourceText  = sourceText+'//%s'%(fn['comment']) + '\nvoid Blaa()\n{'+body+'}\n\n'
-
-
-
-#endif
-
 //
 //
 //
@@ -80,15 +26,11 @@ public:
     //
     //
     //
-    IPv4(TCPTransportLayerType& _tcpLayer, UDPTransportLayerType _udpLayer, ICMPTransportLayerType& _icmpLayer, ARPTransportLayerType& _arpLayer) :
+    IPv4(TCPTransportLayerType& _tcpLayer, void (*_newPacket)(int) ) :
         packetState(Unknown),
         tcpLayer(_tcpLayer),
-        udpLayer(_udpLayer),
-        icmpLayer(_icmpLayer),
-        arpLayer(_arpLayer)
+        newPacket(_newPacket)
     {
-        int     blaa[10] = "abd";
-        x = blaa[2];
     }
 
     //
@@ -225,18 +167,21 @@ public:
 
             case 20:
                 printf("(IPv4) TransportDataStart.\n");
-                layerList[protocolIndex].NewPacket();
+                newPacket(protocol);
+                //layerList[protocolIndex].NewPacket();
             default:
                 printf("(IPv4) data.\n");
 
                 //
                 // Data portion of the IP packet.
                 //
+                /*
                 state = layerList[protocolIndex].State();
                 if(state != Rejected)
                 {
                     layerList[protocolIndex].PushInto(byte);
                 }
+                */
                 
                 break;
         }
@@ -284,9 +229,7 @@ private:
     uint8_t                 protocol;
 
     TCPTransportLayerType&  tcpLayer;
-    UDPTransportLayerType&  udpLayer;
-    ICMPTransportLayerType& icmpLayer;
-    ARPTransportLayerType&  arpLayer;
+    void                    (*newPacket)(int);
 
 };
 
