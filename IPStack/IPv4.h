@@ -26,10 +26,11 @@ public:
     //
     //
     //
-    IPv4(TCPTransportLayerType& _tcpLayer, void (*_newPacket)(int) ) :
+    IPv4(TCPTransportLayerType& _tcpLayer, void (*_newPacket)(int), PacketProcessingState (*_layerState)(int)  ) :
         packetState(Unknown),
         tcpLayer(_tcpLayer),
-        newPacket(_newPacket)
+        newPacket(_newPacket),
+        layerState(_layerState)
     {
     }
 
@@ -168,20 +169,18 @@ public:
             case 20:
                 printf("(IPv4) TransportDataStart.\n");
                 newPacket(protocol);
-                //layerList[protocolIndex].NewPacket();
+                // Fallthrough intented.
             default:
                 printf("(IPv4) data.\n");
 
                 //
                 // Data portion of the IP packet.
                 //
-                /*
-                state = layerList[protocolIndex].State();
+                PacketProcessingState state   = State();
                 if(state != Rejected)
                 {
-                    layerList[protocolIndex].PushInto(byte);
+                    //layerList[protocolIndex].PushInto(byte);
                 }
-                */
                 
                 break;
         }
@@ -230,6 +229,7 @@ private:
 
     TCPTransportLayerType&  tcpLayer;
     void                    (*newPacket)(int);
+    PacketProcessingState   (*layerState)(int);
 
 };
 

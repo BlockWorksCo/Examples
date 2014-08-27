@@ -26,11 +26,12 @@ STACK_TYPES_BREAKOUT;
 UDPTransportLayerType   udpLayer;
 ARPTransportLayerType	arpLayer;
 ICMPTransportLayerType	icmpLayer;
-auto NewPacket = [](int protocolType) -> void { switch(protocolType) { case 1: udpLayer.NewPacket();break; case 2:arpLayer.NewPacket();break; case 3:icmpLayer.NewPacket();break; } };
+auto NewPacket 	= [](int protocolType) -> void { switch(protocolType) { case 1: udpLayer.NewPacket();break; case 2:arpLayer.NewPacket();break; case 3:icmpLayer.NewPacket();break; } };
+auto LayerState = [](int protocolType) -> PacketProcessingState { switch(protocolType) { case 1: return udpLayer.State();break; case 2:return arpLayer.State();break; case 3:return icmpLayer.State();break; default:return Rejected;break;} };
 
 ApplicationLayerType    tcpApplicationLayer;
 TCPTransportLayerType   tcpLayer(tcpApplicationLayer);
-InternetLayerType       internetLayer(tcpLayer, NewPacket);
+InternetLayerType       internetLayer(tcpLayer, NewPacket, LayerState);
 LinkLayerType           linkLayer(internetLayer);
 
 
