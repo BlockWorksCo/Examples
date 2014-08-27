@@ -218,6 +218,11 @@ public:
                 //
                 StateMachine();
 
+                //
+                // Reset the outputput packet generation while we're still receiving.
+                //
+                outputPosition  = 0;
+
 
                 break;
         }
@@ -306,6 +311,16 @@ public:
     {
         uint8_t         byteToSend  = 0x00;
 
+        switch(outputPosition)
+        {
+            case 0:
+                byteToSend  = 0xab;
+                break;
+            default:
+                byteToSend  = 0xff;
+                break;
+        }
+#if 0
         switch(packetToSend)
         {
             case TCP_SYN:
@@ -317,8 +332,10 @@ public:
                 dataAvailable   = false;
                 break;
         }
-
+#endif
         //byteToSend  = applicationLayer.PullFrom( dataAvailable );
+
+        outputPosition++;
 
         //
         // TODO: Pull from all upper layers, one whole packet at a time.
@@ -346,6 +363,7 @@ private:
 
     ApplicationLayerType&   applicationLayer;
     TCPFlags                packetToSend;
+    uint16_t                outputPosition;
 
 };
 
