@@ -211,24 +211,30 @@ public:
     {
         bool            dataAvailableFromAbove  = false;
         uint8_t         byteToTransmit          = 0x00;
-        const uint16_t  sizeofTCPHeader         = 20;
-        uint16_t        length                  = 0x0000;
-        const uint8_t   TTL                     = 0x8;
-        uint8_t         protocol                = 0x06;
+
+        const uint8_t   DSCP                    = 0x00;                                 // ununsed.
+        const uint16_t  sizeofTCPHeader         = 20;                                   // standard/minimum size.
+        uint16_t        length                  = 0x0000;                               // unknown.
+        const uint8_t   TTL                     = 0x8;                                  // Seconds/hops
+        uint8_t         protocol                = 0x06;                                 // 6=TCP, 11=UDP, etc...
         uint16_t        headerChecksum          = 0x0000;
-        uint32_t        sourceIP                = 0x00112233;
+        const uint32_t  sourceIP                = 0x00112233;                           // us... static.
         uint32_t        destIP                  = 0x44556677;
+        const uint16_t  fragmentationID         = 0x0000;                               // unused.
+        const uint8_t   versionAndIHL           = (0x04 << 4)| (sizeofTCPHeader/4);     // IPv4 + 20 byte header.
+        const uint8_t   fragmentationFlags      = 0x02;                                 // Dont Fragment.
+        const uint8_t   fragmentationOffset     = 0x00;                                 // unused.
 
         if( position < sizeofTCPHeader )
         {
             switch(position)
             {
                 case 0:
-                    byteToTransmit      = 0x40 | (sizeofTCPHeader/4); // IPv4 & header length.
+                    byteToTransmit      = versionAndIHL;
                     break;
 
                 case 1:
-                    byteToTransmit      = 0x00; // DSCP
+                    byteToTransmit      = DSCP;
                     break;
 
                 case 2:
@@ -240,19 +246,19 @@ public:
                     break;
 
                 case 4:
-                    byteToTransmit      = 0xff; // ID
+                    byteToTransmit      = fragmentationID >> 16; // ID
                     break;
 
                 case 5:
-                    byteToTransmit      = 0xff; // ID
+                    byteToTransmit      = fragmentationID & 0xff; // ID
                     break;
 
                 case 6:
-                    byteToTransmit      = 0x02; // Fragmentation flags 0x1 = dont fragment.
+                    byteToTransmit      = fragmentationFlags; // Fragmentation flags 0x1 = dont fragment.
                     break;
 
                 case 7:
-                    byteToTransmit      = 0x00; // Fragmentation offset.
+                    byteToTransmit      = fragmentationOffset; // Fragmentation offset.
                     break;
 
                 case 8:
