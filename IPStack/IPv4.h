@@ -221,9 +221,17 @@ public:
         const uint8_t   fragmentationOffset     = 0x00;                                 // unused.
         const uint8_t   TTL                     = 0x8;                                  // Seconds/hops
         uint8_t         protocol                = 0x06;                                 // 6=TCP, 11=UDP, etc...
-        uint16_t        headerChecksum          = 0x0000;                               // calculated... dynamically.
         const uint32_t  sourceIP                = 0x00112233;                           // us... static.
         uint32_t        destIP                  = 0x44556677;                           // target... dynamic.
+        uint16_t        headerChecksum          = ((versionAndIHL<<8) | DSCP) + 
+                                                  length + 
+                                                  fragmentationID +
+                                                  ((fragmentationFlags<<8) | fragmentationOffset) +
+                                                  ((TTL<<8) | protocol) +
+                                                  (sourceIP >> 16) +
+                                                  (sourceIP & 0xffff) + 
+                                                  (destIP >> 16) +
+                                                  (destIP & 0xffff);
 
         if( position < sizeofTCPHeader )
         {
@@ -330,6 +338,14 @@ public:
 
 private:
 
+    //
+    //
+    //
+    typedef struct
+    {
+        uint8_t             protocol;
+        uint32_t            ip;    
+    } PacketState;
 
     //
     //
