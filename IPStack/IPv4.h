@@ -211,14 +211,100 @@ public:
     {
         bool            dataAvailableFromAbove  = false;
         uint8_t         byteToTransmit          = 0x00;
-        const uint16_t  sizeofTCPHeader         = 0x40;
+        const uint16_t  sizeofTCPHeader         = 20;
+        uint16_t        length                  = 0x0000;
+        const uint8_t   TTL                     = 0x8;
+        uint8_t         protocol                = 0x06;
+        uint16_t        headerChecksum          = 0x0000;
+        uint32_t        sourceIP                = 0x00112233;
+        uint32_t        destIP                  = 0x44556677;
 
         if( position < sizeofTCPHeader )
         {
             switch(position)
             {
                 case 0:
-                    byteToTransmit  = 0xff;
+                    byteToTransmit      = 0x40 | (sizeofTCPHeader/4); // IPv4 & header length.
+                    break;
+
+                case 1:
+                    byteToTransmit      = 0x00; // DSCP
+                    break;
+
+                case 2:
+                    byteToTransmit      = length >> 8; // length ms
+                    break;
+
+                case 3:
+                    byteToTransmit      = length & 0xff; // length ls
+                    break;
+
+                case 4:
+                    byteToTransmit      = 0xff; // ID
+                    break;
+
+                case 5:
+                    byteToTransmit      = 0xff; // ID
+                    break;
+
+                case 6:
+                    byteToTransmit      = 0x02; // Fragmentation flags 0x1 = dont fragment.
+                    break;
+
+                case 7:
+                    byteToTransmit      = 0x00; // Fragmentation offset.
+                    break;
+
+                case 8:
+                    byteToTransmit      = TTL;
+                    break;
+
+                case 9:
+                    byteToTransmit      = protocol;
+                    break;
+
+                case 10:
+                    byteToTransmit      =  headerChecksum >> 8;
+                    break;
+
+                case 11:
+                    byteToTransmit      = headerChecksum & 0xff;
+                    break;
+
+                case 12:
+                    byteToTransmit      = sourceIP >> 24;
+                    break;
+
+                case 13:
+                    byteToTransmit      = (sourceIP >> 16) & 0xff;
+                    break;
+
+                case 14:
+                    byteToTransmit      = (sourceIP >> 8) & 0xff;
+                    break;
+
+                case 15:
+                    byteToTransmit      = sourceIP & 0xff;
+                    break;
+
+                case 16:
+                    // Dest IP.
+                    byteToTransmit      = destIP >> 24;
+                    break;
+
+                case 17:
+                    // Dest IP.
+                    byteToTransmit      = (destIP >> 16) & 0xff;
+                    break;
+
+                case 18:
+                    // Dest IP.
+                    byteToTransmit      = (destIP >> 8) & 0xff;
+                    break;
+
+                case 19:
+                    // Dest IP.
+                    byteToTransmit      = destIP >> 24;
                     break;
 
                 default:
@@ -228,14 +314,11 @@ public:
         else
         {
             //
-            //
+            // Not the header, lets pull the data from the layer above...
             //
             byteToTransmit  = pullFromLayer(protocol, dataAvailableFromAbove, position-sizeofTCPHeader );            
         }
 
-        //
-        // TODO: Pull from all upper layers, one whole packet at a time.
-        //
         return byteToTransmit;
     }
 
