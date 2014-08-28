@@ -211,19 +211,19 @@ public:
     {
         bool            dataAvailableFromAbove  = false;
         uint8_t         byteToTransmit          = 0x00;
-
-        const uint8_t   DSCP                    = 0x00;                                 // ununsed.
         const uint16_t  sizeofTCPHeader         = 20;                                   // standard/minimum size.
-        uint16_t        length                  = 0x0000;                               // unknown.
-        const uint8_t   TTL                     = 0x8;                                  // Seconds/hops
-        uint8_t         protocol                = 0x06;                                 // 6=TCP, 11=UDP, etc...
-        uint16_t        headerChecksum          = 0x0000;
-        const uint32_t  sourceIP                = 0x00112233;                           // us... static.
-        uint32_t        destIP                  = 0x44556677;
-        const uint16_t  fragmentationID         = 0x0000;                               // unused.
+
         const uint8_t   versionAndIHL           = (0x04 << 4)| (sizeofTCPHeader/4);     // IPv4 + 20 byte header.
+        const uint8_t   DSCP                    = 0x00;                                 // ununsed.
+        uint16_t        length                  = 0x0000;                               // unknown. Assume a constant size greater than the actual size and pad with zeroes. Checksum is not affected by zeroes.
+        const uint16_t  fragmentationID         = 0x0000;                               // unused.
         const uint8_t   fragmentationFlags      = 0x02;                                 // Dont Fragment.
         const uint8_t   fragmentationOffset     = 0x00;                                 // unused.
+        const uint8_t   TTL                     = 0x8;                                  // Seconds/hops
+        uint8_t         protocol                = 0x06;                                 // 6=TCP, 11=UDP, etc...
+        uint16_t        headerChecksum          = 0x0000;                               // calculated... dynamically.
+        const uint32_t  sourceIP                = 0x00112233;                           // us... static.
+        uint32_t        destIP                  = 0x44556677;                           // target... dynamic.
 
         if( position < sizeofTCPHeader )
         {
@@ -238,27 +238,27 @@ public:
                     break;
 
                 case 2:
-                    byteToTransmit      = length >> 8; // length ms
+                    byteToTransmit      = length >> 8;
                     break;
 
                 case 3:
-                    byteToTransmit      = length & 0xff; // length ls
+                    byteToTransmit      = length & 0xff;
                     break;
 
                 case 4:
-                    byteToTransmit      = fragmentationID >> 16; // ID
+                    byteToTransmit      = fragmentationID >> 16;
                     break;
 
                 case 5:
-                    byteToTransmit      = fragmentationID & 0xff; // ID
+                    byteToTransmit      = fragmentationID & 0xff;
                     break;
 
                 case 6:
-                    byteToTransmit      = fragmentationFlags; // Fragmentation flags 0x1 = dont fragment.
+                    byteToTransmit      = fragmentationFlags; 
                     break;
 
                 case 7:
-                    byteToTransmit      = fragmentationOffset; // Fragmentation offset.
+                    byteToTransmit      = fragmentationOffset;
                     break;
 
                 case 8:
@@ -270,7 +270,7 @@ public:
                     break;
 
                 case 10:
-                    byteToTransmit      =  headerChecksum >> 8;
+                    byteToTransmit      = headerChecksum >> 8;
                     break;
 
                 case 11:
