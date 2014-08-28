@@ -157,9 +157,10 @@ public:
             //
             // Form the new packet.
             //
+            i   = 0;
             do
             {
-                outbuf[i]   = internetLayer.PullFrom( dataAvailable );
+                outbuf[i]   = internetLayer.PullFrom( dataAvailable, i );
                 if(dataAvailable == true)
                 {
                     i++;

@@ -26,7 +26,10 @@ public:
     //
     //
     //
-    IPv4( void (*_newPacket)(int), PacketProcessingState (*_layerState)(int) ,void (*_pushIntoLayer)(int, uint8_t), uint8_t (*_pullFromLayer)(int, bool& ) ) :
+    IPv4(   void (*_newPacket)(int), 
+            PacketProcessingState (*_layerState)(int),
+            void (*_pushIntoLayer)(int, uint8_t), 
+            uint8_t (*_pullFromLayer)(int, bool&,  uint16_t) ) :
         packetState(Unknown),
         newPacket(_newPacket),
         layerState(_layerState),
@@ -204,12 +207,36 @@ public:
     //
     // Pull some packet data out of the processor for transmission.
     //
-    uint8_t PullFrom(bool& dataAvailable)
+    uint8_t PullFrom(bool& dataAvailable, uint16_t position)
     {
+        bool            dataAvailableFromAbove  = false;
+        uint8_t         byteToTransmit          = 0x00;
+        const uint16_t  sizeofTCPHeader         = 0x40;
+
+        if( position < sizeofTCPHeader )
+        {
+            switch(position)
+            {
+                case 0:
+                    byteToTransmit  = 0xff;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            //
+            //
+            //
+            byteToTransmit  = pullFromLayer(protocol, dataAvailableFromAbove, position-sizeofTCPHeader );            
+        }
+
         //
         // TODO: Pull from all upper layers, one whole packet at a time.
         //
-        return pullFromLayer(protocol, dataAvailable );
+        return byteToTransmit;
     }
 
 private:
@@ -231,7 +258,7 @@ private:
     void                    (*newPacket)(int);
     PacketProcessingState   (*layerState)(int);
     void                    (*pushIntoLayer)(int, uint8_t);
-    uint8_t                 (*pullFromLayer)(int, bool& );
+    uint8_t                 (*pullFromLayer)(int, bool&, uint16_t );
 
 };
 

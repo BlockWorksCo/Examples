@@ -108,7 +108,7 @@ public:
     //
     // Pull some packet data out of the processor for transmission.
     //
-    uint8_t PullFrom(bool& dataAvailable)
+    uint8_t PullFrom(bool& dataAvailable, uint16_t position)
     {
         //
         // TODO: Pull from all upper layers, one whole packet at a time.

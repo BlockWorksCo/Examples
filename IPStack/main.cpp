@@ -29,7 +29,7 @@ ICMPTransportLayerType	icmpLayer;
 auto NewPacket 		= [](int protocolType) -> void { switch(protocolType) { case 1: udpLayer.NewPacket();break; case 2:arpLayer.NewPacket();break; case 3:icmpLayer.NewPacket();break; } };
 auto LayerState 	= [](int protocolType) -> PacketProcessingState { switch(protocolType) { case 1: return udpLayer.State();break; case 2:return arpLayer.State();break; case 3:return icmpLayer.State();break; default:return Rejected;break;} };
 auto PushIntoLayer 	= [](int protocolType, uint8_t byte) -> void { switch(protocolType) { case 1: udpLayer.PushInto(byte);break; case 2:arpLayer.PushInto(byte);break; case 3:icmpLayer.PushInto(byte);break; } };
-auto PullFromLayer 	= [](int protocolType, bool& dataAvailable) -> uint8_t { switch(protocolType) { case 1:return udpLayer.PullFrom(dataAvailable);break; case 2:return arpLayer.PullFrom(dataAvailable);break; case 3:return icmpLayer.PullFrom(dataAvailable);break; default:dataAvailable=false;return 0;break;} };
+auto PullFromLayer 	= [](int protocolType, bool& dataAvailable, uint16_t position) -> uint8_t { switch(protocolType) { case 1:return udpLayer.PullFrom(dataAvailable,position);break; case 2:return arpLayer.PullFrom(dataAvailable,position);break; case 3:return icmpLayer.PullFrom(dataAvailable,position);break; default:dataAvailable=false;return 0;break;} };
 
 ApplicationLayerType    tcpApplicationLayer;
 TCPTransportLayerType   tcpLayer(tcpApplicationLayer);

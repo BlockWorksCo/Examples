@@ -307,7 +307,7 @@ public:
     //
     // Pull some packet data out of the processor for transmission.
     //
-    uint8_t PullFrom(bool& dataAvailable)
+    uint8_t PullFrom(bool& dataAvailable, uint16_t position)
     {
         uint8_t         byteToSend  = 0x00;
 
