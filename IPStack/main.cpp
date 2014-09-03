@@ -40,7 +40,7 @@ auto IPv4PullFromLayer  = [](int protocolType, bool& dataAvailable, uint16_t pos
 
 
 InternetLayerType       internetLayer( IPv4NewPacket, IPv4LayerState, IPv4PushIntoLayer, IPv4PullFromLayer);
-LinkLayerType           linkLayer(internetLayer, "../Traces/HTTPGET.pcap");
+LinkLayerType           linkLayer(internetLayer, "./Traces/HTTPGET.pcap");
 
 
 

@@ -22,6 +22,22 @@
 
 
 
+#define PCAP_VERSION_MAJOR 2
+#define PCAP_VERSION_MINOR 4
+
+#define PCAP_ERRBUF_SIZE 256
+
+/*
+ * Compatibility for systems that have a bpf.h that
+ * predates the bpf typedefs for 64-bit support.
+ */
+#if BPF_RELEASE - 0 < 199406
+typedef int bpf_int32;
+typedef u_int bpf_u_int32;
+#endif
+
+
+
 
 
 //
@@ -57,24 +73,32 @@ public:
             printf("PCAP device handle: %d", fd);
         }
 
+        //
+        //
+        //
+        int r   = read(fd, &fileHeader, sizeof(fileHeader));
+        printf("r: %d\n", r);
+        printf("magic %04d\n", fileHeader.magic);
+        printf("major %04d\n", fileHeader.version_major);
+        printf("minor %04d\n", fileHeader.version_minor);
+#if 0
+        bpf_u_int32 magic;
+        u_short version_major;
+        u_short version_minor;
+        bpf_int32 thiszone; /* gmt to local correction */
+        bpf_u_int32 sigfigs;  /* accuracy of timestamps */
+        bpf_u_int32 snaplen;  /* max length saved portion of each pkt */
+        bpf_u_int32 linktype; /* data link type (LINKTYPE_*) */
+#endif
     }
 
 
 
     void Iterate()
     {
-        fd_set          fdset;
-        struct timeval  tv;
-        int             ret;
+        pcap_pkthdr     packetHeader;
 
-        tv.tv_sec       = 0;
-        tv.tv_usec      = 500000;
-        FD_ZERO(&fdset);
-        FD_SET(fd, &fdset);
-
-        printf("Waiting for data (%d)...\n",fd);
-        ret = select(fd + 1, &fdset, NULL, NULL, &tv);
-        if(ret == 0)
+        if(0)
         {
             //
             // Timeout.
@@ -92,8 +116,8 @@ public:
             //
             // Data available.
             //
-
-            bytes_left = read(fd, inbuf, sizeof(inbuf));
+            int r = read(fd, &packetHeader, sizeof(packetHeader));
+            bytes_left = read(fd, inbuf, packetHeader.caplen);
             if(bytes_left == -1)
             {   
                 perror("PCAP: dev_get: read\n");
@@ -103,7 +127,7 @@ public:
                 //
                 // Packet received, send it up the stack.
                 //
-                printf("<got %d bytes from tun>\n",bytes_left);
+                printf("<got %d bytes from pcap>\n",bytes_left);
                 printf("<");
                 internetLayer.NewPacket();
                 for(int i=0; i<bytes_left; i++)
@@ -173,7 +197,76 @@ public:
 
 private:
 
+    /*
+     * The first record in the file contains saved values for some
+     * of the flags used in the printout phases of tcpdump.
+     * Many fields here are 32 bit ints so compilers won't insert unwanted
+     * padding; these files need to be interchangeable across architectures.
+     *
+     * Do not change the layout of this structure, in any way (this includes
+     * changes that only affect the length of fields in this structure).
+     *
+     * Also, do not change the interpretation of any of the members of this
+     * structure, in any way (this includes using values other than
+     * LINKTYPE_ values, as defined in "savefile.c", in the "linktype"
+     * field).
+     *
+     * Instead:
+     *
+     *  introduce a new structure for the new format, if the layout
+     *  of the structure changed;
+     *
+     *  send mail to "tcpdump-workers@tcpdump.org", requesting a new
+     *  magic number for your new capture file format, and, when
+     *  you get the new magic number, put it in "savefile.c";
+     *
+     *  use that magic number for save files with the changed file
+     *  header;
+     *
+     *  make the code in "savefile.c" capable of reading files with
+     *  the old file header as well as files with the new file header
+     *  (using the magic number to determine the header format).
+     *
+     * Then supply the changes to "patches@tcpdump.org", so that future
+     * versions of libpcap and programs that use it (such as tcpdump) will
+     * be able to read your new capture file format.
+     */
+    struct pcap_file_header 
+    {
+        bpf_u_int32 magic;
+        u_short version_major;
+        u_short version_minor;
+        bpf_int32 thiszone; /* gmt to local correction */
+        bpf_u_int32 sigfigs;  /* accuracy of timestamps */
+        bpf_u_int32 snaplen;  /* max length saved portion of each pkt */
+        bpf_u_int32 linktype; /* data link type (LINKTYPE_*) */
+    };
+
+    /*
+     * Each packet in the dump file is prepended with this generic header.
+     * This gets around the problem of different headers for different
+     * packet interfaces.
+     */
+    struct pcap_pkthdr 
+    {
+        struct timeval ts;  /* time stamp */
+        bpf_u_int32 caplen; /* length of portion present */
+        bpf_u_int32 len;  /* length this packet (off wire) */
+    };
+
+    /*
+     * As returned by the pcap_stats()
+     */
+    struct pcap_stat 
+    {
+        u_int ps_recv;    /* number of packets received */
+        u_int ps_drop;    /* number of packets dropped */
+        u_int ps_ifdrop;  /* drops by interface XXX not yet supported */
+    };
+
     InternetLayerType&  internetLayer;
+
+    struct pcap_file_header fileHeader;
 
     int             dropFlag;
     int             fd;
