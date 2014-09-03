@@ -302,22 +302,18 @@ public:
                     break;
 
                 case 16:
-                    // Dest IP.
                     byteToTransmit      = destIP >> 24;
                     break;
 
                 case 17:
-                    // Dest IP.
                     byteToTransmit      = (destIP >> 16) & 0xff;
                     break;
 
                 case 18:
-                    // Dest IP.
                     byteToTransmit      = (destIP >> 8) & 0xff;
                     break;
 
                 case 19:
-                    // Dest IP.
                     byteToTransmit      = destIP >> 24;
                     break;
 

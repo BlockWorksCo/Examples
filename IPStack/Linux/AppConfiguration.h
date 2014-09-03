@@ -23,6 +23,7 @@ typedef enum
 #include <stdint.h>
 
 #include "TUN.h"
+#include "PCAP.h"
 #include "IPv4.h"
 #include "TCP.h"
 #include "UDP.h"
@@ -38,7 +39,7 @@ struct StackType
     typedef TCP<StackType>                      TCPTransportLayerType;
     typedef UDP<StackType>                      UDPTransportLayerType;
     typedef IPv4<StackType>                     InternetLayerType;
-    typedef TUN<StackType>                      LinkLayerType;
+    typedef PCAP<StackType>                     LinkLayerType;
     typedef ARP<StackType>                      ARPTransportLayerType;
     typedef ICMP<StackType>                     ICMPTransportLayerType;
 };
