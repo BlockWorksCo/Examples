@@ -117,36 +117,38 @@ public:
             // Data available.
             //
             int r = read(fd, &packetHeader, sizeof(packetHeader));
-            bytes_left = read(fd, inbuf, packetHeader.caplen);
-            if(bytes_left == -1)
-            {   
-                perror("PCAP: dev_get: read\n");
-            }
-            else
+            if( r != -1 )
             {
-                //
-                // Packet received, send it up the stack.
-                //
-                printf("<got %d bytes from pcap>\n",bytes_left);
-                printf("<");
-                internetLayer.NewPacket();
-                for(int i=0; i<bytes_left; i++)
-                {
-                    if(internetLayer.State() != Rejected)
-                    {
-                        internetLayer.PushInto( inbuf[i] );                        
-                    }
-
-                    printf("%02x ", inbuf[i]);                
+                bytes_left = read(fd, inbuf, packetHeader.caplen);
+                if(bytes_left == -1)
+                {   
+                    perror("PCAP: dev_get: read\n");
                 }
-                printf(">\n");
+                else
+                {
+                    //
+                    // Packet received, send it up the stack.
+                    //
+                    printf("<got %d bytes from pcap>\n",packetHeader.len);
+                    printf("<");
+                    internetLayer.NewPacket();
+                    for(int i=0; i<packetHeader.len; i++)
+                    {
+                        if(internetLayer.State() != Rejected)
+                        {
+                            internetLayer.PushInto( inbuf[i] );                        
+                        }
 
-                //
-                // Send any packets that may have been produced.
-                //
-                PullFromStackAndSend();
+                        printf("%02x ", inbuf[i]);                
+                    }
+                    printf(">\n");
+
+                    //
+                    // Send any packets that may have been produced.
+                    //
+                    PullFromStackAndSend();
+                }
             }
-
         }
     }
 
@@ -198,6 +200,8 @@ public:
 private:
 
     /*
+     * Describe at http://wiki.wireshark.org/Development/LibpcapFileFormat
+     * 
      * The first record in the file contains saved values for some
      * of the flags used in the printout phases of tcpdump.
      * Many fields here are 32 bit ints so compilers won't insert unwanted
