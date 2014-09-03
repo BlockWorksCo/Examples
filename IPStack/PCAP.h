@@ -132,7 +132,7 @@ public:
                     printf("<got %d bytes from pcap>\n",packetHeader.len);
                     printf("<");
                     internetLayer.NewPacket();
-                    for(int i=0; i<packetHeader.len; i++)
+                    for(int i=14; i<packetHeader.len; i++)
                     {
                         if(internetLayer.State() != Rejected)
                         {
