@@ -27,16 +27,6 @@
 
 #define PCAP_ERRBUF_SIZE 256
 
-/*
- * Compatibility for systems that have a bpf.h that
- * predates the bpf typedefs for 64-bit support.
- */
-#if BPF_RELEASE - 0 < 199406
-typedef int bpf_int32;
-typedef u_int bpf_u_int32;
-#endif
-
-
 
 
 
@@ -82,13 +72,13 @@ public:
         printf("major %04d\n", fileHeader.version_major);
         printf("minor %04d\n", fileHeader.version_minor);
 #if 0
-        bpf_u_int32 magic;
+        uint32_t magic;
         u_short version_major;
         u_short version_minor;
-        bpf_int32 thiszone; /* gmt to local correction */
-        bpf_u_int32 sigfigs;  /* accuracy of timestamps */
-        bpf_u_int32 snaplen;  /* max length saved portion of each pkt */
-        bpf_u_int32 linktype; /* data link type (LINKTYPE_*) */
+        int32_t thiszone; /* gmt to local correction */
+        uint32_t sigfigs;  /* accuracy of timestamps */
+        uint32_t snaplen;  /* max length saved portion of each pkt */
+        uint32_t linktype; /* data link type (LINKTYPE_*) */
 #endif
     }
 
@@ -237,13 +227,13 @@ private:
      */
     struct pcap_file_header 
     {
-        bpf_u_int32 magic;
-        u_short version_major;
-        u_short version_minor;
-        bpf_int32 thiszone; /* gmt to local correction */
-        bpf_u_int32 sigfigs;  /* accuracy of timestamps */
-        bpf_u_int32 snaplen;  /* max length saved portion of each pkt */
-        bpf_u_int32 linktype; /* data link type (LINKTYPE_*) */
+        uint32_t    magic;
+        uint16_t    version_major;
+        uint16_t    version_minor;
+        int32_t     thiszone;       /* gmt to local correction */
+        uint32_t    sigfigs;        /* accuracy of timestamps */
+        uint32_t    snaplen;        /* max length saved portion of each pkt */
+        uint32_t    linktype;       /* data link type (LINKTYPE_*) */
     };
 
     /*
@@ -254,19 +244,10 @@ private:
     struct pcap_pkthdr 
     {
         struct timeval ts;  /* time stamp */
-        bpf_u_int32 caplen; /* length of portion present */
-        bpf_u_int32 len;  /* length this packet (off wire) */
+        uint32_t caplen; /* length of portion present */
+        uint32_t len;  /* length this packet (off wire) */
     };
 
-    /*
-     * As returned by the pcap_stats()
-     */
-    struct pcap_stat 
-    {
-        u_int ps_recv;    /* number of packets received */
-        u_int ps_drop;    /* number of packets dropped */
-        u_int ps_ifdrop;  /* drops by interface XXX not yet supported */
-    };
 
     InternetLayerType&  internetLayer;
 
