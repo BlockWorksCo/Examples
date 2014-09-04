@@ -33,7 +33,7 @@ void blaaa(int protocolType)
 int main(int argc, char **argv)
 {
     printf("\nBLOCK::WORKS IPStack Demo\n");
-    
+
     while(true)
     {
         linkLayer.Iterate();    
