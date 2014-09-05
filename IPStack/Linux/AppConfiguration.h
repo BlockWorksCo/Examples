@@ -50,10 +50,18 @@ typedef enum
 
 struct StackType
 {
+    //
+    // TODO: Remove ProtocolType parameter from these...
+    //
     static void IPv4NewPacket(IP::ProtocolType protocolType);
     static PacketProcessingState IPv4LayerState(IP::ProtocolType protocolType);
     static void IPv4PushIntoLayer(IP::ProtocolType protocolType, uint8_t byte);
     static uint8_t IPv4PullFromLayer(IP::ProtocolType protocolType, bool& dataAvailable,  uint16_t position);
+
+    static void LinkNewPacket();
+    static PacketProcessingState LinkLayerState();
+    static void LinkPushIntoLayer(uint8_t byte);
+    static uint8_t LinkPullFromLayer(bool& dataAvailable,  uint16_t position);
 
     typedef HelloWorldPageGenerator<StackType>  ApplicationLayerType;
     typedef TCP<StackType>                      TCPTransportLayerType;
@@ -64,7 +72,11 @@ struct StackType
                     IPv4LayerState, 
                     IPv4PushIntoLayer, 
                     IPv4PullFromLayer >         InternetLayerType;
-    typedef PCAP<StackType>                     LinkLayerType;
+    typedef PCAP<   StackType,
+                    LinkNewPacket, 
+                    LinkLayerState, 
+                    LinkPushIntoLayer, 
+                    LinkPullFromLayer >         LinkLayerType;
     typedef ARP<StackType>                      ARPTransportLayerType;
     typedef ICMP<StackType>                     ICMPTransportLayerType;
 };

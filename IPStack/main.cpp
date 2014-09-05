@@ -43,6 +43,32 @@ uint8_t StackType::IPv4PullFromLayer(IP::ProtocolType protocolType, bool& dataAv
 
 
 //
+// LinkLayer linking.
+//
+void StackType::LinkNewPacket()
+{
+    internetLayer.NewPacket();    
+    arpLayer.NewPacket();
+}
+
+PacketProcessingState StackType::LinkLayerState()
+{
+    return internetLayer.State();
+}
+
+void StackType::LinkPushIntoLayer(uint8_t byte)
+{
+    internetLayer.PushInto(byte);
+    arpLayer.PushInto(byte);
+}
+
+uint8_t StackType::LinkPullFromLayer(bool& dataAvailable,  uint16_t position)
+{ 
+    return internetLayer.PullFrom(dataAvailable, position);
+} 
+
+
+//
 //
 //
 int main(int argc, char **argv)

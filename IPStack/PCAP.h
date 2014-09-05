@@ -33,7 +33,12 @@
 //
 //
 //
-template < typename StackType >
+template <  typename StackType,
+            void (*newPacket)() ,
+            PacketProcessingState (*layerState)(),
+            void (*pushIntoLayer)(uint8_t), 
+            uint8_t (*pullFromLayer)(bool&,  uint16_t)
+            >
 class PCAP
 {
     //
@@ -86,7 +91,8 @@ public:
 
     void Iterate()
     {
-        pcap_pkthdr     packetHeader;
+        pcap_pkthdr         packetHeader;
+        static uint32_t     packetCount     = 0;
 
         if(0)
         {
@@ -119,7 +125,7 @@ public:
                     //
                     // Packet received, send it up the stack.
                     //
-                    printf("<got %d bytes from pcap>\n",packetHeader.len);
+                    printf("<got %d bytes from pcap, packet %d>\n",packetHeader.len, packetCount);
                     printf("<");
                     internetLayer.NewPacket();
                     for(int i=14; i<packetHeader.len; i++)
@@ -142,6 +148,8 @@ public:
                     //
                     PullFromStackAndSend();
                 }
+
+                packetCount++;
             }
         }
     }
@@ -187,8 +195,6 @@ public:
             }
 
         } while(i > 0);
-
-        exit(0);
 
     }
 

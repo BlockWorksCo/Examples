@@ -129,7 +129,7 @@ public:
 
             case 7:
                 sequenceNumber  |= byte;
-                printf("(TCP) sequenceNumber: %d\n", sequenceNumber);
+                printf("(TCP) sequenceNumber: %08x\n", sequenceNumber);
                 break;
 
             case 8:
@@ -146,7 +146,7 @@ public:
 
             case 11:
                 ackNumber  |= byte;
-                printf("(TCP) ackNumber: %d\n", ackNumber);
+                printf("(TCP) ackNumber: %08x\n", ackNumber);
                 break;
 
             case 12:
@@ -157,7 +157,7 @@ public:
 
             case 13:
                 flags   = static_cast<TCPFlags>(byte);
-                printf("(TCP) Flags: %d\n", flags);
+                printf("(TCP) Flags: %02x\n", flags);
                 break;
 
             case 14:
@@ -175,7 +175,7 @@ public:
 
             case 17:
                 checksum  |= byte;
-                printf("(TCP) checksum: %d\n", checksum);
+                printf("(TCP) checksum: %04x\n", checksum);
                 break;
 
             case 18:
@@ -184,7 +184,7 @@ public:
 
             case 19:
                 urgentPointer  |= byte;
-                printf("(TCP) urgentPointer: %d\n", urgentPointer);
+                printf("(TCP) urgentPointer: %02x\n", urgentPointer);
                 break;
 
             case 20:
