@@ -156,7 +156,7 @@ public:
                 break;
 
             case 13:
-                flags   = byte;
+                flags   = static_cast<TCPFlags>(byte);
                 printf("(TCP) Flags: %d\n", flags);
                 break;
 
@@ -270,7 +270,7 @@ public:
                     //
                     // Send a SynAck packet.
                     //
-                    packetToSend    = TCP_ACK | TCP_SYN;
+                    packetToSend    = static_cast<TCPFlags>(TCP_ACK | TCP_SYN);
                     nextTCPState    = SYN_SENT;
                 }
 
@@ -282,7 +282,7 @@ public:
                     //
                     // Send a SynAck packet.
                     //
-                    packetToSend    = TCP_ACK;
+                    packetToSend    = static_cast<TCPFlags>(TCP_ACK);
                     nextTCPState    = SYN_SENT;
                 }
 
@@ -291,7 +291,7 @@ public:
                     //
                     // Connection established.
                     //
-                    packetToSend    = TCP_NONE;
+                    packetToSend    = static_cast<TCPFlags>(TCP_NONE);
                     currentState    = ESTABLISHED;
                 }
 

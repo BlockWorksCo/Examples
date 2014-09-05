@@ -46,13 +46,13 @@ typedef enum
 #include "ICMP.h"
 #include "HelloWorldPageGenerator.h"
 
-void IPv4NewPacket(int protocolType);
-PacketProcessingState IPv4LayerState(int protocolType);
-void IPv4PushIntoLayer(int protocolType, uint8_t byte);
-uint8_t IPv4PullFromLayer(int protocolType, bool& dataAvailable,  uint16_t position);
-
 struct StackType
 {
+    static void IPv4NewPacket(IP::ProtocolType protocolType);
+    static PacketProcessingState IPv4LayerState(IP::ProtocolType protocolType);
+    static void IPv4PushIntoLayer(IP::ProtocolType protocolType, uint8_t byte);
+    static uint8_t IPv4PullFromLayer(IP::ProtocolType protocolType, bool& dataAvailable,  uint16_t position);
+
     typedef HelloWorldPageGenerator<StackType>  ApplicationLayerType;
     typedef TCP<StackType>                      TCPTransportLayerType;
     typedef UDP<StackType>                      UDPTransportLayerType;

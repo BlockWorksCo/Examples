@@ -256,8 +256,8 @@ private:
     int             dropFlag;
     int             fd;
     int             bytes_left;
-    char            inbuf[2048];
-    char            outbuf[2048];
+    uint8_t         inbuf[2048];
+    uint8_t         outbuf[2048];
     int             inptr;
     int             outptr;
 };

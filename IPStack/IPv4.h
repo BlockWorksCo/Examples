@@ -7,16 +7,28 @@
 #define __IPV4_H__
 
 
+//
+//
+//
+struct IP
+{       
+    typedef enum
+    {
+        ICMP    = 1,
+        TCP     = 6,
+        UDP     = 17,
 
+    } ProtocolType;    
+};
 
 //
 //
 //
 template <  typename StackType, 
-            void (*NewPacketType)(int) ,
-            PacketProcessingState (*layerState)(int),
-            void (*pushIntoLayer)(int, uint8_t), 
-            uint8_t (*pullFromLayer)(int, bool&,  uint16_t)
+            void (*newPacket)(IP::ProtocolType) ,
+            PacketProcessingState (*layerState)(IP::ProtocolType),
+            void (*pushIntoLayer)(IP::ProtocolType, uint8_t), 
+            uint8_t (*pullFromLayer)(IP::ProtocolType, bool&,  uint16_t)
             >
 class IPv4
 {
@@ -122,7 +134,7 @@ public:
                 break;
 
             case 9:
-                protocol    = byte;
+                protocol    = static_cast<IP::ProtocolType>(byte);
                 printf("(IPv4) Protocol: %d\n",byte);
                 break;
 
@@ -170,8 +182,8 @@ public:
 
             case 20:
                 printf("(IPv4) TransportDataStart.\n");
-                NewPacketType(protocol);
-                // Fallthrough intented.
+                newPacket(protocol);
+                // Fallthrough intended.
             default:
                 printf("(IPv4) data.\n");
 
@@ -218,7 +230,7 @@ public:
         const uint8_t   fragmentationFlags      = 0x02;                                 // Dont Fragment.
         const uint8_t   fragmentationOffset     = 0x00;                                 // unused.
         const uint8_t   TTL                     = 0x8;                                  // Seconds/hops
-        uint8_t         protocol                = 0x06;                                 // 6=TCP, 11=UDP, etc...
+        IP::ProtocolType  protocol              = IP::TCP;                              // 6=TCP, 11=UDP, etc...
         const uint32_t  sourceIP                = 0x00112233;                           // us... static.
         uint32_t        destIP                  = 0x44556677;                           // target... dynamic.
         uint16_t        headerChecksum          = ((versionAndIHL<<8) | DSCP) + 
@@ -330,6 +342,7 @@ public:
         return byteToTransmit;
     }
 
+
 private:
 
     //
@@ -337,8 +350,9 @@ private:
     //
     typedef struct
     {
-        uint8_t             protocol;
-        uint32_t            ip;    
+        IP::ProtocolType  protocol;
+        uint32_t        ip;    
+
     } PacketState;
 
     //
@@ -352,7 +366,7 @@ private:
     uint8_t                 fragmentFlags;
     uint16_t                headerChecksum;
     uint32_t                sourceIP;
-    uint8_t                 protocol;
+    IP::ProtocolType          protocol;
 
 };
 
