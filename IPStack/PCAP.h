@@ -34,10 +34,11 @@
 //
 //
 template <  typename StackType,
+            void (*idle)(),
             void (*newPacket)() ,
             PacketProcessingState (*layerState)(),
-            void (*pushIntoLayer)(uint8_t), 
-            uint8_t (*pullFromLayer)(bool&,  uint16_t)
+            void (*pushInto)(uint8_t), 
+            uint8_t (*pullFrom)(bool&,  uint16_t)
             >
 class PCAP
 {
@@ -49,8 +50,7 @@ class PCAP
 
 public:
 
-    PCAP(InternetLayerType& _internetLayer, const char* inputFileName) :
-        internetLayer(_internetLayer),
+    PCAP(const char* inputFileName) :
         dropFlag(0)
     {
 
@@ -105,7 +105,7 @@ public:
             //
             PullFromStackAndSend();
 
-            internetLayer.Idle();
+            idle();
         }
         else
         {
@@ -127,13 +127,13 @@ public:
                     //
                     printf("<got %d bytes from pcap, packet %d>\n",packetHeader.len, packetCount);
                     printf("<");
-                    internetLayer.NewPacket();
+                    newPacket();
                     for(int i=14; i<packetHeader.len; i++)
                     {
-                        if(internetLayer.State() != Rejected)
+                        if(layerState() != Rejected)
                         {
                             printf("Accept: %02x ", inbuf[i]);                                            
-                            internetLayer.PushInto( inbuf[i] );                        
+                            pushInto( inbuf[i] );                        
                         }
                         else
                         {
@@ -174,7 +174,7 @@ public:
             i   = 0;
             do
             {
-                outbuf[i]   = internetLayer.PullFrom( dataAvailable, i );
+                outbuf[i]   = pullFrom( dataAvailable, i );
                 if(dataAvailable == true)
                 {
                     i++;
@@ -260,8 +260,6 @@ private:
         uint32_t len;  /* length this packet (off wire) */
     };
 
-
-    InternetLayerType&  internetLayer;
 
     struct pcap_file_header fileHeader;
 

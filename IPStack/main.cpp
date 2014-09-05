@@ -15,7 +15,7 @@ StackType::ApplicationLayerType    tcpApplicationLayer;
 StackType::ARPTransportLayerType   arpLayer;
 StackType::TCPTransportLayerType   tcpLayer(tcpApplicationLayer);
 StackType::InternetLayerType       internetLayer;
-StackType::LinkLayerType           linkLayer(internetLayer, "./Traces/HTTPGET.pcap");
+StackType::LinkLayerType           linkLayer("./Traces/HTTPGET.pcap");
 
 
 //
@@ -45,6 +45,12 @@ uint8_t StackType::IPv4PullFromLayer(IP::ProtocolType protocolType, bool& dataAv
 //
 // LinkLayer linking.
 //
+void StackType::LinkIdle()
+{
+    internetLayer.Idle();    
+    arpLayer.Idle();
+}
+
 void StackType::LinkNewPacket()
 {
     internetLayer.NewPacket();    

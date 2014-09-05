@@ -58,6 +58,7 @@ struct StackType
     static void IPv4PushIntoLayer(IP::ProtocolType protocolType, uint8_t byte);
     static uint8_t IPv4PullFromLayer(IP::ProtocolType protocolType, bool& dataAvailable,  uint16_t position);
 
+    static void LinkIdle();
     static void LinkNewPacket();
     static PacketProcessingState LinkLayerState();
     static void LinkPushIntoLayer(uint8_t byte);
@@ -73,6 +74,7 @@ struct StackType
                     IPv4PushIntoLayer, 
                     IPv4PullFromLayer >         InternetLayerType;
     typedef PCAP<   StackType,
+                    LinkIdle,
                     LinkNewPacket, 
                     LinkLayerState, 
                     LinkPushIntoLayer, 
