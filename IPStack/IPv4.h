@@ -8,10 +8,14 @@
 
 
 //
-//
+// Generic public IP definitions.
 //
 struct IP
 {       
+    //
+    // IANA specified IP protocol numbers.
+    // See: http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
+    //
     typedef enum
     {
         ICMP    = 1,
@@ -21,10 +25,15 @@ struct IP
     } ProtocolType;    
 };
 
+
+
+
 //
-//
+// IPv4 class:
+// Provides all the functionality of the IPv4/internet layer.
 //
 template <  typename StackType, 
+            uint32_t IPAddress,
             void (*newPacket)(IP::ProtocolType) ,
             PacketProcessingState (*layerState)(IP::ProtocolType),
             void (*pushIntoLayer)(IP::ProtocolType, uint8_t), 
@@ -41,7 +50,8 @@ class IPv4
 public:
 
     //
-    //
+    // Constructor for the IPv4 layer. 
+    // Simply resets the stack right now.
     //
     IPv4() :
         packetState(Unknown)
@@ -49,7 +59,8 @@ public:
     }
 
     //
-    //
+    // Idle:
+    // Provided for general timing/timeout behaviour.
     //
     void Idle()
     {
@@ -165,19 +176,31 @@ public:
                 break;
 
             case 16:
-                // Dest IP.
+                if( byte != ((IPAddress>>24)&0xff) )
+                {
+                    NewPacket();
+                }
                 break;
 
             case 17:
-                // Dest IP.
+                if( byte != ((IPAddress>>16)&0xff) )
+                {
+                    NewPacket();
+                }
                 break;
 
             case 18:
-                // Dest IP.
+                if( byte != ((IPAddress>>8)&0xff) )
+                {
+                    NewPacket();
+                }
                 break;
 
             case 19:
-                // Dest IP.
+                if( byte != (IPAddress&0xff) )
+                {
+                    NewPacket();
+                }
                 break;
 
             case 20:
@@ -221,9 +244,9 @@ public:
     {
         bool            dataAvailableFromAbove  = false;
         uint8_t         byteToTransmit          = 0x00;
-        const uint16_t  sizeofTCPHeader         = 20;                                   // standard/minimum size.
+        const uint16_t  sizeofIPHeader          = 20;                                   // standard/minimum size.
 
-        const uint8_t   versionAndIHL           = (0x04 << 4)| (sizeofTCPHeader/4);     // IPv4 + 20 byte header.
+        const uint8_t   versionAndIHL           = (0x04 << 4)| (sizeofIPHeader/4);     // IPv4 + 20 byte header.
         const uint8_t   DSCP                    = 0x00;                                 // ununsed.
         uint16_t        length                  = 0x0000;                               // unknown. Assume a constant size greater than the actual size and pad with zeroes. Checksum is not affected by zeroes.
         const uint16_t  fragmentationID         = 0x0000;                               // unused.
@@ -243,7 +266,7 @@ public:
                                                   (destIP >> 16) +
                                                   (destIP & 0xffff);
 
-        if( position < sizeofTCPHeader )
+        if( position < sizeofIPHeader )
         {
             switch(position)
             {
@@ -336,7 +359,7 @@ public:
             //
             // Not the header, lets pull the data from the layer above...
             //
-            byteToTransmit  = pullFromLayer(protocol, dataAvailableFromAbove, position-sizeofTCPHeader );            
+            byteToTransmit  = pullFromLayer(protocol, dataAvailableFromAbove, position-sizeofIPHeader );            
         }
 
         return byteToTransmit;

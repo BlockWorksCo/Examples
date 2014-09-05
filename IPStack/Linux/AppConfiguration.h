@@ -46,6 +46,8 @@ typedef enum
 #include "ICMP.h"
 #include "HelloWorldPageGenerator.h"
 
+
+
 struct StackType
 {
     static void IPv4NewPacket(IP::ProtocolType protocolType);
@@ -56,7 +58,12 @@ struct StackType
     typedef HelloWorldPageGenerator<StackType>  ApplicationLayerType;
     typedef TCP<StackType>                      TCPTransportLayerType;
     typedef UDP<StackType>                      UDPTransportLayerType;
-    typedef IPv4<StackType, IPv4NewPacket, IPv4LayerState, IPv4PushIntoLayer, IPv4PullFromLayer >              InternetLayerType;
+    typedef IPv4<   StackType, 
+                    0xc0a80279, 
+                    IPv4NewPacket, 
+                    IPv4LayerState, 
+                    IPv4PushIntoLayer, 
+                    IPv4PullFromLayer >         InternetLayerType;
     typedef PCAP<StackType>                     LinkLayerType;
     typedef ARP<StackType>                      ARPTransportLayerType;
     typedef ICMP<StackType>                     ICMPTransportLayerType;

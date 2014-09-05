@@ -6,7 +6,9 @@
 
 
 
-
+//
+// Instantiations.
+//
 StackType::UDPTransportLayerType   udpLayer;
 StackType::ICMPTransportLayerType  icmpLayer;
 StackType::ApplicationLayerType    tcpApplicationLayer;
@@ -16,13 +18,9 @@ StackType::InternetLayerType       internetLayer;
 StackType::LinkLayerType           linkLayer(internetLayer, "./Traces/HTTPGET.pcap");
 
 
-#if 0
-template <typename ...Args> void ForEachLayer(Args... args)
-{
-    switch(protocolType) { case 1: udpLayer.NewPacket();break; case 3:icmpLayer.NewPacket();break; }
-}
-#endif
-
+//
+// IPv4 linking.
+//
 void StackType::IPv4NewPacket(IP::ProtocolType protocolType)
 {
     switch(protocolType) { case IP::TCP:tcpLayer.NewPacket();break; case IP::UDP:udpLayer.NewPacket();break; case IP::ICMP:icmpLayer.NewPacket();break; }
