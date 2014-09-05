@@ -13,18 +13,30 @@ StackType::ApplicationLayerType    tcpApplicationLayer;
 StackType::ARPTransportLayerType   arpLayer;
 StackType::TCPTransportLayerType   tcpLayer(tcpApplicationLayer);
 
-StackType::InternetLayerType       internetLayer(   [](int protocolType) -> PacketProcessingState { switch(protocolType) { case 1: return udpLayer.State();break; case 3:return icmpLayer.State();break; default:return Rejected;break;} }, 
-                                                    [](int protocolType, uint8_t byte) -> void { switch(protocolType) { case 1: udpLayer.PushInto(byte);break; case 3:icmpLayer.PushInto(byte);break; } }, 
-                                                    [](int protocolType, bool& dataAvailable, uint16_t position) -> uint8_t { switch(protocolType) { case 1:return udpLayer.PullFrom(dataAvailable,position);break; case 3:return icmpLayer.PullFrom(dataAvailable,position);break; default:dataAvailable=false;return 0;break;} } );
+StackType::InternetLayerType       internetLayer;
 
 StackType::LinkLayerType           linkLayer(internetLayer, "./Traces/HTTPGET.pcap");
 
 
-void blaaa(int protocolType)
+void IPv4NewPacket(int protocolType)
 {
     switch(protocolType) { case 1: udpLayer.NewPacket();break; case 3:icmpLayer.NewPacket();break; }
 }
 
+PacketProcessingState IPv4LayerState(int protocolType)
+{
+    switch(protocolType) { case 1: return udpLayer.State();break; case 3:return icmpLayer.State();break; default:return Rejected;break;}
+}
+
+void IPv4PushIntoLayer(int protocolType, uint8_t byte)
+{
+    switch(protocolType) { case 1: udpLayer.PushInto(byte);break; case 3:icmpLayer.PushInto(byte);break; }     
+}
+
+uint8_t IPv4PullFromLayer(int protocolType, bool& dataAvailable,  uint16_t position)
+{ 
+    switch(protocolType) { case 1:return udpLayer.PullFrom(dataAvailable,position);break; case 3:return icmpLayer.PullFrom(dataAvailable,position);break; default:dataAvailable=false;return 0;break;}
+} 
 
 
 //

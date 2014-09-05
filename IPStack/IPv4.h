@@ -12,7 +12,12 @@
 //
 //
 //
-template < typename StackType, void (*NewPacketType)(int) >
+template <  typename StackType, 
+            void (*NewPacketType)(int) ,
+            PacketProcessingState (*layerState)(int),
+            void (*pushIntoLayer)(int, uint8_t), 
+            uint8_t (*pullFromLayer)(int, bool&,  uint16_t)
+            >
 class IPv4
 {
     //
@@ -26,13 +31,8 @@ public:
     //
     //
     //
-    IPv4(   PacketProcessingState (*_layerState)(int),
-            void (*_pushIntoLayer)(int, uint8_t), 
-            uint8_t (*_pullFromLayer)(int, bool&,  uint16_t) ) :
-        packetState(Unknown),
-        layerState(_layerState),
-        pushIntoLayer(_pushIntoLayer),
-        pullFromLayer(_pullFromLayer)
+    IPv4() :
+        packetState(Unknown)
     {
     }
 
@@ -353,10 +353,6 @@ private:
     uint16_t                headerChecksum;
     uint32_t                sourceIP;
     uint8_t                 protocol;
-
-    PacketProcessingState   (*layerState)(int);
-    void                    (*pushIntoLayer)(int, uint8_t);
-    uint8_t                 (*pullFromLayer)(int, bool&, uint16_t );
 
 };
 
