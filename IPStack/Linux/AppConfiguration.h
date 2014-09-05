@@ -31,14 +31,14 @@ typedef enum
 #include "ICMP.h"
 #include "HelloWorldPageGenerator.h"
 
-
+void blaaa(int);
 
 struct StackType
 {
     typedef HelloWorldPageGenerator<StackType>  ApplicationLayerType;
     typedef TCP<StackType>                      TCPTransportLayerType;
     typedef UDP<StackType>                      UDPTransportLayerType;
-    typedef IPv4<StackType>                     InternetLayerType;
+    typedef IPv4<StackType, blaaa>              InternetLayerType;
     typedef PCAP<StackType>                     LinkLayerType;
     typedef ARP<StackType>                      ARPTransportLayerType;
     typedef ICMP<StackType>                     ICMPTransportLayerType;

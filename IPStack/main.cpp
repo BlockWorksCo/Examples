@@ -39,10 +39,14 @@ auto IPv4PullFromLayer  = [](int protocolType, bool& dataAvailable, uint16_t pos
 
 
 
-InternetLayerType       internetLayer( IPv4NewPacket, IPv4LayerState, IPv4PushIntoLayer, IPv4PullFromLayer);
+InternetLayerType       internetLayer( IPv4LayerState, IPv4PushIntoLayer, IPv4PullFromLayer);
 LinkLayerType           linkLayer(internetLayer, "./Traces/HTTPGET.pcap");
 
 
+void blaaa(int protocolType)
+{
+    switch(protocolType) { case 1: udpLayer.NewPacket();break; case 3:icmpLayer.NewPacket();break; }
+}
 
 
 

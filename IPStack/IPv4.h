@@ -12,7 +12,7 @@
 //
 //
 //
-template < typename StackType >
+template < typename StackType, void (*NewPacketType)(int) >
 class IPv4
 {
     //
@@ -26,12 +26,10 @@ public:
     //
     //
     //
-    IPv4(   void (*_newPacket)(int), 
-            PacketProcessingState (*_layerState)(int),
+    IPv4(   PacketProcessingState (*_layerState)(int),
             void (*_pushIntoLayer)(int, uint8_t), 
             uint8_t (*_pullFromLayer)(int, bool&,  uint16_t) ) :
         packetState(Unknown),
-        newPacket(_newPacket),
         layerState(_layerState),
         pushIntoLayer(_pushIntoLayer),
         pullFromLayer(_pullFromLayer)
@@ -172,7 +170,7 @@ public:
 
             case 20:
                 printf("(IPv4) TransportDataStart.\n");
-                newPacket(protocol);
+                NewPacketType(protocol);
                 // Fallthrough intented.
             default:
                 printf("(IPv4) data.\n");
@@ -356,7 +354,6 @@ private:
     uint32_t                sourceIP;
     uint8_t                 protocol;
 
-    void                    (*newPacket)(int);
     PacketProcessingState   (*layerState)(int);
     void                    (*pushIntoLayer)(int, uint8_t);
     uint8_t                 (*pullFromLayer)(int, bool&, uint16_t );
