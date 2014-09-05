@@ -152,6 +152,8 @@ public:
                 packetCount++;
             }
         }
+
+        exit(0);
     }
 
 
