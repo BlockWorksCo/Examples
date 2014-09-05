@@ -74,6 +74,8 @@ public:
     {
         position        = 0;
         packetState     = Unknown;
+
+        printf("\n\n-->NewPacket:\n");
     }
 
     //
@@ -178,28 +180,32 @@ public:
             case 16:
                 if( byte != ((IPAddress>>24)&0xff) )
                 {
-                    NewPacket();
+                    Reject();
                 }
                 break;
 
             case 17:
                 if( byte != ((IPAddress>>16)&0xff) )
                 {
-                    NewPacket();
+                    Reject();
                 }
                 break;
 
             case 18:
                 if( byte != ((IPAddress>>8)&0xff) )
                 {
-                    NewPacket();
+                    Reject();
                 }
                 break;
 
             case 19:
                 if( byte != (IPAddress&0xff) )
                 {
-                    NewPacket();
+                    Reject();
+                }
+                else
+                {
+                    printf("DestIP: %08x\n", IPAddress);
                 }
                 break;
 
@@ -254,7 +260,6 @@ public:
         const uint8_t   fragmentationOffset     = 0x00;                                 // unused.
         const uint8_t   TTL                     = 0x8;                                  // Seconds/hops
         IP::ProtocolType  protocol              = IP::TCP;                              // 6=TCP, 11=UDP, etc...
-        const uint32_t  sourceIP                = 0x00112233;                           // us... static.
         uint32_t        destIP                  = 0x44556677;                           // target... dynamic.
         uint16_t        headerChecksum          = ((versionAndIHL<<8) | DSCP) + 
                                                   length + 
@@ -319,19 +324,19 @@ public:
                     break;
 
                 case 12:
-                    byteToTransmit      = sourceIP >> 24;
+                    byteToTransmit      = IPAddress >> 24;
                     break;
 
                 case 13:
-                    byteToTransmit      = (sourceIP >> 16) & 0xff;
+                    byteToTransmit      = (IPAddress >> 16) & 0xff;
                     break;
 
                 case 14:
-                    byteToTransmit      = (sourceIP >> 8) & 0xff;
+                    byteToTransmit      = (IPAddress >> 8) & 0xff;
                     break;
 
                 case 15:
-                    byteToTransmit      = sourceIP & 0xff;
+                    byteToTransmit      = IPAddress & 0xff;
                     break;
 
                 case 16:
@@ -367,6 +372,17 @@ public:
 
 
 private:
+
+
+    //
+    // Set the current packet as rejected.
+    //
+    void Reject()
+    {
+        packetState     = Rejected;
+    }
+
+
 
     //
     //

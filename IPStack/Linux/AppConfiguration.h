@@ -59,7 +59,7 @@ struct StackType
     typedef TCP<StackType>                      TCPTransportLayerType;
     typedef UDP<StackType>                      UDPTransportLayerType;
     typedef IPv4<   StackType, 
-                    0xc0a80279, 
+                    0xc0a802fd, 
                     IPv4NewPacket, 
                     IPv4LayerState, 
                     IPv4PushIntoLayer, 

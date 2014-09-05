@@ -126,10 +126,14 @@ public:
                     {
                         if(internetLayer.State() != Rejected)
                         {
+                            printf("Accept: %02x ", inbuf[i]);                                            
                             internetLayer.PushInto( inbuf[i] );                        
                         }
+                        else
+                        {
+                            printf("Reject: %02x ", inbuf[i]);                                            
+                        }
 
-                        printf("%02x ", inbuf[i]);                
                     }
                     printf(">\n");
 
@@ -183,6 +187,8 @@ public:
             }
 
         } while(i > 0);
+
+        exit(0);
 
     }
 
