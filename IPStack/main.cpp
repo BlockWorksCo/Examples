@@ -19,7 +19,7 @@ StackType::LinkLayerType           linkLayer("./Traces/HTTPGET.pcap");
 
 
 //
-// IPv4 linking.
+// IPv4->TCP,UDP,ICMP coupling.
 //
 void StackType::IPv4NewPacket(IP::ProtocolType protocolType)
 {
@@ -43,7 +43,7 @@ uint8_t StackType::IPv4PullFromLayer(IP::ProtocolType protocolType, bool& dataAv
 
 
 //
-// LinkLayer linking.
+// Link->IPv4,ARP coupling.
 //
 void StackType::LinkIdle()
 {
