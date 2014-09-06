@@ -14,7 +14,8 @@
 //
 //
 //
-template < typename StackType >
+template <  typename LoggerType,
+            typename StackType >
 class ICMP
 {
     //
@@ -41,7 +42,7 @@ public:
     //
     void Idle()
     {
-        printf("(ICMP) Idle.\n");
+        LoggerType::printf("(ICMP) Idle.\n");
     }
 
     //
@@ -58,7 +59,7 @@ public:
     //
     void PushInto(uint8_t byte)
     {
-        printf("(ICMP)\n");
+        LoggerType::printf("(ICMP)\n");
     }
 
 

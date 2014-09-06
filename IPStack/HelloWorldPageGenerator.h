@@ -14,7 +14,8 @@
 //
 //
 //
-template < typename StackType >
+template <  typename LoggerType,
+            typename StackType >
 class HelloWorldPageGenerator
 {
     //
@@ -46,7 +47,7 @@ public:
     //
     void Idle()
     {
-        printf("(App) Idle.\n");
+        LoggerType::printf("(App) Idle.\n");
     }
 
     //
@@ -63,7 +64,7 @@ public:
     //
     void PushInto(uint8_t byte)
     {
-        printf("(App) %02x\n", byte);
+        LoggerType::printf("(App) %02x\n", byte);
 
         //
         // Ready for next byte.

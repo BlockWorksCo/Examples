@@ -49,7 +49,8 @@ typedef enum
 #include "NullLog.h"
 
 
-typedef StdoutLog<128>     LoggerType;
+typedef StdoutLog<128>      LoggerType;
+typedef NullLog<1>          NullLoggerType;
 
 struct StackType
 {
@@ -67,9 +68,12 @@ struct StackType
     static void LinkPushIntoLayer(uint8_t byte);
     static uint8_t LinkPullFromLayer(bool& dataAvailable,  uint16_t position);
 
-    typedef HelloWorldPageGenerator<StackType>  ApplicationLayerType;
-    typedef TCP<StackType>                      TCPTransportLayerType;
-    typedef UDP<StackType>                      UDPTransportLayerType;
+    typedef HelloWorldPageGenerator<LoggerType,    
+                                    StackType>  ApplicationLayerType;
+    typedef TCP<    LoggerType,
+                    StackType>                  TCPTransportLayerType;
+    typedef UDP<    LoggerType,
+                    StackType>                  UDPTransportLayerType;
     typedef IPv4<   LoggerType,
                     StackType, 
                     0xc0a802fd, 
@@ -77,14 +81,17 @@ struct StackType
                     IPv4LayerState, 
                     IPv4PushIntoLayer, 
                     IPv4PullFromLayer >         InternetLayerType;
-    typedef PCAP<   StackType,
+    typedef PCAP<   LoggerType,
+                    StackType,
                     LinkIdle,
                     LinkNewPacket, 
                     LinkLayerState, 
                     LinkPushIntoLayer, 
                     LinkPullFromLayer >         LinkLayerType;
-    typedef ARP<StackType>                      ARPTransportLayerType;
-    typedef ICMP<StackType>                     ICMPTransportLayerType;
+    typedef ARP<    NullLoggerType, 
+                    StackType>                  ARPTransportLayerType;
+    typedef ICMP<   LoggerType,
+                    StackType>                  ICMPTransportLayerType;
 };
 
 

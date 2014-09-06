@@ -33,7 +33,8 @@
 //
 //
 //
-template <  typename StackType,
+template <  typename LoggerType,
+            typename StackType,
             void (*idle)(),
             void (*newPacket)() ,
             PacketProcessingState (*layerState)(),
@@ -65,17 +66,17 @@ public:
         }
         else
         {
-            printf("PCAP device handle: %d", fd);
+            LoggerType::printf("PCAP device handle: %d", fd);
         }
 
         //
         //
         //
         int r   = read(fd, &fileHeader, sizeof(fileHeader));
-        printf("r: %d\n", r);
-        printf("magic %04d\n", fileHeader.magic);
-        printf("major %04d\n", fileHeader.version_major);
-        printf("minor %04d\n", fileHeader.version_minor);
+        LoggerType::printf("r: %d\n", r);
+        LoggerType::printf("magic %04d\n", fileHeader.magic);
+        LoggerType::printf("major %04d\n", fileHeader.version_major);
+        LoggerType::printf("minor %04d\n", fileHeader.version_minor);
 #if 0
         uint32_t magic;
         u_short version_major;
@@ -125,23 +126,23 @@ public:
                     //
                     // Packet received, send it up the stack.
                     //
-                    printf("<got %d bytes from pcap, packet %d>\n",packetHeader.len, packetCount);
-                    printf("<");
+                    LoggerType::printf("<got %d bytes from pcap, packet %d>\n",packetHeader.len, packetCount);
+                    LoggerType::printf("<");
                     newPacket();
                     for(int i=14; i<packetHeader.len; i++)
                     {
                         if(layerState() != Rejected)
                         {
-                            printf("Accept: %02x ", inbuf[i]);                                            
+                            LoggerType::printf("Accept: %02x ", inbuf[i]);                                            
                             pushInto( inbuf[i] );                        
                         }
                         else
                         {
-                            printf("Reject: %02x ", inbuf[i]);                                            
+                            LoggerType::printf("Reject: %02x ", inbuf[i]);                                            
                         }
 
                     }
-                    printf(">\n");
+                    LoggerType::printf(">\n");
 
                     //
                     // Send any packets that may have been produced.
@@ -192,7 +193,7 @@ public:
                 size_t  bytesWritten    = write(fd, outbuf, i);
                 if(bytesWritten != i)
                 {
-                    printf("(PCAP) not all bytes written!\n");
+                    LoggerType::printf("(PCAP) not all bytes written!\n");
                 }
             }
 
