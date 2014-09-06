@@ -49,6 +49,8 @@ typedef enum
 #include "NullLog.h"
 
 
+typedef StdoutLog<128>     LoggerType;
+
 struct StackType
 {
     //
@@ -68,7 +70,8 @@ struct StackType
     typedef HelloWorldPageGenerator<StackType>  ApplicationLayerType;
     typedef TCP<StackType>                      TCPTransportLayerType;
     typedef UDP<StackType>                      UDPTransportLayerType;
-    typedef IPv4<   StackType, 
+    typedef IPv4<   LoggerType,
+                    StackType, 
                     0xc0a802fd, 
                     IPv4NewPacket, 
                     IPv4LayerState, 

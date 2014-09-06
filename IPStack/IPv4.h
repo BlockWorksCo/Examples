@@ -32,7 +32,8 @@ struct IP
 // IPv4 class:
 // Provides all the functionality of the IPv4/internet layer.
 //
-template <  typename StackType, 
+template <  typename LoggerType,
+            typename StackType, 
             uint32_t IPAddress,
             void (*newPacket)(IP::ProtocolType) ,
             PacketProcessingState (*layerState)(IP::ProtocolType),
@@ -64,7 +65,7 @@ public:
     //
     void Idle()
     {
-        printf("(IPv4) Idle.\n");
+        LoggerType::printf("(IPv4) Idle.\n");
     }
 
     //
@@ -75,7 +76,7 @@ public:
         position        = 0;
         packetState     = Unknown;
 
-        printf("\n\n-->NewPacket:\n");
+        LoggerType::printf("\n\n-->NewPacket:\n");
     }
 
     //
@@ -91,12 +92,12 @@ public:
             case 0:
                 if( byte == 0x45)
                 {
-                    printf("(IPv4) Claimed, Header Length = %x.\n", byte&0xf);
+                    LoggerType::printf("(IPv4) Claimed, Header Length = %x.\n", byte&0xf);
                     packetState   = Claimed;
                 }
                 else
                 {
-                    printf("(IPv4) Rejected.\n");
+                    LoggerType::printf("(IPv4) Rejected.\n");
                     packetState   = Rejected;
                 }
                 break;
@@ -112,7 +113,7 @@ public:
 
             case 3:
                 length  |= byte;
-                printf("(IPv4) Packet Length = %d\n", length);
+                LoggerType::printf("(IPv4) Packet Length = %d\n", length);
                 break;
 
             case 4:
@@ -126,12 +127,12 @@ public:
             case 6:
                 fragmentOffset  = (byte & 0x1f) << 8;
                 fragmentFlags   = (byte & 0xe0) >> 5;
-                printf("(IPv4) Fragment flags: %d\n", fragmentFlags);
+                LoggerType::printf("(IPv4) Fragment flags: %d\n", fragmentFlags);
                 break;
 
             case 7:
                 fragmentOffset    |= byte;                
-                printf("(IPv4) Fragment offset: %d\n", fragmentOffset);
+                LoggerType::printf("(IPv4) Fragment offset: %d\n", fragmentOffset);
 
                 if(fragmentFlags != 2)
                 {
@@ -143,12 +144,12 @@ public:
                 break;
 
             case 8:
-                printf("(IPv4) TTL: %d\n",byte);
+                LoggerType::printf("(IPv4) TTL: %d\n",byte);
                 break;
 
             case 9:
                 protocol    = static_cast<IP::ProtocolType>(byte);
-                printf("(IPv4) Protocol: %d\n",byte);
+                LoggerType::printf("(IPv4) Protocol: %d\n",byte);
                 break;
 
             case 10:
@@ -157,7 +158,7 @@ public:
 
             case 11:
                 headerChecksum  |= byte;
-                printf("(IPv4) headerChecksum: %04x\n", headerChecksum);
+                LoggerType::printf("(IPv4) headerChecksum: %04x\n", headerChecksum);
                 break;
 
             case 12:
@@ -174,7 +175,7 @@ public:
 
             case 15:
                 sourceIP    |= byte;
-                printf("(IPv4) SourceIP: %08x\n", sourceIP);
+                LoggerType::printf("(IPv4) SourceIP: %08x\n", sourceIP);
                 break;
 
             case 16:
@@ -205,16 +206,16 @@ public:
                 }
                 else
                 {
-                    printf("DestIP: %08x\n", IPAddress);
+                    LoggerType::printf("DestIP: %08x\n", IPAddress);
                 }
                 break;
 
             case 20:
-                printf("(IPv4) TransportDataStart.\n");
+                LoggerType::printf("(IPv4) TransportDataStart.\n");
                 newPacket(protocol);
                 // Fallthrough intended.
             default:
-                printf("(IPv4) data.\n");
+                LoggerType::printf("(IPv4) data.\n");
 
                 //
                 // Data portion of the IP packet.
