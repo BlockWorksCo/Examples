@@ -45,7 +45,8 @@ typedef enum
 #include "ARP.h"
 #include "ICMP.h"
 #include "HelloWorldPageGenerator.h"
-
+#include "StdoutLog.h"
+#include "NullLog.h"
 
 
 struct StackType
