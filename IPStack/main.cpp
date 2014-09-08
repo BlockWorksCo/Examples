@@ -59,6 +59,7 @@ void StackType::LinkNewPacket()
 
 PacketProcessingState StackType::LinkLayerState()
 {
+    arpLayer.State();
     return internetLayer.State();
 }
 
@@ -70,6 +71,7 @@ void StackType::LinkPushIntoLayer(uint8_t byte)
 
 uint8_t StackType::LinkPullFromLayer(bool& dataAvailable,  uint16_t position)
 { 
+    arpLayer.PullFrom(dataAvailable, position);
     return internetLayer.PullFrom(dataAvailable, position);
 } 
 

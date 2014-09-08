@@ -249,7 +249,6 @@ public:
     //
     uint8_t PullFrom(bool& dataAvailable, uint16_t position)
     {
-        bool            dataAvailableFromAbove  = false;
         uint8_t         byteToTransmit          = 0x00;
         const uint16_t  sizeofIPHeader          = 20;                                   // standard/minimum size.
 
@@ -274,6 +273,9 @@ public:
 
         if( position < sizeofIPHeader )
         {
+
+            dataAvailable   = true;
+
             switch(position)
             {
                 case 0:
@@ -365,7 +367,7 @@ public:
             //
             // Not the header, lets pull the data from the layer above...
             //
-            byteToTransmit  = pullFromLayer(protocol, dataAvailableFromAbove, position-sizeofIPHeader );            
+            byteToTransmit  = pullFromLayer(protocol, dataAvailable, position-sizeofIPHeader );            
         }
 
         return byteToTransmit;

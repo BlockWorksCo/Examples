@@ -148,6 +148,7 @@ public:
                     // Send any packets that may have been produced.
                     //
                     PullFromStackAndSend();
+                    LoggerType::printf("Done...\n");
                 }
 
                 packetCount++;
@@ -167,37 +168,34 @@ public:
         bool        dataAvailable   = false;
 
         //
-        // While there are still packets in the stack...
+        // Form the new packet.
         //
+        i   = 0;
         do
         {
-            //
-            // Form the new packet.
-            //
-            i   = 0;
-            do
+            outbuf[i]   = pullFrom( dataAvailable, i );
+            if(dataAvailable == true)
             {
-                outbuf[i]   = pullFrom( dataAvailable, i );
-                if(dataAvailable == true)
-                {
-                    i++;
-                }
-
-            } while(dataAvailable == true);
-
-            //
-            // Send the new packet.
-            //
-            if(i>0)
+                i++;
+            }
+            else
             {
-                size_t  bytesWritten    = write(fd, outbuf, i);
-                if(bytesWritten != i)
-                {
-                    LoggerType::printf("(PCAP) not all bytes written!\n");
-                }
+                LoggerType::printf(">%02x<\n", outbuf[i] );
             }
 
-        } while(i > 0);
+        } while(dataAvailable == true);
+
+        //
+        // Send the new packet.
+        //
+        if(i>0)
+        {
+            size_t  bytesWritten    = write(fd, outbuf, i);
+            if(bytesWritten != i)
+            {
+                LoggerType::printf("(PCAP) not all bytes written!\n");
+            }
+        }
 
     }
 

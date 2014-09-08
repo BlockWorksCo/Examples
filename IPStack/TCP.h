@@ -318,22 +318,10 @@ public:
                 byteToSend  = 0xab;
                 break;
             default:
-                byteToSend  = 0xff;
+                byteToSend  = applicationLayer.PullFrom(dataAvailable, position);
                 break;
         }
-#if 0
-        switch(packetToSend)
-        {
-            case TCP_SYN:
-                dataAvailable   = true;
-                byteToSend      = 0xff;
-                break;
 
-            default:
-                dataAvailable   = false;
-                break;
-        }
-#endif
         //byteToSend  = applicationLayer.PullFrom( dataAvailable );
 
         outputPosition++;
