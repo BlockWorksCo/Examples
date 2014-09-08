@@ -14,7 +14,8 @@
 //
 //
 //
-template < typename StackType >
+template <  typename LoggerType,
+            typename StackType >
 class UDP
 {
     //
@@ -40,7 +41,7 @@ public:
     //
     void Idle()
     {
-        printf("(UDP) Idle.\n");
+        LoggerType::printf("(UDP) Idle.\n");
     }
 
     //
@@ -57,7 +58,7 @@ public:
     //
     void PushInto(uint8_t byte)
     {
-        printf("(UDP)\n");
+        LoggerType::printf("(UDP)\n");
     }
 
 

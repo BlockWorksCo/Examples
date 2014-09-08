@@ -29,7 +29,8 @@
 //
 //
 //
-template < typename StackType >
+template <  typename LoggerType,
+            typename StackType >
 class TUN
 {
     //
@@ -56,7 +57,7 @@ public:
         }
         else
         {
-            printf("TUN device handle: %d", fd);
+            LoggerType::printf("TUN device handle: %d", fd);
         }
 
 
@@ -86,7 +87,7 @@ public:
         FD_ZERO(&fdset);
         FD_SET(fd, &fdset);
 
-        printf("Waiting for data (%d)...\n",fd);
+        LoggerType::printf("Waiting for data (%d)...\n",fd);
         ret = select(fd + 1, &fdset, NULL, NULL, &tv);
         if(ret == 0)
         {
@@ -117,8 +118,8 @@ public:
                 //
                 // Packet received, send it up the stack.
                 //
-                printf("<got %d bytes from tun>\n",bytes_left);
-                printf("<");
+                LoggerType::printf("<got %d bytes from tun>\n",bytes_left);
+                LoggerType::printf("<");
                 internetLayer.NewPacket();
                 for(int i=0; i<bytes_left; i++)
                 {
@@ -127,9 +128,9 @@ public:
                         internetLayer.PushInto( inbuf[i] );                        
                     }
 
-                    printf("%02x ", inbuf[i]);                
+                    LoggerType::printf("%02x ", inbuf[i]);                
                 }
-                printf(">\n");
+                LoggerType::printf(">\n");
 
                 //
                 // Send any packets that may have been produced.
@@ -176,7 +177,7 @@ public:
                 size_t  bytesWritten    = write(fd, outbuf, i);
                 if(bytesWritten != i)
                 {
-                    printf("(TUN) not all bytes written!\n");
+                    LoggerType::printf("(TUN) not all bytes written!\n");
                 }
             }
 
@@ -201,7 +202,7 @@ public:
        /* open the clone device */
        if( (fd = open(clonedev, O_RDWR)) < 0 ) 
        {
-         printf("opened clonedev\n");
+         LoggerType::printf("opened clonedev\n");
          return fd;
        }
 
@@ -212,7 +213,7 @@ public:
 
        if (*dev) 
        {
-         printf("name %s supplied\n",dev);
+         LoggerType::printf("name %s supplied\n",dev);
          /* if a device name was specified, put it in the structure; otherwise,
           * the kernel will try to allocate the "next" device of the
           * specified type */
@@ -222,14 +223,14 @@ public:
        /* try to create the device */
        if( (err = ioctl(fd, TUNSETIFF, (void *) &ifr)) < 0 ) 
        {
-         printf("ioctl failed. \n");
+         LoggerType::printf("ioctl failed. \n");
          close(fd);
          fd = -1;
          return err;
        }
        else
        {
-         printf("ioctl ok, fd=%d. \n",fd);        
+         LoggerType::printf("ioctl ok, fd=%d. \n",fd);        
        }
 
       /* if the operation was successful, write back the name of the
@@ -237,7 +238,7 @@ public:
        * it. Note that the caller MUST reserve space in *dev (see calling
        * code below) */
       strcpy(dev, ifr.ifr_name);
-     printf("dev name = %s. \n", dev);
+     LoggerType::printf("dev name = %s. \n", dev);
 
       /* this is the special file descriptor that the caller will use to talk
        * with the virtual interface */

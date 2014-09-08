@@ -14,7 +14,8 @@
 //
 //
 //
-template < typename StackType >
+template <  typename LoggerType,
+            typename StackType >
 class ARP
 {
 
@@ -42,7 +43,7 @@ public:
     //
     void Idle()
     {
-        printf("(ARP) Idle.\n");
+        LoggerType::printf("(ARP) Idle.\n");
     }
 
     //
@@ -59,7 +60,7 @@ public:
     //
     void PushInto(uint8_t byte)
     {
-        printf("(ARP)\n");
+        LoggerType::printf("(ARP)\n");
     }
 
 

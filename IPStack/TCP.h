@@ -12,7 +12,8 @@
 //
 //
 //
-template < typename StackType >
+template <  typename LoggerType,
+            typename StackType >
 class TCP
 {
     //
@@ -74,7 +75,7 @@ public:
     //
     void Idle()
     {
-        printf("(IPv4) Idle.\n");
+        LoggerType::printf("(IPv4) Idle.\n");
     }
 
     //
@@ -103,7 +104,7 @@ public:
 
             case 1:
                 sourcePort  |= byte;
-                printf("(TCP) sourcePort: %d\n", sourcePort);
+                LoggerType::printf("(TCP) sourcePort: %d\n", sourcePort);
                 break;
 
             case 2:
@@ -112,7 +113,7 @@ public:
 
             case 3:
                 destinationPort  |= byte;
-                printf("(TCP) destinationPort: %d\n", destinationPort);
+                LoggerType::printf("(TCP) destinationPort: %d\n", destinationPort);
                 break;
 
             case 4:
@@ -129,7 +130,7 @@ public:
 
             case 7:
                 sequenceNumber  |= byte;
-                printf("(TCP) sequenceNumber: %08x\n", sequenceNumber);
+                LoggerType::printf("(TCP) sequenceNumber: %08x\n", sequenceNumber);
                 break;
 
             case 8:
@@ -146,18 +147,18 @@ public:
 
             case 11:
                 ackNumber  |= byte;
-                printf("(TCP) ackNumber: %08x\n", ackNumber);
+                LoggerType::printf("(TCP) ackNumber: %08x\n", ackNumber);
                 break;
 
             case 12:
                 dataOffset  = byte >> 4;
                 dataOffset  *= 4;
-                printf("(TCP) dataOffset: %d\n", dataOffset);
+                LoggerType::printf("(TCP) dataOffset: %d\n", dataOffset);
                 break;
 
             case 13:
                 flags   = static_cast<TCPFlags>(byte);
-                printf("(TCP) Flags: %02x\n", flags);
+                LoggerType::printf("(TCP) Flags: %02x\n", flags);
                 break;
 
             case 14:
@@ -166,7 +167,7 @@ public:
 
             case 15:
                 windowSize  |= byte;
-                printf("(TCP) windowSize: %d\n", windowSize);
+                LoggerType::printf("(TCP) windowSize: %d\n", windowSize);
                 break;
 
             case 16:
@@ -175,7 +176,7 @@ public:
 
             case 17:
                 checksum  |= byte;
-                printf("(TCP) checksum: %04x\n", checksum);
+                LoggerType::printf("(TCP) checksum: %04x\n", checksum);
                 break;
 
             case 18:
@@ -184,18 +185,18 @@ public:
 
             case 19:
                 urgentPointer  |= byte;
-                printf("(TCP) urgentPointer: %02x\n", urgentPointer);
+                LoggerType::printf("(TCP) urgentPointer: %02x\n", urgentPointer);
                 break;
 
             case 20:
-                printf("(TCP) AppDataStart\n");
+                LoggerType::printf("(TCP) AppDataStart\n");
                 applicationLayer.NewPacket();
 
             default:
 
                 if(position >= dataOffset)
                 {
-                    printf("(TCP) AppData.\n");
+                    LoggerType::printf("(TCP) AppData.\n");
                     
                     //
                     // Data portion of the IP packet.
@@ -210,7 +211,7 @@ public:
                     //
                     // Variable length option data.
                     //
-                    printf("(TCP) OptionData.\n");
+                    LoggerType::printf("(TCP) OptionData.\n");
                 }
 
                 //
