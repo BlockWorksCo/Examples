@@ -38,7 +38,9 @@ template <  typename LoggerType,
             void (*newPacket)(IP::ProtocolType) ,
             PacketProcessingState (*layerState)(IP::ProtocolType),
             void (*pushIntoLayer)(IP::ProtocolType, uint8_t), 
-            uint8_t (*pullFromLayer)(IP::ProtocolType, bool&,  uint16_t)
+            uint8_t (*pullFromLayer)(IP::ProtocolType, bool&,  uint16_t),
+            uint32_t destinationIP(IP::ProtocolType),
+            uint16_t packetLength(IP::ProtocolType)
             >
 class IPv4
 {
@@ -250,17 +252,17 @@ public:
     uint8_t PullFrom(bool& dataAvailable, uint16_t position)
     {
         uint8_t         byteToTransmit          = 0x00;
-        const uint16_t  sizeofIPHeader          = 20;                                   // standard/minimum size.
+        const uint16_t  sizeofIPHeader          = 20;                                       // standard/minimum size.
 
-        const uint8_t   versionAndIHL           = (0x04 << 4)| (sizeofIPHeader/4);      // IPv4 + 20 byte header.
-        const uint8_t   DSCP                    = 0x00;                                 // ununsed.
-        uint16_t        length                  = 0x0000;                               // unknown. Assume a constant size greater than the actual size and pad with zeroes. Checksum is not affected by zeroes.
-        const uint16_t  fragmentationID         = 0x0000;                               // unused.
-        const uint8_t   fragmentationFlags      = 0x02;                                 // Dont Fragment.
-        const uint8_t   fragmentationOffset     = 0x00;                                 // unused.
-        const uint8_t   TTL                     = 64;                                   // Seconds/hops
-        IP::ProtocolType  protocol              = IP::TCP;                              // 6=TCP, 11=UDP, etc...
-        uint32_t        destIP                  = 0x00000000;                           // target... dynamic.
+        const uint8_t   versionAndIHL           = (0x04 << 4)| (sizeofIPHeader/4);          // IPv4 + 20 byte header.
+        const uint8_t   DSCP                    = 0x00;                                     // ununsed.
+        uint16_t        length                  = packetLength(protocol)+sizeofIPHeader;    // unknown. Assume a constant size greater than the actual size and pad with zeroes. Checksum is not affected by zeroes.
+        const uint16_t  fragmentationID         = 0x0000;                                   // unused.
+        const uint8_t   fragmentationFlags      = 0x02;                                     // Dont Fragment.
+        const uint8_t   fragmentationOffset     = 0x00;                                     // unused.
+        const uint8_t   TTL                     = 64;                                       // Seconds/hops
+        IP::ProtocolType  protocol              = IP::TCP;                                  // 6=TCP, 11=UDP, etc...
+        uint32_t        destIP                  = destinationIP(protocol);                  // target... dynamic.
         uint16_t        headerChecksum          = ((versionAndIHL<<8) | DSCP) + 
                                                   length + 
                                                   fragmentationID +

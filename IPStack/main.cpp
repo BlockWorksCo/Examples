@@ -41,6 +41,16 @@ uint8_t StackType::IPv4PullFromLayer(IP::ProtocolType protocolType, bool& dataAv
     switch(protocolType) {case IP::TCP:return tcpLayer.PullFrom(dataAvailable,position);break;  case IP::UDP:return udpLayer.PullFrom(dataAvailable,position);break; case IP::ICMP:return icmpLayer.PullFrom(dataAvailable,position);break; default:dataAvailable=false;return 0;break;}
 } 
 
+uint32_t StackType::DestinationIP(IP::ProtocolType protocolType)
+{
+    switch(protocolType) { case IP::TCP: return tcpLayer.DestinationIP();break; case IP::UDP: return udpLayer.DestinationIP();break; case IP::ICMP:return icmpLayer.DestinationIP();break; default:return 0x00000000;break;}
+}
+
+uint16_t StackType::PacketLength(IP::ProtocolType protocolType)
+{
+    switch(protocolType) { case IP::TCP: return tcpLayer.PacketLength();break; case IP::UDP: return udpLayer.PacketLength();break; case IP::ICMP:return icmpLayer.PacketLength();break; default:return 0;break;}
+}
+
 
 //
 // Link->IPv4,ARP coupling.

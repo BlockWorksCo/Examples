@@ -329,6 +329,17 @@ public:
         return byteToSend;
     }
 
+
+    uint32_t DestinationIP()
+    {
+        return applicationLayer.DestinationIP();
+    }
+
+    uint16_t PacketLength()
+    {
+        return applicationLayer.PacketLength();
+    }
+
 private:
 
     //

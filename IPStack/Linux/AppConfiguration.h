@@ -67,6 +67,8 @@ struct StackType
     static PacketProcessingState LinkLayerState();
     static void LinkPushIntoLayer(uint8_t byte);
     static uint8_t LinkPullFromLayer(bool& dataAvailable,  uint16_t position);
+    static uint32_t DestinationIP(IP::ProtocolType protocol);
+    static uint16_t PacketLength(IP::ProtocolType protocol);
 
     typedef HelloWorldPageGenerator<LoggerType,    
                                     StackType>  ApplicationLayerType;
@@ -80,7 +82,9 @@ struct StackType
                     IPv4NewPacket, 
                     IPv4LayerState, 
                     IPv4PushIntoLayer, 
-                    IPv4PullFromLayer >         InternetLayerType;
+                    IPv4PullFromLayer,
+                    DestinationIP,
+                    PacketLength >         InternetLayerType;
     typedef PCAP<   LoggerType,
                     StackType,
                     LinkIdle,

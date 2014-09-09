@@ -106,7 +106,7 @@ public:
         //
         // Always ready to serve data...
         //
-        if( position  < 10 )
+        if( position < packetLength )
         {
             dataAvailable   = true;
             return (uint8_t)position;
@@ -118,6 +118,19 @@ public:
         }
 
     }
+
+
+    uint32_t DestinationIP()
+    {
+        return 0x00112233;
+    }
+
+    uint16_t PacketLength()
+    {
+        return packetLength;
+    }
+
+
 
 private:
 
@@ -141,6 +154,7 @@ private:
     PacketProcessingState   packetState;
     TCPState 				tcpState;
     TCPState                nextTCPState;
+    const uint16_t          packetLength    = 10;
 
 };
 

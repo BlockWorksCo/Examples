@@ -82,6 +82,16 @@ public:
         return 0;
     }
 
+    uint32_t DestinationIP()
+    {
+        return 0x00000000;
+    }
+
+    uint16_t PacketLength()
+    {
+        return 10;
+    }
+
 
 
 private:
