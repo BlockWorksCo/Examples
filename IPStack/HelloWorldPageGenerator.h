@@ -81,14 +81,6 @@ public:
         return packetState;
     }
 
-    //
-    // Pull some packet data out of the processor for transmission.
-    //
-    uint8_t PullFrom()
-    {
-        return 0;
-    }
-
 
     //
     //
@@ -112,10 +104,19 @@ public:
     uint8_t PullFrom(bool& dataAvailable, uint16_t position)
     {
         //
-        // TODO: Pull from all upper layers, one whole packet at a time.
+        // Always ready to serve data...
         //
-        dataAvailable 	= false;
-        return 0;
+        if( position  < 10 )
+        {
+            dataAvailable   = true;
+            return (uint8_t)position;
+        }
+        else
+        {
+            dataAvailable   = false;
+            return 0x00;
+        }
+
     }
 
 private:

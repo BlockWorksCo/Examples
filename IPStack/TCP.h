@@ -312,19 +312,16 @@ public:
     {
         uint8_t         byteToSend  = 0x00;
 
-        switch(outputPosition)
+        switch(position)
         {
             case 0:
-                byteToSend  = 0xab;
+                byteToSend      = 0xab;
+                dataAvailable   = true;
                 break;
             default:
                 byteToSend  = applicationLayer.PullFrom(dataAvailable, position);
                 break;
         }
-
-        //byteToSend  = applicationLayer.PullFrom( dataAvailable );
-
-        outputPosition++;
 
         //
         // TODO: Pull from all upper layers, one whole packet at a time.

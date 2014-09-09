@@ -176,15 +176,13 @@ public:
             outbuf[i]   = pullFrom( dataAvailable, i );
             if(dataAvailable == true)
             {
+                LoggerType::printf(">%d:%02x<\n", i, outbuf[i] );
                 i++;
             }
-            else
-            {
-                LoggerType::printf(">%02x<\n", outbuf[i] );
-            }
+
 
         } while(dataAvailable == true);
-
+#if 0
         //
         // Send the new packet.
         //
@@ -196,7 +194,7 @@ public:
                 LoggerType::printf("(PCAP) not all bytes written!\n");
             }
         }
-
+#endif
     }
 
 
