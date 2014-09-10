@@ -257,8 +257,8 @@ public:
         const uint8_t   versionAndIHL           = (0x04 << 4)| (sizeofIPHeader/4);          // IPv4 + 20 byte header.
         const uint8_t   DSCP                    = 0x00;                                     // ununsed.
         uint16_t        length                  = packetLength(protocol)+sizeofIPHeader;    // unknown. Assume a constant size greater than the actual size and pad with zeroes. Checksum is not affected by zeroes.
-        const uint16_t  fragmentationID         = 0x0000;                                   // unused.
-        const uint8_t   fragmentationFlags      = 0x02;                                     // Dont Fragment.
+        const uint16_t  fragmentationID         = 0x1234;                                   // unused.
+        const uint8_t   fragmentationFlags      = 0x40;                                     // Dont Fragment.
         const uint8_t   fragmentationOffset     = 0x00;                                     // unused.
         const uint8_t   TTL                     = 64;                                       // Seconds/hops
         IP::ProtocolType  protocol              = IP::TCP;                                  // 6=TCP, 11=UDP, etc...
@@ -297,7 +297,7 @@ public:
                     break;
 
                 case 4:
-                    byteToTransmit      = fragmentationID >> 16;
+                    byteToTransmit      = fragmentationID >> 8;
                     break;
 
                 case 5:
@@ -357,7 +357,7 @@ public:
                     break;
 
                 case 19:
-                    byteToTransmit      = destIP >> 24;
+                    byteToTransmit      = destIP & 0xff;
                     break;
 
                 default:

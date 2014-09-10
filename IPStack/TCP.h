@@ -310,16 +310,104 @@ public:
     //
     uint8_t PullFrom(bool& dataAvailable, uint16_t position)
     {
-        uint8_t         byteToSend  = 0x00;
+        const uint16_t  dataOffset          = sizeofTCPHeader;
+        uint8_t         byteToSend          = 0x00;
+        uint16_t        sourcePort          = 80;
+        uint16_t        destinationPort     = 8080;
+        uint32_t        sequenceNumber      = 0x70c5dc78;
+        uint32_t        ackNumber           = 0xe3899124;
+        const uint16_t  urgentPointer       = 0x0000;
+        const uint16_t  windowSize          = 822;
+        const uint16_t  checksum            = 0x0000;
+        uint8_t         flags               = TCP_SYN;
+
+        dataAvailable   = true;
 
         switch(position)
         {
             case 0:
-                byteToSend      = 0xab;
-                dataAvailable   = true;
+                byteToSend  = sourcePort >> 8;
                 break;
+
+            case 1:
+                byteToSend  = sourcePort & 0xff;
+                break;
+
+            case 2:
+                byteToSend  = destinationPort >> 8;
+                break;
+
+            case 3:
+                byteToSend  = destinationPort & 0xff;
+                break;
+
+            case 4:
+                byteToSend  = (sequenceNumber >> 24) & 0xff;
+                break;
+
+            case 5:
+                byteToSend  = (sequenceNumber >> 16) & 0xff;
+                break;
+
+            case 6:
+                byteToSend  = (sequenceNumber >> 8) & 0xff;
+                break;
+
+            case 7:
+                byteToSend  = (sequenceNumber) & 0xff;
+                break;
+
+            case 8:
+                byteToSend  = (ackNumber >> 24) & 0xff;
+                break;
+
+            case 9:
+                byteToSend  = (ackNumber >> 16) & 0xff;
+                break;
+
+            case 10:
+                byteToSend  = (ackNumber >> 8) & 0xff;
+                break;
+
+            case 11:
+                byteToSend  = (ackNumber) & 0xff;
+                break;
+
+            case 12:
+                byteToSend  = (dataOffset / 4) << 4;
+                byteToSend  = 0x50;
+                break;
+
+            case 13:
+                byteToSend  = flags;
+                break;
+
+            case 14:
+                byteToSend  = windowSize >> 8;
+                break;
+
+            case 15:
+                byteToSend  = windowSize & 0xff;
+                break;
+
+            case 16:
+                byteToSend  = checksum >> 8;
+                break;
+
+            case 17:
+                byteToSend  = checksum & 0xff;
+                break;
+
+            case 18:
+                byteToSend  = urgentPointer >> 8;
+                break;
+
+            case 19:
+                byteToSend  = urgentPointer & 0xff;
+                break;
+
             default:
-                byteToSend  = applicationLayer.PullFrom(dataAvailable, position);
+                byteToSend  = applicationLayer.PullFrom(dataAvailable, position-sizeofTCPHeader);
                 break;
         }
 
@@ -337,10 +425,13 @@ public:
 
     uint16_t PacketLength()
     {
-        return applicationLayer.PacketLength();
+        return applicationLayer.PacketLength() + sizeofTCPHeader;
     }
 
 private:
+
+
+    const uint16_t  sizeofTCPHeader     = 20;
 
     //
     //
