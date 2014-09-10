@@ -182,19 +182,36 @@ public:
 
 
         } while(dataAvailable == true);
-#if 0
-        //
-        // Send the new packet.
-        //
-        if(i>0)
+
+
         {
-            size_t  bytesWritten    = write(fd, outbuf, i);
-            if(bytesWritten != i)
+            pcap_pkthdr         packetHeader;
+
+            int outfd = open("Output.pcap", O_RDWR|O_CREAT, S_IRWXU);
+            if(outfd == -1)
             {
-                LoggerType::printf("(PCAP) not all bytes written!\n");
+                perror("PCAP: dev_init: output open");
+                exit(1);
             }
+            else
+            {
+                LoggerType::printf("PCAP device handle: %d", outfd);
+            }
+
+            packetHeader.caplen     = i;
+            packetHeader.len        = i;
+            //packetHeader.ts         = 0;
+
+            //
+            //
+            //
+            int r;
+            r   = write(outfd, &fileHeader, sizeof(fileHeader));
+            r   = write(outfd, &packetHeader, sizeof(packetHeader));
+            r   = write(outfd, &outbuf[0], i);
+            r = r;
         }
-#endif
+
     }
 
 
