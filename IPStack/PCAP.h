@@ -158,22 +158,53 @@ public:
         exit(0);
     }
 
+    typedef enum
+    {
+        ARP     = 0x0806,
+        IPv4    = 0x0800,
+        IPv6    = 0x86dd,
+
+    } EtherType;
 
     //
     //
     //
     void PullFromStackAndSend()
     {
-        uint16_t    i               = 0;
-        bool        dataAvailable   = false;
+        uint16_t        i               = 0;
+        bool            dataAvailable   = false;
+        const uint8_t   destMAC[6]      = {0x11,0x22,0x33,0x44,0x55,0x66};
+        const uint8_t   srcMAC[6]       = {0x66,0x77,0x88,0x99,0xaa,0xbb};
+        const uint16_t  frameType       = 0x0800;
+        uint16_t        checksum        = 0xabcd;
 
+        //
+        // Ethernet II frame header.
+        //
+        outbuf[0]   = destMAC[0];
+        outbuf[1]   = destMAC[1];
+        outbuf[2]   = destMAC[2];
+        outbuf[3]   = destMAC[3];
+        outbuf[4]   = destMAC[4];
+        outbuf[5]   = destMAC[5];
+
+        outbuf[6]   = srcMAC[0];
+        outbuf[7]   = srcMAC[1];
+        outbuf[8]   = srcMAC[2];
+        outbuf[9]   = srcMAC[3];
+        outbuf[10]  = srcMAC[4];
+        outbuf[11]  = srcMAC[5];
+
+        outbuf[12]  = frameType >> 8;
+        outbuf[13]  = frameType & 0xff;
+ 
         //
         // Form the new packet.
         //
-        i   = 0;
+        i   = 14;
         do
         {
-            outbuf[i]   = pullFrom( dataAvailable, i );
+            outbuf[i]   = pullFrom( dataAvailable, i-14 );
             if(dataAvailable == true)
             {
                 LoggerType::printf(">%d:%02x<\n", i, outbuf[i] );
@@ -183,7 +214,18 @@ public:
 
         } while(dataAvailable == true);
 
+        //
+        // Frame CRC.
+        //
+        outbuf[i]  = checksum >> 8;
+        i++;
+        outbuf[i]  = checksum & 0xff;
+        i++;
+ 
 
+        //
+        // Write the packet to a pcap file.
+        //
         {
             pcap_pkthdr         packetHeader;
 
