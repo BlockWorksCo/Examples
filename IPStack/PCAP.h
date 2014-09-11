@@ -176,7 +176,7 @@ public:
         const uint8_t   destMAC[6]          = {0x11,0x22,0x33,0x44,0x55,0x66};
         const uint8_t   srcMAC[6]           = {0x66,0x77,0x88,0x99,0xaa,0xbb};
         const uint16_t  frameType           = 0x0800;
-        uint16_t        frameCheckSequence  = 0xabcd;
+        uint32_t        frameCheckSequence  = 0x00000000;
 
         //
         // Ethernet II frame header.
@@ -282,30 +282,17 @@ private:
 
     uint32_t CurrentCRC()
     {
-        for (int n=0; n<4; n++)  /* display the CRC, lower byte first */
-        {
-            LoggerType::printf("%02X ", crc & 0xFF);
-            crc >>= 8;
-        }
+        LoggerType::printf("%08X ", crc);
 
         return crc;
     }
 
     //
     // Originally from http://www.edaboard.com/thread120700.html
-    // Also:
-    //    # write payload
-    //    for byte in data:
-    //        f.write('%02X\n' % ord(byte))
-    //    # write FCS
-    //    crc = zlib.crc32(data)&0xFFFFFFFF
-    //    for i in range(4):
-    //        b = (crc >> (8*i)) & 0xFF
-    //        f.write('%02X\n' % b)
     //
     void AccumulateCRC(uint8_t value)
     {
-        static const uint32_t   crc_table[] =
+        static const uint32_t   crcTable[] =
         {
             0x4DBDF21C, 0x500AE278, 0x76D3D2D4, 0x6B64C2B0,
             0x3B61B38C, 0x26D6A3E8, 0x000F9344, 0x1DB88320,
@@ -313,8 +300,8 @@ private:
             0xD6D930AC, 0xCB6E20C8, 0xEDB71064, 0xF0000000
         };
 
-        crc = (crc >> 4) ^ crc_table[(crc ^ (value >> 0)) & 0x0F];  /* lower nibble */
-        crc = (crc >> 4) ^ crc_table[(crc ^ (value >> 4)) & 0x0F];  /* upper nibble */
+        crc = (crc >> 4) ^ crcTable[(crc ^ (value >> 0)) & 0x0F];  // lower nibble
+        crc = (crc >> 4) ^ crcTable[(crc ^ (value >> 4)) & 0x0F];  // upper nibble
     }
 
 
