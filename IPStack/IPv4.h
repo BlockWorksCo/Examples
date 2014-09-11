@@ -378,6 +378,37 @@ public:
 
 private:
 
+    //
+    // IPv4 Checksum alg.
+    //
+    uint16_t checksum1(const uint8_t* buf, uint16_t size)
+    {
+        uint32_t    sum = 0;
+        int         i;
+
+        /* Accumulate checksum */
+        for (i=0; i<size-1; i+=2)
+        {
+            uint16_t word16 = * ((uint16_t *)&buf[i]);
+            sum += word16;
+        }
+
+        /* Handle odd-sized case */
+        if ( (size&1) != 0 )
+        {
+            uint16_t word16 = (unsigned char) buf[i];
+            sum += word16;
+        }
+
+        /* Fold to get the ones-complement result */
+        while ( (sum>>16) != 0 ) 
+        {
+            sum = (sum & 0xFFFF)+(sum >> 16);
+        }
+
+        /* Invert to get the negative in ones-complement arithmetic */
+        return ~sum;
+    }
 
     //
     // Set the current packet as rejected.
