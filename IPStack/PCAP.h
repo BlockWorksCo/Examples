@@ -171,12 +171,12 @@ public:
     //
     void PullFromStackAndSend()
     {
-        uint16_t        i               = 0;
-        bool            dataAvailable   = false;
-        const uint8_t   destMAC[6]      = {0x11,0x22,0x33,0x44,0x55,0x66};
-        const uint8_t   srcMAC[6]       = {0x66,0x77,0x88,0x99,0xaa,0xbb};
-        const uint16_t  frameType       = 0x0800;
-        uint16_t        checksum        = 0xabcd;
+        uint16_t        i                   = 0;
+        bool            dataAvailable       = false;
+        const uint8_t   destMAC[6]          = {0x11,0x22,0x33,0x44,0x55,0x66};
+        const uint8_t   srcMAC[6]           = {0x66,0x77,0x88,0x99,0xaa,0xbb};
+        const uint16_t  frameType           = 0x0800;
+        uint16_t        frameCheckSequence  = 0xabcd;
 
         //
         // Ethernet II frame header.
@@ -215,11 +215,11 @@ public:
         } while(dataAvailable == true);
 
         //
-        // Frame CRC.
+        // Frame Check Sequence (FCS) in the frame trailer.
         //
-        outbuf[i]  = checksum >> 8;
+        outbuf[i]  = frameCheckSequence >> 8;
         i++;
-        outbuf[i]  = checksum & 0xff;
+        outbuf[i]  = frameCheckSequence & 0xff;
         i++;
  
 
@@ -258,6 +258,58 @@ public:
 
 
 private:
+
+
+    //
+    // Originally from http://www.edaboard.com/thread120700.html
+    // Also:
+    //    # write payload
+    //    for byte in data:
+    //        f.write('%02X\n' % ord(byte))
+    //    # write FCS
+    //    crc = zlib.crc32(data)&0xFFFFFFFF
+    //    for i in range(4):
+    //        b = (crc >> (8*i)) & 0xFF
+    //        f.write('%02X\n' % b)
+    //
+    int fcsCalc(void)
+    {
+        static const uint8_t    data[]      =
+        {
+            0x00, 0x0A, 0xE6, 0xF0, 0x05, 0xA3, 0x00, 0x12,
+            0x34, 0x56, 0x78, 0x90, 0x08, 0x00, 0x45, 0x00,
+            0x00, 0x30, 0xB3, 0xFE, 0x00, 0x00, 0x80, 0x11,
+            0x72, 0xBA, 0x0A, 0x00, 0x00, 0x03, 0x0A, 0x00,
+            0x00, 0x02, 0x04, 0x00, 0x04, 0x00, 0x00, 0x1C,
+            0x89, 0x4D, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05,
+            0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
+            0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13
+        };
+        static const uint32_t   crc_table[] =
+        {
+            0x4DBDF21C, 0x500AE278, 0x76D3D2D4, 0x6B64C2B0,
+            0x3B61B38C, 0x26D6A3E8, 0x000F9344, 0x1DB88320,
+            0xA005713C, 0xBDB26158, 0x9B6B51F4, 0x86DC4190,
+            0xD6D930AC, 0xCB6E20C8, 0xEDB71064, 0xF0000000
+        };
+        uint32_t                n;
+        uint32_t                crc         = 0;
+
+        for (n=0; n<sizeof(data); n++)
+        {
+            crc = (crc >> 4) ^ crc_table[(crc ^ (data[n] >> 0)) & 0x0F];  /* lower nibble */
+            crc = (crc >> 4) ^ crc_table[(crc ^ (data[n] >> 4)) & 0x0F];  /* upper nibble */
+        }
+
+        for (n=0; n<4; n++)  /* display the CRC, lower byte first */
+        {
+            printf("%02X ", crc & 0xFF);
+            crc >>= 8;
+        }
+        printf("\n");
+        return 0;
+    }
+
 
     /*
      * Describe at http://wiki.wireshark.org/Development/LibpcapFileFormat
