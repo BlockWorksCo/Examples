@@ -1,0 +1,24 @@
+
+
+env = Environment()
+env.VariantDir('Output', './', duplicate=0)
+
+
+env.Append(CPPPATH = ['Linux/'])
+env.Append(CCFLAGS='-std=c++11')
+env.Append(CCFLAGS='-O3')
+env.Append(CPPDEFINES={'RELEASE_BUILD' : '1'})
+#env.Append(LIBS = ['SDL_image','GL'])
+#env.Append(LINKFLAGS = ['-Wl,--rpath,/usr/local/lib/'])
+
+mainTarget = env.Program(target='Output/Main', source=['AppMain.cpp'])
+#mainTarget = env.Program('/tmp/EventLoop.cpp')
+
+
+Default(mainTarget)
+
+
+
+
+
+
