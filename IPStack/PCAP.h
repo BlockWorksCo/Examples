@@ -214,14 +214,28 @@ public:
 
         } while(dataAvailable == true);
 
+ 
+        //
+        // Calculate the CRC... Done in such a way that we could streamify it in future.
+        //
+        StartNewCRC();
+        for(uint16_t j=0; j<i; j++)
+        {
+            AccumulateCRC( outbuf[j] );
+        }
+        frameCheckSequence  = CurrentCRC();
+
         //
         // Frame Check Sequence (FCS) in the frame trailer.
         //
-        outbuf[i]  = frameCheckSequence >> 8;
-        i++;
         outbuf[i]  = frameCheckSequence & 0xff;
         i++;
- 
+        outbuf[i]  = (frameCheckSequence >> 8) & 0xff;
+        i++;
+        outbuf[i]  = (frameCheckSequence >> 16) & 0xff;
+        i++;
+        outbuf[i]  = (frameCheckSequence >> 24) & 0xff;
+        i++;
 
         //
         // Write the packet to a pcap file.
@@ -259,6 +273,23 @@ public:
 
 private:
 
+    uint32_t    crc;
+
+    void StartNewCRC()
+    {
+        crc  = 0;
+    }
+
+    uint32_t CurrentCRC()
+    {
+        for (int n=0; n<4; n++)  /* display the CRC, lower byte first */
+        {
+            LoggerType::printf("%02X ", crc & 0xFF);
+            crc >>= 8;
+        }
+
+        return crc;
+    }
 
     //
     // Originally from http://www.edaboard.com/thread120700.html
@@ -272,19 +303,8 @@ private:
     //        b = (crc >> (8*i)) & 0xFF
     //        f.write('%02X\n' % b)
     //
-    int fcsCalc(void)
+    void AccumulateCRC(uint8_t value)
     {
-        static const uint8_t    data[]      =
-        {
-            0x00, 0x0A, 0xE6, 0xF0, 0x05, 0xA3, 0x00, 0x12,
-            0x34, 0x56, 0x78, 0x90, 0x08, 0x00, 0x45, 0x00,
-            0x00, 0x30, 0xB3, 0xFE, 0x00, 0x00, 0x80, 0x11,
-            0x72, 0xBA, 0x0A, 0x00, 0x00, 0x03, 0x0A, 0x00,
-            0x00, 0x02, 0x04, 0x00, 0x04, 0x00, 0x00, 0x1C,
-            0x89, 0x4D, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05,
-            0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
-            0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13
-        };
         static const uint32_t   crc_table[] =
         {
             0x4DBDF21C, 0x500AE278, 0x76D3D2D4, 0x6B64C2B0,
@@ -292,22 +312,9 @@ private:
             0xA005713C, 0xBDB26158, 0x9B6B51F4, 0x86DC4190,
             0xD6D930AC, 0xCB6E20C8, 0xEDB71064, 0xF0000000
         };
-        uint32_t                n;
-        uint32_t                crc         = 0;
 
-        for (n=0; n<sizeof(data); n++)
-        {
-            crc = (crc >> 4) ^ crc_table[(crc ^ (data[n] >> 0)) & 0x0F];  /* lower nibble */
-            crc = (crc >> 4) ^ crc_table[(crc ^ (data[n] >> 4)) & 0x0F];  /* upper nibble */
-        }
-
-        for (n=0; n<4; n++)  /* display the CRC, lower byte first */
-        {
-            printf("%02X ", crc & 0xFF);
-            crc >>= 8;
-        }
-        printf("\n");
-        return 0;
+        crc = (crc >> 4) ^ crc_table[(crc ^ (value >> 0)) & 0x0F];  /* lower nibble */
+        crc = (crc >> 4) ^ crc_table[(crc ^ (value >> 4)) & 0x0F];  /* upper nibble */
     }
 
 
