@@ -18,10 +18,6 @@
 //
 extern "C" void AppMain()
 {
-	auto func = [](int a, int b) -> int { return a+b; };
-
-	volatile int i = func(2,3);
-	//printf("%d\n", func(2, 3) );
 
     while(true)
     {
