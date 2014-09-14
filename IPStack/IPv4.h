@@ -261,9 +261,9 @@ public:
         const uint8_t   fragmentationFlags      = 0x40;                                     // Dont Fragment.
         const uint8_t   fragmentationOffset     = 0x00;                                     // unused.
         const uint8_t   TTL                     = 64;                                       // Seconds/hops
-        IP::ProtocolType  protocol              = IP::TCP;                                  // 6=TCP, 11=UDP, etc...
+        IP::ProtocolType protocol               = IP::TCP;                                  // 6=TCP, 11=UDP, etc...
         uint32_t        destIP                  = destinationIP(protocol);                  // target... dynamic.
-        uint16_t        headerChecksum          = ((versionAndIHL<<8) | DSCP) + 
+        uint32_t        headerChecksum          = ((versionAndIHL<<8) | DSCP) + 
                                                   length + 
                                                   fragmentationID +
                                                   ((fragmentationFlags<<8) | fragmentationOffset) +
@@ -272,6 +272,9 @@ public:
                                                   (sourceIP & 0xffff) + 
                                                   (destIP >> 16) +
                                                   (destIP & 0xffff);
+        uint16_t        carry                   = (headerChecksum & 0xffff0000) >> 16;
+        uint16_t        value                   = headerChecksum & 0xffff;
+        uint16_t        temp                    = ~(value + 0);
 
         if( position < sizeofIPHeader )
         {
@@ -321,11 +324,11 @@ public:
                     break;
 
                 case 10:
-                    byteToTransmit      = headerChecksum >> 8;
+                    byteToTransmit      = temp >> 8;
                     break;
 
                 case 11:
-                    byteToTransmit      = headerChecksum & 0xff;
+                    byteToTransmit      = temp & 0xff;
                     break;
 
                 case 12:
