@@ -1,18 +1,28 @@
+import os
+
+
+
+def ModifyTargets(target, source, env):
+    """
+    """    
+    target=['%s/%s'%(env['OUTPUTDIR'],f) for f in target]
+    return target, source
+
+
+cppBuilder  = Builder(action = 'gcc -std=c++11 -o $OUTPUTDIR\\$TARGET -c $SOURCE',  suffix='.o',        src_suffix='.cpp',  emitter=ModifyTargets)
+cBuilder    = Builder(action = 'gcc -std=c99 -o $OUTPUTDIR\\$TARGET -c $SOURCE',    suffix='.o',        src_suffix='.c',    emitter=ModifyTargets)
+ldBuilder   = Builder(action = 'gcc -o $TARGET $SOURCES',                           suffix='.exe',      src_suffix='.o',    emitter=ModifyTargets)
 
 
 env = Environment()
-env.VariantDir('Output', './', duplicate=0)
+env.Append(ENV = {'PATH' : os.environ['PATH']})
+env.Append(BUILDERS = {'CPP' : cppBuilder})
+env.Append(BUILDERS = {'C'   : cBuilder})
+env.Append(BUILDERS = {'LD'  : ldBuilder})
+env.Append(OUTPUTDIR='Output')
 
 
-env.Append(CPPPATH = ['Linux/'])
-env.Append(CCFLAGS='-std=c++11')
-env.Append(CCFLAGS='-O3')
-env.Append(CPPDEFINES={'RELEASE_BUILD' : '1'})
-#env.Append(LIBS = ['SDL_image','GL'])
-#env.Append(LINKFLAGS = ['-Wl,--rpath,/usr/local/lib/'])
-
-mainTarget = env.Program(target='Output/Main', source=['AppMain.cpp'])
-#mainTarget = env.Program('/tmp/EventLoop.cpp')
+mainTarget = env.LD(target='Main.exe', source=['#AppMain.o','#One.o'] )
 
 
 Default(mainTarget)
@@ -20,5 +30,29 @@ Default(mainTarget)
 
 
 
+#env.VariantDir('Output', './', duplicate=0)
+#print(env)
 
 
+
+
+#code_generator = Builder(action = '$CC $CCFLAGS -S $SOURCE -o $TARGET',
+#                         single_source = 1,
+#                         suffix = '.s')
+#env.Replace(CC= 'clang')
+#env.Append(BUILDERS = {'CodeGenerator' : code_generator})
+#sources = env.CodeGenerator(file)
+#env.Program('say_hello', sources)
+
+
+
+
+#env.Append(CPPPATH = ['Linux/'])
+#env.Append(CCFLAGS='-std=c++11')
+#env.Append(CCFLAGS='-O3')
+#env.Append(CPPDEFINES={'RELEASE_BUILD' : '1'})
+#env.Append(LIBS = ['SDL_image','GL'])
+#env.Append(LINKFLAGS = ['-Wl,--rpath,/usr/local/lib/'])
+
+#mainTarget = env.Program(target='Output/Main', source=['AppMain.cpp'])
+#mainTarget = env.Program('/tmp/EventLoop.cpp')
