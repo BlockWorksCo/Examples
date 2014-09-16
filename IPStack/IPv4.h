@@ -287,7 +287,7 @@ public:
         const uint8_t   TTL                     = 64;                                       // Seconds/hops
         IP::ProtocolType protocol               = IP::TCP;                                  // 6=TCP, 11=UDP, etc...
         uint32_t        destIP                  = destinationIP(protocol);                  // target... dynamic.
-        uint32_t        sourceIP                = 0xca0802fd;
+        uint32_t        sourceIP                = 0xc0a802fd;
         uint32_t        headerChecksum          = ((versionAndIHL<<8) | DSCP) + 
                                                   length + 
                                                   fragmentationID +
