@@ -31,6 +31,14 @@ struct IP
         UDP     = 17,
 
     } ProtocolType;    
+
+    //
+    //
+    //
+    typedef struct
+    {
+        uint32_t    sourceIP;
+    } ConnectionState;
 };
 
 
@@ -43,12 +51,13 @@ struct IP
 template <  typename LoggerType,
             typename StackType, 
             uint32_t IPAddress,
-            void (*newPacket)(IP::ProtocolType) ,
-            PacketProcessingState (*layerState)(IP::ProtocolType),
-            void (*pushIntoLayer)(IP::ProtocolType, uint8_t), 
-            uint8_t (*pullFromLayer)(IP::ProtocolType, bool&,  uint16_t),
+            void newPacket(IP::ProtocolType),
+            PacketProcessingState layerState(IP::ProtocolType),
+            void pushIntoLayer(IP::ProtocolType, uint8_t), 
+            uint8_t pullFromLayer(IP::ProtocolType, bool&,  uint16_t),
             uint32_t destinationIP(IP::ProtocolType),
-            uint16_t packetLength(IP::ProtocolType)
+            uint16_t packetLength(IP::ProtocolType),
+            IP::ConnectionState& connectionState(IP::ProtocolType)
             >
 class IPv4
 {
@@ -185,6 +194,8 @@ public:
 
             case 15:
                 sourceIP    |= byte;
+                //connectionState(protocol);
+                //blaa.sourceIP    = sourceIP;
                 LoggerType::printf("(IPv4) SourceIP: %08x\n", sourceIP);
                 break;
 

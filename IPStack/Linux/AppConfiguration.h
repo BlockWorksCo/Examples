@@ -66,12 +66,13 @@ const uint32_t      IPAddress       = 0xc0a802fd;
 struct StackType
 {
     //
-    // TODO: Remove ProtocolType parameter from these...
+    // 
     //
     static void IPv4NewPacket(IP::ProtocolType protocolType);
     static PacketProcessingState IPv4LayerState(IP::ProtocolType protocolType);
     static void IPv4PushIntoLayer(IP::ProtocolType protocolType, uint8_t byte);
     static uint8_t IPv4PullFromLayer(IP::ProtocolType protocolType, bool& dataAvailable,  uint16_t position);
+    static IP::ConnectionState& IPv4ConnectionState(IP::ProtocolType protocolType);
 
     static void LinkIdle();
     static void LinkNewPacket();
@@ -96,7 +97,8 @@ struct StackType
                     IPv4PushIntoLayer, 
                     IPv4PullFromLayer,
                     DestinationIP,
-                    PacketLength >              InternetLayerType;
+                    PacketLength,
+                    IPv4ConnectionState >       InternetLayerType;
     typedef PCAP<   LoggerType,
                     StackType,
                     LinkIdle,

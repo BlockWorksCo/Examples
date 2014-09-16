@@ -342,6 +342,7 @@ public:
         const uint16_t  urgentPointer       = 0x0000;
         const uint16_t  windowSize          = 822;
         uint8_t         flags               = TCP_SYN;
+        uint32_t        sourceIP            = 0x00112233;
 
         dataAvailable   = true;
 
@@ -419,8 +420,12 @@ public:
                 //
                 // Psuedo header portion of the checksum.
                 //
+                UpdateAccumulatedChecksum( sourceIP >> 16 );
+                UpdateAccumulatedChecksum( sourceIP & 0xffff );
                 UpdateAccumulatedChecksum( IPAddress >> 16 );
                 UpdateAccumulatedChecksum( IPAddress & 0xffff );
+                UpdateAccumulatedChecksum( IP::TCP );
+                UpdateAccumulatedChecksum( PacketLength() );        // *Note: this layers length, not the applications.
 
                 //
                 // TCP header portion of the checksum
@@ -485,6 +490,12 @@ public:
     uint16_t PacketLength()
     {
         return applicationLayer.PacketLength() + sizeofTCPHeader;
+    }
+
+    IP::ConnectionState     connectionState;
+    IP::ConnectionState& ConnectionState()
+    {
+        return connectionState;
     }
 
 private:

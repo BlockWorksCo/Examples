@@ -100,6 +100,12 @@ public:
         return 10;
     }
 
+    IP::ConnectionState     connectionState;
+    IP::ConnectionState& ConnectionState()
+    {
+        return connectionState;
+    }
+
 
 
 private:

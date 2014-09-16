@@ -11,8 +11,10 @@
 
 
 #include "AppConfiguration.h"
+#include "Utilities.h"
 
 
+volatile uint32_t    panicCode   = 0;
 
 //
 // Instantiations.
@@ -58,6 +60,12 @@ uint16_t StackType::PacketLength(IP::ProtocolType protocolType)
 {
     switch(protocolType) { case IP::TCP: return tcpLayer.PacketLength();break; case IP::UDP: return udpLayer.PacketLength();break; case IP::ICMP:return icmpLayer.PacketLength();break; default:return 0;break;}
 }
+
+IP::ConnectionState& IPv4ConnectionState(IP::ProtocolType protocolType)
+{
+    switch(protocolType) { case IP::TCP: return tcpLayer.ConnectionState();break; case IP::UDP: return udpLayer.ConnectionState();break; case IP::ICMP:return icmpLayer.ConnectionState();break; default:PANIC(1);break;}    
+}
+
 
 
 //
