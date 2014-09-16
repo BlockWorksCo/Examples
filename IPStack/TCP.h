@@ -342,7 +342,6 @@ public:
         const uint16_t  urgentPointer       = 0x0000;
         const uint16_t  windowSize          = 822;
         uint8_t         flags               = TCP_SYN;
-        uint32_t        sourceIP            = 0x00112233;
 
         dataAvailable   = true;
 
@@ -398,7 +397,6 @@ public:
 
             case 12:
                 byteToSend  = dataOffset;
-                //byteToSend  = 0x50;
                 break;
 
             case 13:
@@ -415,17 +413,19 @@ public:
 
             case 16:
 
+                LoggerType::printf("connection sourceIP = %04x\n", connectionState.sourceIP);
+
                 accumulatedChecksum     = 0;                    
 
                 //
                 // Psuedo header portion of the checksum.
                 //
-                UpdateAccumulatedChecksum( sourceIP >> 16 );
-                UpdateAccumulatedChecksum( sourceIP & 0xffff );
-                UpdateAccumulatedChecksum( IPAddress >> 16 );
-                UpdateAccumulatedChecksum( IPAddress & 0xffff );
-                UpdateAccumulatedChecksum( IP::TCP );
-                UpdateAccumulatedChecksum( PacketLength() );        // *Note: this layers length, not the applications.
+                UpdateAccumulatedChecksum( IPAddress >> 16 );                   // source IP, us.
+                UpdateAccumulatedChecksum( IPAddress & 0xffff );                //
+                UpdateAccumulatedChecksum( connectionState.sourceIP >> 16 );    // Dest IP, remote.
+                UpdateAccumulatedChecksum( connectionState.sourceIP & 0xffff ); //
+                UpdateAccumulatedChecksum( IP::TCP );                           // always 6, TCP
+                UpdateAccumulatedChecksum( PacketLength() );                    // *Note: the whole TCP segment, length, not just the applications.
 
                 //
                 // TCP header portion of the checksum
@@ -453,7 +453,7 @@ public:
                 accumulatedChecksum    = ~accumulatedChecksum;
                 LoggerType::printf("TCP Checksum: %04x\n", accumulatedChecksum );
 
-                accumulatedChecksum = 0xd0d3;
+                //accumulatedChecksum = 0xd0d3;
                 // 
                 byteToSend  = accumulatedChecksum >> 8;
                 break;
@@ -492,7 +492,6 @@ public:
         return applicationLayer.PacketLength() + sizeofTCPHeader;
     }
 
-    IP::ConnectionState     connectionState;
     IP::ConnectionState& ConnectionState()
     {
         return connectionState;
@@ -501,32 +500,6 @@ public:
 private:
 
 
-
-    unsigned short checksum1(const char *buf, unsigned size)
-    {
-        unsigned sum = 0;
-        int i;
-
-        /* Accumulate checksum */
-        for (i = 0; i < size - 1; i += 2)
-        {
-            unsigned short word16 = *(unsigned short *) &buf[i];
-            sum += word16;
-        }
-
-        /* Handle odd-sized case */
-        if (size & 1)
-        {
-            unsigned short word16 = (unsigned char) buf[i];
-            sum += word16;
-        }
-
-        /* Fold to get the ones-complement result */
-        while (sum >> 16) sum = (sum & 0xFFFF)+(sum >> 16);
-
-        /* Invert to get the negative in ones-complement arithmetic */
-        return ~sum;
-    }
 
     const uint16_t  sizeofTCPHeader     = 20;
 
@@ -552,6 +525,7 @@ private:
     TCPFlags                packetToSend;
     uint16_t                outputPosition;
 
+    IP::ConnectionState     connectionState;
 };
 
 

@@ -194,8 +194,7 @@ public:
 
             case 15:
                 sourceIP    |= byte;
-                //connectionState(protocol);
-                //blaa.sourceIP    = sourceIP;
+                connectionState(protocol).sourceIP  = sourceIP;
                 LoggerType::printf("(IPv4) SourceIP: %08x\n", sourceIP);
                 break;
 
