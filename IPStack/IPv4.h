@@ -260,12 +260,9 @@ public:
     //
     void UpdateAccumulatedChecksum(uint16_t value)
     {
-        uint32_t prev = accumulatedChecksum;
         accumulatedChecksum     += value;
-        printf("<update %04x %08x %08x>",value, prev, accumulatedChecksum);
         if( accumulatedChecksum > 0xffff )
         {
-            printf("<overflow %04x %04x>",value, accumulatedChecksum);
             accumulatedChecksum -= 0xffff;
         }
     }
@@ -288,22 +285,7 @@ public:
         IP::ProtocolType protocol               = IP::TCP;                                  // 6=TCP, 11=UDP, etc...
         uint32_t        destIP                  = destinationIP(protocol);                  // target... dynamic.
         uint32_t        sourceIP                = 0xc0a802fd;
-        uint32_t        headerChecksum          = ((versionAndIHL<<8) | DSCP) + 
-                                                  length + 
-                                                  fragmentationID +
-                                                  ((fragmentationFlags<<8) | fragmentationOffset) +
-                                                  ((TTL<<8) | protocol) +
-                                                  (sourceIP >> 16) +
-                                                  (sourceIP & 0xffff) + 
-                                                  (destIP >> 16) +
-                                                  (destIP & 0xffff);
 
-
-        while ( (headerChecksum >> 16) != 0 ) 
-        {
-            headerChecksum  = (headerChecksum&0xffff) + (headerChecksum>>16);
-        }
-        headerChecksum    = ~headerChecksum;
 
         if( position < sizeofIPHeader )
         {
@@ -354,69 +336,17 @@ public:
 
                 case 10:
 
-                    uint16_t    t;
-                    //static uint16_t  ttt[] = {0x4500, 0x0073, 0x0000, 0x4000, 0x4011, 0xb861, 0xc0a8, 0x0001, 0xc0a8, 0x00c7 };
-                    //static uint16_t    ttt[] = {0x4500, 0x0073, 0x0000, 0x4000, 0x4011, 0x0000, 0xc0a8, 0x0001, 0xc0a8, 0x00c7 };
-                    //static uint16_t  ttt[] = {0x4500, 0x0032, 0x1234, 0x4000, 0x4006, 0x432d, 0xc0a8, 0x02fd, 0x0011, 0x2233 };
-                    static uint16_t    ttt[] = {0x4500, 0x0032, 0x1234, 0x4000, 0x4006, 0x0000, 0xc0a8, 0x02fd, 0x0011, 0x2233 };
-                    accumulatedChecksum     = 0;
-                    for(int i=0; i<10; i++)
-                    {
-                        t   = ttt[i];
-                        LoggerType::printf("(%04x) = %04x\n", t, accumulatedChecksum);
-                        UpdateAccumulatedChecksum( t );
-                    }
-                    accumulatedChecksum    = ~accumulatedChecksum;
-                    LoggerType::printf("Check = %04x\n", accumulatedChecksum );
-
-
-                    LoggerType::printf("ip=%08x\n", sourceIP );
-
                     accumulatedChecksum     = 0;                    
-
-                    t   = ( ((uint16_t)versionAndIHL<<8) | (uint16_t)DSCP);
-                    LoggerType::printf("..%04x = %04x\n", t, accumulatedChecksum);
-                    UpdateAccumulatedChecksum( t );
-
-                    t   = length;
-                    LoggerType::printf("..%04x = %04x\n", t, accumulatedChecksum);
-                    UpdateAccumulatedChecksum( t );
-
-                    t   = fragmentationID;
-                    LoggerType::printf("..%04x = %04x\n", t, accumulatedChecksum);
-                    UpdateAccumulatedChecksum( t );
-
-                    t   = (( ((uint16_t)fragmentationFlags)<<8) | (uint16_t)fragmentationOffset);
-                    LoggerType::printf("..%04x = %04x\n", t, accumulatedChecksum);
-                    UpdateAccumulatedChecksum( t );
-
-                    t   = (( ((uint16_t)TTL)<<8) | (uint16_t)protocol);
-                    LoggerType::printf("..%04x = %04x\n", t, accumulatedChecksum);
-                    UpdateAccumulatedChecksum( t );
-
-                    t   = 0;
-                    LoggerType::printf("..%04x = %04x\n", t, accumulatedChecksum);
-                    UpdateAccumulatedChecksum( t );
-
-                    t   = (uint16_t)(sourceIP >> 16);
-                    LoggerType::printf("..%04x = %04x\n", t, accumulatedChecksum);
-                    UpdateAccumulatedChecksum( t );
-
-                    t   = (uint16_t)(sourceIP & 0xffff);
-                    LoggerType::printf("....%04x = %04x\n", t, accumulatedChecksum);
-                    UpdateAccumulatedChecksum( t );
-
-                    t   = (uint16_t)(destIP >> 16);
-                    LoggerType::printf("..%04x = %04x\n", t, accumulatedChecksum);
-                    UpdateAccumulatedChecksum( t );
-
-                    t   = (uint16_t)(destIP & 0xffff);
-                    LoggerType::printf("..%04x = %04x\n", t, accumulatedChecksum);
-                    UpdateAccumulatedChecksum( t );
-
+                    UpdateAccumulatedChecksum( ( ((uint16_t)versionAndIHL<<8) | (uint16_t)DSCP) );
+                    UpdateAccumulatedChecksum( length );
+                    UpdateAccumulatedChecksum( fragmentationID );
+                    UpdateAccumulatedChecksum( (( ((uint16_t)fragmentationFlags)<<8) | (uint16_t)fragmentationOffset) );
+                    UpdateAccumulatedChecksum( (( ((uint16_t)TTL)<<8) | (uint16_t)protocol) );
+                    UpdateAccumulatedChecksum( (uint16_t)(sourceIP >> 16) );
+                    UpdateAccumulatedChecksum( (uint16_t)(sourceIP & 0xffff) );
+                    UpdateAccumulatedChecksum( (uint16_t)(destIP >> 16) );
+                    UpdateAccumulatedChecksum( (uint16_t)(destIP & 0xffff) );
                     accumulatedChecksum    = ~accumulatedChecksum;
-
-                    LoggerType::printf("Check = %04x\n", accumulatedChecksum );
 
                     byteToTransmit      = accumulatedChecksum >> 8;
                     break;
@@ -474,38 +404,6 @@ public:
 
 
 private:
-
-    //
-    // IPv4 Checksum alg.
-    //
-    uint16_t checksum1(const uint8_t* buf, uint16_t size)
-    {
-        uint32_t    sum = 0;
-        int         i;
-
-        /* Accumulate checksum */
-        for (i=0; i<size-1; i+=2)
-        {
-            uint16_t word16 = * ((uint16_t *)&buf[i]);
-            sum += word16;
-        }
-
-        /* Handle odd-sized case */
-        if ( (size&1) != 0 )
-        {
-            uint16_t word16 = (unsigned char) buf[i];
-            sum += word16;
-        }
-
-        /* Fold to get the ones-complement result */
-        while ( (sum>>16) != 0 ) 
-        {
-            sum = (sum & 0xFFFF)+(sum >> 16);
-        }
-
-        /* Invert to get the negative in ones-complement arithmetic */
-        return ~sum;
-    }
 
     //
     // Set the current packet as rejected.
