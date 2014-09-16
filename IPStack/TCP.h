@@ -313,12 +313,26 @@ public:
         applicationLayer.SetTCPState(currentState);
     }
 
+
+
+    //
+    //
+    //
+    void UpdateAccumulatedChecksum(uint16_t value)
+    {
+        accumulatedChecksum     += value;
+        if( accumulatedChecksum > 0xffff )
+        {
+            accumulatedChecksum -= 0xffff;
+        }
+    }    
+
     //
     // Pull some packet data out of the processor for transmission.
     //
     uint8_t PullFrom(bool& dataAvailable, uint16_t position)
     {
-        const uint16_t  dataOffset          = sizeofTCPHeader;
+        const uint8_t   dataOffset          = (sizeofTCPHeader / 4) << 4;;
         uint8_t         byteToSend          = 0x00;
         uint16_t        sourcePort          = 80;
         uint16_t        destinationPort     = 8080;
@@ -326,7 +340,6 @@ public:
         uint32_t        ackNumber           = 0xe3899124;
         const uint16_t  urgentPointer       = 0x0000;
         const uint16_t  windowSize          = 822;
-        const uint16_t  checksum            = 0x0000;
         uint8_t         flags               = TCP_SYN;
 
         dataAvailable   = true;
@@ -382,8 +395,8 @@ public:
                 break;
 
             case 12:
-                byteToSend  = (dataOffset / 4) << 4;
-                byteToSend  = 0x50;
+                byteToSend  = dataOffset;
+                //byteToSend  = 0x50;
                 break;
 
             case 13:
@@ -399,11 +412,25 @@ public:
                 break;
 
             case 16:
-                byteToSend  = checksum >> 8;
+
+                accumulatedChecksum     = 0;                    
+                UpdateAccumulatedChecksum( sourcePort );
+                UpdateAccumulatedChecksum( destinationPort );
+                UpdateAccumulatedChecksum( sequenceNumber >> 16 );
+                UpdateAccumulatedChecksum( sequenceNumber &0xffff );
+                UpdateAccumulatedChecksum( ackNumber >> 16 );
+                UpdateAccumulatedChecksum( ackNumber & 0xffff );
+                UpdateAccumulatedChecksum( destinationPort );
+                UpdateAccumulatedChecksum( destinationPort );
+                accumulatedChecksum    = ~accumulatedChecksum;
+
+                accumulatedChecksum = 0xd0d3;
+                // 
+                byteToSend  = accumulatedChecksum >> 8;
                 break;
 
             case 17:
-                byteToSend  = checksum & 0xff;
+                byteToSend  = accumulatedChecksum & 0xff;
                 break;
 
             case 18:
@@ -439,6 +466,33 @@ public:
 private:
 
 
+
+    unsigned short checksum1(const char *buf, unsigned size)
+    {
+        unsigned sum = 0;
+        int i;
+
+        /* Accumulate checksum */
+        for (i = 0; i < size - 1; i += 2)
+        {
+            unsigned short word16 = *(unsigned short *) &buf[i];
+            sum += word16;
+        }
+
+        /* Handle odd-sized case */
+        if (size & 1)
+        {
+            unsigned short word16 = (unsigned char) buf[i];
+            sum += word16;
+        }
+
+        /* Fold to get the ones-complement result */
+        while (sum >> 16) sum = (sum & 0xFFFF)+(sum >> 16);
+
+        /* Invert to get the negative in ones-complement arithmetic */
+        return ~sum;
+    }
+
     const uint16_t  sizeofTCPHeader     = 20;
 
     //
@@ -446,6 +500,8 @@ private:
     //
     uint16_t                position;
     PacketProcessingState   packetState;
+
+    uint32_t                accumulatedChecksum;
 
     uint16_t                sourcePort;
     uint16_t                destinationPort;
