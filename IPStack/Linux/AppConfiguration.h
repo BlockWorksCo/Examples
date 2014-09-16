@@ -60,6 +60,9 @@ typedef enum
 typedef StdoutLog<128>      LoggerType;
 typedef NullLog<1>          NullLoggerType;
 
+const uint32_t      IPAddress       = 0xc0a802fd;
+
+
 struct StackType
 {
     //
@@ -81,18 +84,19 @@ struct StackType
     typedef HelloWorldPageGenerator<LoggerType,    
                                     StackType>  ApplicationLayerType;
     typedef TCP<    LoggerType,
-                    StackType>                  TCPTransportLayerType;
+                    StackType,
+                    IPAddress>                  TCPTransportLayerType;
     typedef UDP<    LoggerType,
                     StackType>                  UDPTransportLayerType;
     typedef IPv4<   LoggerType,
                     StackType, 
-                    0xc0a802fd, 
+                    IPAddress, 
                     IPv4NewPacket, 
                     IPv4LayerState, 
                     IPv4PushIntoLayer, 
                     IPv4PullFromLayer,
                     DestinationIP,
-                    PacketLength >         InternetLayerType;
+                    PacketLength >              InternetLayerType;
     typedef PCAP<   LoggerType,
                     StackType,
                     LinkIdle,

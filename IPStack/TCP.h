@@ -21,7 +21,8 @@
 //
 //
 template <  typename LoggerType,
-            typename StackType >
+            typename StackType,
+            uint32_t IPAddress >
 class TCP
 {
     //
@@ -414,15 +415,38 @@ public:
             case 16:
 
                 accumulatedChecksum     = 0;                    
+
+                //
+                // Psuedo header portion of the checksum.
+                //
+                UpdateAccumulatedChecksum( IPAddress >> 16 );
+                UpdateAccumulatedChecksum( IPAddress & 0xffff );
+
+                //
+                // TCP header portion of the checksum
+                //
                 UpdateAccumulatedChecksum( sourcePort );
                 UpdateAccumulatedChecksum( destinationPort );
                 UpdateAccumulatedChecksum( sequenceNumber >> 16 );
                 UpdateAccumulatedChecksum( sequenceNumber &0xffff );
                 UpdateAccumulatedChecksum( ackNumber >> 16 );
                 UpdateAccumulatedChecksum( ackNumber & 0xffff );
-                UpdateAccumulatedChecksum( destinationPort );
-                UpdateAccumulatedChecksum( destinationPort );
+                UpdateAccumulatedChecksum( ((uint16_t)dataOffset<<16) | (uint16_t)flags );
+                UpdateAccumulatedChecksum( windowSize );
+                UpdateAccumulatedChecksum( urgentPointer );
+
+                //
+                // Data portion of the checksum
+                //
+                for(uint16_t i=0; i<applicationLayer.PacketLength(); i++)
+                {
+                    bool        moreDataAvailable   = false;
+                    uint8_t     hiByte              = applicationLayer.PullFrom(moreDataAvailable, i);
+                    uint8_t     loByte              = applicationLayer.PullFrom(moreDataAvailable, i);
+                    UpdateAccumulatedChecksum( ((uint16_t)hiByte<<16) | (uint16_t)loByte  );
+                }
                 accumulatedChecksum    = ~accumulatedChecksum;
+                LoggerType::printf("TCP Checksum: %04x\n", accumulatedChecksum );
 
                 accumulatedChecksum = 0xd0d3;
                 // 

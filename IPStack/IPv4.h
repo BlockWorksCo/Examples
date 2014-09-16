@@ -267,6 +267,7 @@ public:
         }
     }
 
+
     //
     // Pull some packet data out of the processor for transmission.
     //
@@ -284,7 +285,6 @@ public:
         const uint8_t   TTL                     = 64;                                       // Seconds/hops
         IP::ProtocolType protocol               = IP::TCP;                                  // 6=TCP, 11=UDP, etc...
         uint32_t        destIP                  = destinationIP(protocol);                  // target... dynamic.
-        uint32_t        sourceIP                = 0xc0a802fd;
 
 
         if( position < sizeofIPHeader )
@@ -342,8 +342,8 @@ public:
                     UpdateAccumulatedChecksum( fragmentationID );
                     UpdateAccumulatedChecksum( (( ((uint16_t)fragmentationFlags)<<8) | (uint16_t)fragmentationOffset) );
                     UpdateAccumulatedChecksum( (( ((uint16_t)TTL)<<8) | (uint16_t)protocol) );
-                    UpdateAccumulatedChecksum( (uint16_t)(sourceIP >> 16) );
-                    UpdateAccumulatedChecksum( (uint16_t)(sourceIP & 0xffff) );
+                    UpdateAccumulatedChecksum( (uint16_t)(IPAddress >> 16) );
+                    UpdateAccumulatedChecksum( (uint16_t)(IPAddress & 0xffff) );
                     UpdateAccumulatedChecksum( (uint16_t)(destIP >> 16) );
                     UpdateAccumulatedChecksum( (uint16_t)(destIP & 0xffff) );
                     accumulatedChecksum    = ~accumulatedChecksum;
