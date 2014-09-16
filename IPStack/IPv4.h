@@ -246,6 +246,22 @@ public:
         return packetState;
     }
 
+
+    //
+    //
+    //
+    void UpdateAccumulatedChecksum(uint16_t value)
+    {
+        uint32_t prev = accumulatedChecksum;
+        accumulatedChecksum     += value;
+        printf("<update %04x %08x %08x>",value, prev, accumulatedChecksum);
+        if( accumulatedChecksum > 0xffff )
+        {
+            printf("<overflow %04x %04x>",value, accumulatedChecksum);
+            accumulatedChecksum -= 0xffff;
+        }
+    }
+
     //
     // Pull some packet data out of the processor for transmission.
     //
@@ -261,9 +277,10 @@ public:
         const uint8_t   fragmentationFlags      = 0x40;                                     // Dont Fragment.
         const uint8_t   fragmentationOffset     = 0x00;                                     // unused.
         const uint8_t   TTL                     = 64;                                       // Seconds/hops
-        IP::ProtocolType  protocol              = IP::TCP;                                  // 6=TCP, 11=UDP, etc...
+        IP::ProtocolType protocol               = IP::TCP;                                  // 6=TCP, 11=UDP, etc...
         uint32_t        destIP                  = destinationIP(protocol);                  // target... dynamic.
-        uint16_t        headerChecksum          = ((versionAndIHL<<8) | DSCP) + 
+        uint32_t        sourceIP                = 0xca0802fd;
+        uint32_t        headerChecksum          = ((versionAndIHL<<8) | DSCP) + 
                                                   length + 
                                                   fragmentationID +
                                                   ((fragmentationFlags<<8) | fragmentationOffset) +
@@ -272,6 +289,13 @@ public:
                                                   (sourceIP & 0xffff) + 
                                                   (destIP >> 16) +
                                                   (destIP & 0xffff);
+
+
+        while ( (headerChecksum >> 16) != 0 ) 
+        {
+            headerChecksum  = (headerChecksum&0xffff) + (headerChecksum>>16);
+        }
+        headerChecksum    = ~headerChecksum;
 
         if( position < sizeofIPHeader )
         {
@@ -321,11 +345,76 @@ public:
                     break;
 
                 case 10:
-                    byteToTransmit      = headerChecksum >> 8;
+
+                    uint16_t    t;
+                    //static uint16_t  ttt[] = {0x4500, 0x0073, 0x0000, 0x4000, 0x4011, 0xb861, 0xc0a8, 0x0001, 0xc0a8, 0x00c7 };
+                    //static uint16_t    ttt[] = {0x4500, 0x0073, 0x0000, 0x4000, 0x4011, 0x0000, 0xc0a8, 0x0001, 0xc0a8, 0x00c7 };
+                    //static uint16_t  ttt[] = {0x4500, 0x0032, 0x1234, 0x4000, 0x4006, 0x432d, 0xc0a8, 0x02fd, 0x0011, 0x2233 };
+                    static uint16_t    ttt[] = {0x4500, 0x0032, 0x1234, 0x4000, 0x4006, 0x0000, 0xc0a8, 0x02fd, 0x0011, 0x2233 };
+                    accumulatedChecksum     = 0;
+                    for(int i=0; i<10; i++)
+                    {
+                        t   = ttt[i];
+                        LoggerType::printf("(%04x) = %04x\n", t, accumulatedChecksum);
+                        UpdateAccumulatedChecksum( t );
+                    }
+                    accumulatedChecksum    = ~accumulatedChecksum;
+                    LoggerType::printf("Check = %04x\n", accumulatedChecksum );
+
+
+                    LoggerType::printf("ip=%08x\n", sourceIP );
+
+                    accumulatedChecksum     = 0;                    
+
+                    t   = ( ((uint16_t)versionAndIHL<<8) | (uint16_t)DSCP);
+                    LoggerType::printf("..%04x = %04x\n", t, accumulatedChecksum);
+                    UpdateAccumulatedChecksum( t );
+
+                    t   = length;
+                    LoggerType::printf("..%04x = %04x\n", t, accumulatedChecksum);
+                    UpdateAccumulatedChecksum( t );
+
+                    t   = fragmentationID;
+                    LoggerType::printf("..%04x = %04x\n", t, accumulatedChecksum);
+                    UpdateAccumulatedChecksum( t );
+
+                    t   = (( ((uint16_t)fragmentationFlags)<<8) | (uint16_t)fragmentationOffset);
+                    LoggerType::printf("..%04x = %04x\n", t, accumulatedChecksum);
+                    UpdateAccumulatedChecksum( t );
+
+                    t   = (( ((uint16_t)TTL)<<8) | (uint16_t)protocol);
+                    LoggerType::printf("..%04x = %04x\n", t, accumulatedChecksum);
+                    UpdateAccumulatedChecksum( t );
+
+                    t   = 0;
+                    LoggerType::printf("..%04x = %04x\n", t, accumulatedChecksum);
+                    UpdateAccumulatedChecksum( t );
+
+                    t   = (uint16_t)(sourceIP >> 16);
+                    LoggerType::printf("..%04x = %04x\n", t, accumulatedChecksum);
+                    UpdateAccumulatedChecksum( t );
+
+                    t   = (uint16_t)(sourceIP & 0xffff);
+                    LoggerType::printf("....%04x = %04x\n", t, accumulatedChecksum);
+                    UpdateAccumulatedChecksum( t );
+
+                    t   = (uint16_t)(destIP >> 16);
+                    LoggerType::printf("..%04x = %04x\n", t, accumulatedChecksum);
+                    UpdateAccumulatedChecksum( t );
+
+                    t   = (uint16_t)(destIP & 0xffff);
+                    LoggerType::printf("..%04x = %04x\n", t, accumulatedChecksum);
+                    UpdateAccumulatedChecksum( t );
+
+                    accumulatedChecksum    = ~accumulatedChecksum;
+
+                    LoggerType::printf("Check = %04x\n", accumulatedChecksum );
+
+                    byteToTransmit      = accumulatedChecksum >> 8;
                     break;
 
                 case 11:
-                    byteToTransmit      = headerChecksum & 0xff;
+                    byteToTransmit      = accumulatedChecksum & 0xff;
                     break;
 
                 case 12:
@@ -436,12 +525,14 @@ private:
     uint16_t                position;
     PacketProcessingState   packetState;
 
+    uint32_t                accumulatedChecksum;
+
     uint16_t                length;
     uint16_t                fragmentOffset;
     uint8_t                 fragmentFlags;
     uint16_t                headerChecksum;
     uint32_t                sourceIP;
-    IP::ProtocolType          protocol;
+    IP::ProtocolType        protocol;
 
 };
 
