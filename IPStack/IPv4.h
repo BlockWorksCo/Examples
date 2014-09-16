@@ -252,9 +252,11 @@ public:
     //
     void UpdateAccumulatedChecksum(uint16_t value)
     {
+        printf("<update %04x %04x>",value, accumulatedChecksum);
         accumulatedChecksum     += value;
         if( accumulatedChecksum > 0xffff )
         {
+            printf("<overflow %04x %04x>",value, accumulatedChecksum);
             accumulatedChecksum -= 0xffff;
         }
     }
@@ -392,7 +394,7 @@ public:
                     UpdateAccumulatedChecksum( t );
 
                     t   = (uint16_t)(sourceIP & 0xffff);
-                    LoggerType::printf("..%04x = %04x\n", t, accumulatedChecksum);
+                    LoggerType::printf("....%04x = %04x\n", t, accumulatedChecksum);
                     UpdateAccumulatedChecksum( t );
 
                     t   = (uint16_t)(destIP >> 16);
@@ -529,7 +531,7 @@ private:
     uint8_t                 fragmentFlags;
     uint16_t                headerChecksum;
     uint32_t                sourceIP;
-    IP::ProtocolType          protocol;
+    IP::ProtocolType        protocol;
 
 };
 
