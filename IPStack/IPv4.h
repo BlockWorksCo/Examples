@@ -252,8 +252,9 @@ public:
     //
     void UpdateAccumulatedChecksum(uint16_t value)
     {
-        printf("<update %04x %04x>",value, accumulatedChecksum);
+        uint32_t prev = accumulatedChecksum;
         accumulatedChecksum     += value;
+        printf("<update %04x %08x %08x>",value, prev, accumulatedChecksum);
         if( accumulatedChecksum > 0xffff )
         {
             printf("<overflow %04x %04x>",value, accumulatedChecksum);
