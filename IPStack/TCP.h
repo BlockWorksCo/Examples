@@ -336,12 +336,12 @@ public:
     {
         const uint8_t   dataOffset          = (sizeofTCPHeader / 4) << 4;
         uint8_t         byteToSend          = 0x00;
-        uint16_t        sourcePort          = 0;
-        uint16_t        destinationPort     = 0;
-        uint32_t        sequenceNumber      = 0;
-        uint32_t        ackNumber           = 0;
-        const uint16_t  urgentPointer       = 0x0000;
-        const uint16_t  windowSize          = 0;
+        uint16_t        sourcePort          = 80;
+        uint16_t        destinationPort     = 8080;
+        uint32_t        sequenceNumber      = 0x123;
+        uint32_t        ackNumber           = 0xabc;
+        const uint16_t  urgentPointer       = 0x001;
+        const uint16_t  windowSize          = 822;
         uint8_t         flags               = 0;
 
         dataAvailable   = true;
@@ -498,6 +498,7 @@ private:
 #if 0
 
     http://www.netfor2.com/tcpsum.htm
+
 u16 tcp_accumulatedChecksum_calc(u16 len_tcp, uint32_t src_addr,uint32_t dest_addr, int padding, u16 buff[])
 {
     u16 prot_tcp=6;
@@ -515,13 +516,7 @@ u16 tcp_accumulatedChecksum_calc(u16 len_tcp, uint32_t src_addr,uint32_t dest_ad
     
     //initialize accumulatedChecksum to zero
     accumulatedChecksum=0;
-    
-    // make 16 bit words out of every two adjacent 8 bit words and 
-    // calculate the accumulatedChecksum of all 16 vit words
-    for (i=0; i<len_tcp+padd; i=i+2)
-    {
-        UpdateAccumulatedChecksum( ((buff[i]<<8)&0xFF00) + (buff[i+1]&0xFF) );
-    }   
+
     // add the TCP pseudo header which contains:
     // the IP source and destinationn addresses,
     UpdateAccumulatedChecksum(src_addr >> 16);
@@ -530,6 +525,13 @@ u16 tcp_accumulatedChecksum_calc(u16 len_tcp, uint32_t src_addr,uint32_t dest_ad
     UpdateAccumulatedChecksum(dest_addr & 0xffff);
     UpdateAccumulatedChecksum(6);
     UpdateAccumulatedChecksum(len_tcp);
+    
+    // make 16 bit words out of every two adjacent 8 bit words and 
+    // calculate the accumulatedChecksum of all 16 vit words
+    for (i=0; i<len_tcp+padd; i=i+2)
+    {
+        UpdateAccumulatedChecksum( ((buff[i]<<8)&0xFF00) + (buff[i+1]&0xFF) );
+    }   
 
     // Take the one's complement of accumulatedChecksum
     accumulatedChecksum = ~accumulatedChecksum;
@@ -540,16 +542,29 @@ u16 tcp_accumulatedChecksum_calc(u16 len_tcp, uint32_t src_addr,uint32_t dest_ad
 
 void main()
 { 
-    uint16_t    data[20]    = {0x00,0x00,0x00,0x00};
+    uint16_t    data[30];
 
     memset(&data[0], 0, sizeof(data));
     data[12]    = 0x50;
 
+    data[20]    = 0x00;
+    data[21]    = 0x01;
+    data[22]    = 0x02;
+    data[23]    = 0x03;
+    data[24]    = 0x04;
+    data[25]    = 0x05;
+    data[26]    = 0x06;
+    data[27]    = 0x07;
+    data[28]    = 0x08;
+    data[29]    = 0x09;
+
     //uint16_t     c   = tcp_accumulatedChecksum_calc(20, dstIP, srcIP, 0, data);
-    uint16_t     c   = tcp_accumulatedChecksum_calc(20, 0xc0a80279, 0xc0a802fd, 0, data);
+    uint16_t     c   = tcp_accumulatedChecksum_calc( 30, 0xc0a80279, 0xc0a802fd, 0, data);
 
     printf("%04x\n",c);
 }
+
+
 
 
 
