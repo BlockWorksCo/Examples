@@ -264,7 +264,9 @@ public:
 
             packetHeader.caplen     = i;
             packetHeader.len        = i;
-            //packetHeader.ts         = 0;
+            packetHeader.ts.tv_sec         = 1;
+            packetHeader.ts.tv_usec         = 1;
+            fileHeader.snaplen      = i;
 
             //
             //

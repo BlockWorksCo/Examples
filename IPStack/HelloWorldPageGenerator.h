@@ -31,7 +31,7 @@ class HelloWorldPageGenerator
     //
     STACK_TYPES_BREAKOUT;
 
-    typedef typename TCPTransportLayerType::TCPState 	TCPState;
+    typedef typename TCPIP::TCPState 	TCPState;
 
 
 
@@ -40,8 +40,8 @@ public:
 	HelloWorldPageGenerator() :
         position(0),
         packetState(Unknown),
-        tcpState(TCPTransportLayerType::LISTEN),
-        nextTCPState(TCPTransportLayerType::LISTEN)
+        tcpState(TCPIP::LISTEN),
+        nextTCPState(TCPIP::LISTEN)
 	{
         //
         // Close the port to restart in LISTEN/PassiveOpen mode.
@@ -140,6 +140,10 @@ public:
     }
 
 
+    TCPIP::ConnectionState& ConnectionState()
+    {
+        return connectionState;
+    }
 
 private:
 
@@ -153,7 +157,7 @@ private:
         // Start off in the passive-open state.
         // We wait for a SYN to be received, then send out a SYN packet.
         //
-        tcpState    = TCPTransportLayerType::LISTEN;    
+        tcpState    = TCPIP::LISTEN;    
     }
 
     //
@@ -164,6 +168,8 @@ private:
     TCPState 				tcpState;
     TCPState                nextTCPState;
     const uint16_t          packetLength    = 10;
+
+    TCPIP::ConnectionState  connectionState;
 
 };
 

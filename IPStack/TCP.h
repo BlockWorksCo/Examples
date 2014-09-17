@@ -17,21 +17,13 @@
 
 
 
-//
-//
-//
-template <  typename LoggerType,
-            typename StackType,
-            uint32_t IPAddress >
-class TCP
-{
-    //
-    // Break out the StackType helper types.
-    //
-    STACK_TYPES_BREAKOUT;
 
 
-public:
+//
+// Generic public IP definitions.
+//
+struct TCPIP
+{       
 
     typedef enum
     {
@@ -67,13 +59,54 @@ public:
     } TCPState;
 
 
+    //
+    //
+    //
+    typedef struct
+    {
+        IP::ConnectionState     ipState;
+
+        uint16_t                position;
+        PacketProcessingState   packetState;
+
+        uint32_t                accumulatedChecksum;
+
+        uint16_t                sourcePort;
+        uint16_t                destinationPort;
+        uint32_t                sequenceNumber;
+        uint32_t                ackNumber;
+        TCPFlags                flags;
+        uint16_t                windowSize;
+        uint16_t                checksum;
+        uint16_t                urgentPointer;
+        uint8_t                 dataOffset;
+
+        TCPFlags                packetToSend;
+
+    } ConnectionState;
+};
+
+
+
+
+//
+//
+//
+template <  typename LoggerType,
+            typename StackType,
+            uint32_t IPAddress >
+class TCP
+{
+    //
+    // Break out the StackType helper types.
+    //
+    STACK_TYPES_BREAKOUT;
+
+
 public:
 
     TCP(ApplicationLayerType& _applicationLayer) :
-        position(0),
-        packetState(Unknown),
-        applicationLayer(_applicationLayer),
-        packetToSend(TCP_NONE)
+        applicationLayer(_applicationLayer)
     {
         
     }
@@ -92,9 +125,12 @@ public:
     //
     void NewPacket()
     {
-        position        = 0;
-        packetState     = Unknown;
-        dataOffset      = 20;   // 5 words minimum.
+        applicationLayer.ConnectionState().position          = 0;
+        applicationLayer.ConnectionState().packetState       = Unknown;
+        applicationLayer.ConnectionState().dataOffset        = 20;   // 5 words minimum.
+        applicationLayer.ConnectionState().position          = 0;
+        applicationLayer.ConnectionState().packetState       = Unknown;
+        applicationLayer.ConnectionState().packetToSend      = TCPIP::TCP_NONE;
     }
 
     //
@@ -105,96 +141,96 @@ public:
         //
         // Header portion of the packet.
         //
-        switch(position)
+        switch( applicationLayer.ConnectionState().position )
         {
             case 0:
-                sourcePort  = byte << 8;
+                applicationLayer.ConnectionState().sourcePort  = byte << 8;
                 break;
 
             case 1:
-                sourcePort  |= byte;
-                LoggerType::printf("(TCP) sourcePort: %d\n", sourcePort);
+                applicationLayer.ConnectionState().sourcePort  |= byte;
+                LoggerType::printf("(TCP) sourcePort: %d\n", applicationLayer.ConnectionState().sourcePort);
                 break;
 
             case 2:
-                destinationPort  = byte << 8;
+                applicationLayer.ConnectionState().destinationPort  = byte << 8;
                 break;
 
             case 3:
-                destinationPort  |= byte;
-                LoggerType::printf("(TCP) destinationPort: %d\n", destinationPort);
+                applicationLayer.ConnectionState().destinationPort  |= byte;
+                LoggerType::printf("(TCP) destinationPort: %d\n", applicationLayer.ConnectionState().destinationPort);
                 break;
 
             case 4:
-                sequenceNumber  = byte << 24;
+                applicationLayer.ConnectionState().sequenceNumber  = byte << 24;
                 break;
 
             case 5:
-                sequenceNumber  |= byte << 16;
+                applicationLayer.ConnectionState().sequenceNumber  |= byte << 16;
                 break;
 
             case 6:
-                sequenceNumber  |= byte << 8;
+                applicationLayer.ConnectionState().sequenceNumber  |= byte << 8;
                 break;
 
             case 7:
-                sequenceNumber  |= byte;
-                LoggerType::printf("(TCP) sequenceNumber: %08x\n", sequenceNumber);
+                applicationLayer.ConnectionState().sequenceNumber  |= byte;
+                LoggerType::printf("(TCP) sequenceNumber: %08x\n", applicationLayer.ConnectionState().sequenceNumber);
                 break;
 
             case 8:
-                ackNumber  = byte << 24;
+                applicationLayer.ConnectionState().ackNumber  = byte << 24;
                 break;
 
             case 9:
-                ackNumber  |= byte << 16;
+                applicationLayer.ConnectionState().ackNumber  |= byte << 16;
                 break;
 
             case 10:
-                ackNumber  |= byte << 8;
+                applicationLayer.ConnectionState().ackNumber  |= byte << 8;
                 break;
 
             case 11:
-                ackNumber  |= byte;
-                LoggerType::printf("(TCP) ackNumber: %08x\n", ackNumber);
+                applicationLayer.ConnectionState().ackNumber  |= byte;
+                LoggerType::printf("(TCP) ackNumber: %08x\n", applicationLayer.ConnectionState().ackNumber);
                 break;
 
             case 12:
-                dataOffset  = byte >> 4;
-                dataOffset  *= 4;
-                LoggerType::printf("(TCP) dataOffset: %d\n", dataOffset);
+                applicationLayer.ConnectionState().dataOffset  = byte >> 4;
+                applicationLayer.ConnectionState().dataOffset  *= 4;
+                LoggerType::printf("(TCP) dataOffset: %d\n", applicationLayer.ConnectionState().dataOffset);
                 break;
 
             case 13:
-                flags   = static_cast<TCPFlags>(byte);
-                LoggerType::printf("(TCP) Flags: %02x\n", flags);
+                applicationLayer.ConnectionState().flags   = static_cast<TCPIP::TCPFlags>(byte);
+                LoggerType::printf("(TCP) Flags: %02x\n", applicationLayer.ConnectionState().flags);
                 break;
 
             case 14:
-                windowSize  = byte << 8;
+                applicationLayer.ConnectionState().windowSize  = byte << 8;
                 break;
 
             case 15:
-                windowSize  |= byte;
-                LoggerType::printf("(TCP) windowSize: %d\n", windowSize);
+                applicationLayer.ConnectionState().windowSize  |= byte;
+                LoggerType::printf("(TCP) windowSize: %d\n", applicationLayer.ConnectionState().windowSize);
                 break;
 
             case 16:
-                checksum  = byte << 8;
+                applicationLayer.ConnectionState().checksum  = byte << 8;
                 break;
 
             case 17:
-                checksum  |= byte;
-                LoggerType::printf("(TCP) checksum: %04x\n", checksum);
+                applicationLayer.ConnectionState().checksum  |= byte;
+                LoggerType::printf("(TCP) checksum: %04x\n", applicationLayer.ConnectionState().checksum);
                 break;
 
             case 18:
-                urgentPointer  = byte << 8;
+                applicationLayer.ConnectionState().urgentPointer  = byte << 8;
                 break;
 
             case 19:
-                urgentPointer  |= byte;
-                LoggerType::printf("(TCP) urgentPointer: %02x\n", urgentPointer);
+                applicationLayer.ConnectionState().urgentPointer  |= byte;
+                LoggerType::printf("(TCP) urgentPointer: %02x\n", applicationLayer.ConnectionState().urgentPointer);
                 break;
 
             case 20:
@@ -203,7 +239,7 @@ public:
 
             default:
 
-                if(position >= dataOffset)
+                if( applicationLayer.ConnectionState().position >= applicationLayer.ConnectionState().dataOffset )
                 {
                     LoggerType::printf("(TCP) AppData.\n");
                     
@@ -228,12 +264,6 @@ public:
                 //
                 StateMachine();
 
-                //
-                // Reset the outputput packet generation while we're still receiving.
-                //
-                outputPosition  = 0;
-
-
                 break;
         }
         
@@ -241,7 +271,7 @@ public:
         //
         // Ready for next byte.
         //
-        position++;
+        applicationLayer.ConnectionState().position++;
     }
 
 
@@ -250,7 +280,7 @@ public:
     //
     PacketProcessingState State()
     {
-        return packetState;
+        return applicationLayer.ConnectionState().packetState;
     }
 
     //
@@ -267,42 +297,42 @@ public:
     //
     void StateMachine()
     {
-        TCPState    currentState;
-        TCPState    nextTCPState;  
+        TCPIP::TCPState    currentState;
+        TCPIP::TCPState    nextTCPState;  
 
         applicationLayer.GetTCPState(currentState, nextTCPState);
 
-        switch(currentState)
+        switch( currentState )
         {
-            case LISTEN:
-                if( (flags&TCP_SYN) != 0)
+            case TCPIP::LISTEN:
+                if( (applicationLayer.ConnectionState().flags&TCPIP::TCP_SYN) != 0)
                 {
                     //
                     // Send a SynAck packet.
                     //
-                    packetToSend    = static_cast<TCPFlags>(TCP_ACK | TCP_SYN);
-                    nextTCPState    = SYN_SENT;
+                    applicationLayer.ConnectionState().packetToSend    = static_cast<TCPIP::TCPFlags>(TCPIP::TCP_ACK | TCPIP::TCP_SYN);
+                    nextTCPState    = TCPIP::SYN_SENT;
                 }
 
                 break;
 
-            case SYN_SENT:
-                if( (flags&TCP_SYN) != 0)
+            case TCPIP::SYN_SENT:
+                if( (applicationLayer.ConnectionState().flags&TCPIP::TCP_SYN) != 0)
                 {
                     //
                     // Send a SynAck packet.
                     //
-                    packetToSend    = static_cast<TCPFlags>(TCP_ACK);
-                    nextTCPState    = SYN_SENT;
+                    applicationLayer.ConnectionState().packetToSend    = static_cast<TCPIP::TCPFlags>(TCPIP::TCP_ACK);
+                    nextTCPState    = TCPIP::SYN_SENT;
                 }
 
-                if( (flags&TCP_ACK) != 0)
+                if( (applicationLayer.ConnectionState().flags&TCPIP::TCP_ACK) != 0)
                 {
                     //
                     // Connection established.
                     //
-                    packetToSend    = static_cast<TCPFlags>(TCP_NONE);
-                    currentState    = ESTABLISHED;
+                    applicationLayer.ConnectionState().packetToSend    = static_cast<TCPIP::TCPFlags>(TCPIP::TCP_NONE);
+                    currentState    = TCPIP::ESTABLISHED;
                 }
 
                 break;
@@ -321,11 +351,11 @@ public:
     //
     void UpdateAccumulatedChecksum(uint16_t value)
     {
-        LoggerType::printf("- %04x - %04x -", value, accumulatedChecksum);
-        accumulatedChecksum     += value;
-        if( accumulatedChecksum > 0xffff )
+        LoggerType::printf("- %04x - %04x -", value, applicationLayer.ConnectionState().accumulatedChecksum);
+        applicationLayer.ConnectionState().accumulatedChecksum     += value;
+        if( applicationLayer.ConnectionState().accumulatedChecksum > 0xffff )
         {
-            accumulatedChecksum -= 0xffff;
+            applicationLayer.ConnectionState().accumulatedChecksum -= 0xffff;
         }
     }    
 
@@ -336,64 +366,66 @@ public:
     {
         const uint8_t   dataOffset          = (sizeofTCPHeader / 4) << 4;
         uint8_t         byteToSend          = 0x00;
-        uint16_t        sourcePort          = 80;
-        uint16_t        destinationPort     = 8080;
-        uint32_t        sequenceNumber      = 0x123;
-        uint32_t        ackNumber           = 0xabc;
-        const uint16_t  urgentPointer       = 0x001;
-        const uint16_t  windowSize          = 822;
-        uint8_t         flags               = 0;
+        
+        applicationLayer.ConnectionState().sourcePort          = 80;
+        applicationLayer.ConnectionState().destinationPort     = 8080;
+        applicationLayer.ConnectionState().sequenceNumber      = 0x123;
+        applicationLayer.ConnectionState().ackNumber           = 0x0000;
+        applicationLayer.ConnectionState().urgentPointer       = 0x0000;
+        applicationLayer.ConnectionState().windowSize          = 822;
+        applicationLayer.ConnectionState().flags               = static_cast<TCPIP::TCPFlags>(0);
+        
 
         dataAvailable   = true;
 
         switch(position)
         {
             case 0:
-                byteToSend  = sourcePort >> 8;
+                byteToSend  = applicationLayer.ConnectionState().sourcePort >> 8;
                 break;
 
             case 1:
-                byteToSend  = sourcePort & 0xff;
+                byteToSend  = applicationLayer.ConnectionState().sourcePort & 0xff;
                 break;
 
             case 2:
-                byteToSend  = destinationPort >> 8;
+                byteToSend  = applicationLayer.ConnectionState().destinationPort >> 8;
                 break;
 
             case 3:
-                byteToSend  = destinationPort & 0xff;
+                byteToSend  = applicationLayer.ConnectionState().destinationPort & 0xff;
                 break;
 
             case 4:
-                byteToSend  = (sequenceNumber >> 24) & 0xff;
+                byteToSend  = (applicationLayer.ConnectionState().sequenceNumber >> 24) & 0xff;
                 break;
 
             case 5:
-                byteToSend  = (sequenceNumber >> 16) & 0xff;
+                byteToSend  = (applicationLayer.ConnectionState().sequenceNumber >> 16) & 0xff;
                 break;
 
             case 6:
-                byteToSend  = (sequenceNumber >> 8) & 0xff;
+                byteToSend  = (applicationLayer.ConnectionState().sequenceNumber >> 8) & 0xff;
                 break;
 
             case 7:
-                byteToSend  = (sequenceNumber) & 0xff;
+                byteToSend  = (applicationLayer.ConnectionState().sequenceNumber) & 0xff;
                 break;
 
             case 8:
-                byteToSend  = (ackNumber >> 24) & 0xff;
+                byteToSend  = (applicationLayer.ConnectionState().ackNumber >> 24) & 0xff;
                 break;
 
             case 9:
-                byteToSend  = (ackNumber >> 16) & 0xff;
+                byteToSend  = (applicationLayer.ConnectionState().ackNumber >> 16) & 0xff;
                 break;
 
             case 10:
-                byteToSend  = (ackNumber >> 8) & 0xff;
+                byteToSend  = (applicationLayer.ConnectionState().ackNumber >> 8) & 0xff;
                 break;
 
             case 11:
-                byteToSend  = (ackNumber) & 0xff;
+                byteToSend  = (applicationLayer.ConnectionState().ackNumber) & 0xff;
                 break;
 
             case 12:
@@ -401,43 +433,43 @@ public:
                 break;
 
             case 13:
-                byteToSend  = flags;
+                byteToSend  = applicationLayer.ConnectionState().flags;
                 break;
 
             case 14:
-                byteToSend  = windowSize >> 8;
+                byteToSend  = applicationLayer.ConnectionState().windowSize >> 8;
                 break;
 
             case 15:
-                byteToSend  = windowSize & 0xff;
+                byteToSend  = applicationLayer.ConnectionState().windowSize & 0xff;
                 break;
 
             case 16:
 
-                accumulatedChecksum     = 0;                    
+                applicationLayer.ConnectionState().accumulatedChecksum     = 0;                    
 
                 //
                 // Psuedo header portion of the checksum.
                 //
-                UpdateAccumulatedChecksum( connectionState.destinationIP >> 16 );       // source IP, us.
-                UpdateAccumulatedChecksum( connectionState.destinationIP & 0xffff );    //
-                UpdateAccumulatedChecksum( connectionState.sourceIP >> 16 );            // Dest IP, remote.
-                UpdateAccumulatedChecksum( connectionState.sourceIP & 0xffff );         //
+                UpdateAccumulatedChecksum( ConnectionState().destinationIP >> 16 );       // source IP, us.
+                UpdateAccumulatedChecksum( ConnectionState().destinationIP & 0xffff );    //
+                UpdateAccumulatedChecksum( ConnectionState().sourceIP >> 16 );            // Dest IP, remote.
+                UpdateAccumulatedChecksum( ConnectionState().sourceIP & 0xffff );         //
                 UpdateAccumulatedChecksum( IP::TCP );                                   // always 6, TCP
                 UpdateAccumulatedChecksum( PacketLength() );                            // *Note: the whole TCP segment, length, not just the applications.
 
                 //
                 // TCP header portion of the checksum
                 //
-                UpdateAccumulatedChecksum( sourcePort );
-                UpdateAccumulatedChecksum( destinationPort );
-                UpdateAccumulatedChecksum( sequenceNumber >> 16 );
-                UpdateAccumulatedChecksum( sequenceNumber &0xffff );
-                UpdateAccumulatedChecksum( ackNumber >> 16 );
-                UpdateAccumulatedChecksum( ackNumber & 0xffff );
-                UpdateAccumulatedChecksum( ((uint16_t)dataOffset<<8) | (uint16_t)flags );
-                UpdateAccumulatedChecksum( windowSize );
-                UpdateAccumulatedChecksum( urgentPointer );
+                UpdateAccumulatedChecksum( applicationLayer.ConnectionState().sourcePort );
+                UpdateAccumulatedChecksum( applicationLayer.ConnectionState().destinationPort );
+                UpdateAccumulatedChecksum( applicationLayer.ConnectionState().sequenceNumber >> 16 );
+                UpdateAccumulatedChecksum( applicationLayer.ConnectionState().sequenceNumber &0xffff );
+                UpdateAccumulatedChecksum( applicationLayer.ConnectionState().ackNumber >> 16 );
+                UpdateAccumulatedChecksum( applicationLayer.ConnectionState().ackNumber & 0xffff );
+                UpdateAccumulatedChecksum( ((uint16_t)dataOffset<<8) | (uint16_t)applicationLayer.ConnectionState().flags );
+                UpdateAccumulatedChecksum( applicationLayer.ConnectionState().windowSize );
+                UpdateAccumulatedChecksum( applicationLayer.ConnectionState().urgentPointer );
 
                 //
                 // Data portion of the checksum
@@ -449,27 +481,27 @@ public:
                     uint8_t     loByte              = applicationLayer.PullFrom(moreDataAvailable, i+1);
                     UpdateAccumulatedChecksum( ((uint16_t)hiByte<<8) | (uint16_t)loByte  );
                 }
-                accumulatedChecksum    = ~accumulatedChecksum;
-                LoggerType::printf("TCP Checksum: %04x", accumulatedChecksum );
+                applicationLayer.ConnectionState().accumulatedChecksum    = ~applicationLayer.ConnectionState().accumulatedChecksum;
+                LoggerType::printf("TCP Checksum: %04x", applicationLayer.ConnectionState().accumulatedChecksum );
 
                 // 
-                byteToSend  = accumulatedChecksum >> 8;
+                byteToSend  = applicationLayer.ConnectionState().accumulatedChecksum >> 8;
                 break;
 
             case 17:
-                byteToSend  = accumulatedChecksum & 0xff;
+                byteToSend  = applicationLayer.ConnectionState().accumulatedChecksum & 0xff;
                 break;
 
             case 18:
-                byteToSend  = urgentPointer >> 8;
+                byteToSend  = applicationLayer.ConnectionState().urgentPointer >> 8;
                 break;
 
             case 19:
-                byteToSend  = urgentPointer & 0xff;
+                byteToSend  = applicationLayer.ConnectionState().urgentPointer & 0xff;
                 break;
 
             default:
-                byteToSend  = applicationLayer.PullFrom(dataAvailable, position-sizeofTCPHeader);
+                byteToSend  = applicationLayer.PullFrom(dataAvailable, applicationLayer.ConnectionState().position-sizeofTCPHeader);
                 break;
         }
 
@@ -479,7 +511,7 @@ public:
 
     uint32_t DestinationIP()
     {
-        return connectionState.sourceIP;
+        return ConnectionState().sourceIP;
         //return applicationLayer.DestinationIP();
     }
 
@@ -490,112 +522,20 @@ public:
 
     IP::ConnectionState& ConnectionState()
     {
-        return connectionState;
+        return applicationLayer.ConnectionState().ipState;
     }
 
 private:
 
-#if 0
-
-    http://www.netfor2.com/tcpsum.htm
-
-u16 tcp_accumulatedChecksum_calc(u16 len_tcp, uint32_t src_addr,uint32_t dest_addr, int padding, u16 buff[])
-{
-    u16 prot_tcp=6;
-    u16 padd=0;
-    u16 word16;
-    int     i;
-    
-    // Find out if the length of data is even or odd number. If odd,
-    // add a padding byte = 0 at the end of packet
-    if (padding&1==1)
-    {
-        padd=1;
-        buff[len_tcp]=0;
-    }
-    
-    //initialize accumulatedChecksum to zero
-    accumulatedChecksum=0;
-
-    // add the TCP pseudo header which contains:
-    // the IP source and destinationn addresses,
-    UpdateAccumulatedChecksum(src_addr >> 16);
-    UpdateAccumulatedChecksum(src_addr & 0xffff);
-    UpdateAccumulatedChecksum(dest_addr >> 16);
-    UpdateAccumulatedChecksum(dest_addr & 0xffff);
-    UpdateAccumulatedChecksum(6);
-    UpdateAccumulatedChecksum(len_tcp);
-    
-    // make 16 bit words out of every two adjacent 8 bit words and 
-    // calculate the accumulatedChecksum of all 16 vit words
-    for (i=0; i<len_tcp+padd; i=i+2)
-    {
-        UpdateAccumulatedChecksum( ((buff[i]<<8)&0xFF00) + (buff[i+1]&0xFF) );
-    }   
-
-    // Take the one's complement of accumulatedChecksum
-    accumulatedChecksum = ~accumulatedChecksum;
-
-    return ((unsigned short) accumulatedChecksum);
-}
-
-
-void main()
-{ 
-    uint16_t    data[30];
-
-    memset(&data[0], 0, sizeof(data));
-    data[12]    = 0x50;
-
-    data[20]    = 0x00;
-    data[21]    = 0x01;
-    data[22]    = 0x02;
-    data[23]    = 0x03;
-    data[24]    = 0x04;
-    data[25]    = 0x05;
-    data[26]    = 0x06;
-    data[27]    = 0x07;
-    data[28]    = 0x08;
-    data[29]    = 0x09;
-
-    //uint16_t     c   = tcp_accumulatedChecksum_calc(20, dstIP, srcIP, 0, data);
-    uint16_t     c   = tcp_accumulatedChecksum_calc( 30, 0xc0a80279, 0xc0a802fd, 0, data);
-
-    printf("%04x\n",c);
-}
-
-
-
-
-
-
-#endif
 
     const uint16_t  sizeofTCPHeader     = 20;
 
     //
     //
     //
-    uint16_t                position;
-    PacketProcessingState   packetState;
-
-    uint32_t                accumulatedChecksum;
-
-    uint16_t                sourcePort;
-    uint16_t                destinationPort;
-    uint32_t                sequenceNumber;
-    uint32_t                ackNumber;
-    TCPFlags                flags;
-    uint16_t                windowSize;
-    uint16_t                checksum;
-    uint16_t                urgentPointer;
-    uint8_t                 dataOffset;
 
     ApplicationLayerType&   applicationLayer;
-    TCPFlags                packetToSend;
-    uint16_t                outputPosition;
 
-    IP::ConnectionState     connectionState;
 };
 
 
