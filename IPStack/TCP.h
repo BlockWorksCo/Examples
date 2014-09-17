@@ -321,6 +321,7 @@ public:
     //
     void UpdateAccumulatedChecksum(uint16_t value)
     {
+        LoggerType::printf("- %04x - %04x -", value, accumulatedChecksum);
         accumulatedChecksum     += value;
         if( accumulatedChecksum > 0xffff )
         {
@@ -333,7 +334,7 @@ public:
     //
     uint8_t PullFrom(bool& dataAvailable, uint16_t position)
     {
-        const uint8_t   dataOffset          = (sizeofTCPHeader / 4) << 4;;
+        const uint8_t   dataOffset          = (sizeofTCPHeader / 4) << 4;
         uint8_t         byteToSend          = 0x00;
         uint16_t        sourcePort          = 0;
         uint16_t        destinationPort     = 0;
@@ -344,6 +345,8 @@ public:
         uint8_t         flags               = 0;
 
         dataAvailable   = true;
+
+        connectionState.sourceIP    = 0;
 
         switch(position)
         {
@@ -449,7 +452,7 @@ public:
                     UpdateAccumulatedChecksum( ((uint16_t)hiByte<<16) | (uint16_t)loByte  );
                 }
                 accumulatedChecksum    = ~accumulatedChecksum;
-                LoggerType::printf("TCP Checksum: %04x\n", accumulatedChecksum );
+                LoggerType::printf("TCP Checksum: %04x %04x", accumulatedChecksum, ~accumulatedChecksum );
 
                 //accumulatedChecksum = 0xd0d3;
                 // 

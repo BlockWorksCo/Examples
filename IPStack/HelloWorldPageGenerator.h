@@ -163,7 +163,7 @@ private:
     PacketProcessingState   packetState;
     TCPState 				tcpState;
     TCPState                nextTCPState;
-    const uint16_t          packetLength    = 10;
+    const uint16_t          packetLength    = 0;
 
 };
 
