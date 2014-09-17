@@ -38,6 +38,7 @@ struct IP
     typedef struct
     {
         uint32_t    sourceIP;
+        uint32_t    destinationIP;
     } ConnectionState;
 };
 
@@ -226,6 +227,7 @@ public:
                 }
                 else
                 {
+                    connectionState(protocol).destinationIP  = IPAddress;
                     LoggerType::printf("DestIP: %08x\n", IPAddress);
                 }
                 break;

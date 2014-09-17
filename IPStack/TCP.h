@@ -346,8 +346,6 @@ public:
 
         dataAvailable   = true;
 
-        connectionState.sourceIP    = 0;
-
         switch(position)
         {
             case 0:
@@ -421,12 +419,12 @@ public:
                 //
                 // Psuedo header portion of the checksum.
                 //
-                UpdateAccumulatedChecksum( IPAddress >> 16 );                   // source IP, us.
-                UpdateAccumulatedChecksum( IPAddress & 0xffff );                //
-                UpdateAccumulatedChecksum( connectionState.sourceIP >> 16 );    // Dest IP, remote.
-                UpdateAccumulatedChecksum( connectionState.sourceIP & 0xffff ); //
-                UpdateAccumulatedChecksum( IP::TCP );                           // always 6, TCP
-                UpdateAccumulatedChecksum( PacketLength() );                    // *Note: the whole TCP segment, length, not just the applications.
+                UpdateAccumulatedChecksum( connectionState.destinationIP >> 16 );       // source IP, us.
+                UpdateAccumulatedChecksum( connectionState.destinationIP & 0xffff );    //
+                UpdateAccumulatedChecksum( connectionState.sourceIP >> 16 );            // Dest IP, remote.
+                UpdateAccumulatedChecksum( connectionState.sourceIP & 0xffff );         //
+                UpdateAccumulatedChecksum( IP::TCP );                                   // always 6, TCP
+                UpdateAccumulatedChecksum( PacketLength() );                            // *Note: the whole TCP segment, length, not just the applications.
 
                 //
                 // TCP header portion of the checksum
@@ -437,7 +435,7 @@ public:
                 UpdateAccumulatedChecksum( sequenceNumber &0xffff );
                 UpdateAccumulatedChecksum( ackNumber >> 16 );
                 UpdateAccumulatedChecksum( ackNumber & 0xffff );
-                UpdateAccumulatedChecksum( ((uint16_t)dataOffset<<16) | (uint16_t)flags );
+                UpdateAccumulatedChecksum( ((uint16_t)dataOffset<<8) | (uint16_t)flags );
                 UpdateAccumulatedChecksum( windowSize );
                 UpdateAccumulatedChecksum( urgentPointer );
 
@@ -452,9 +450,8 @@ public:
                     UpdateAccumulatedChecksum( ((uint16_t)hiByte<<16) | (uint16_t)loByte  );
                 }
                 accumulatedChecksum    = ~accumulatedChecksum;
-                LoggerType::printf("TCP Checksum: %04x %04x", accumulatedChecksum, ~accumulatedChecksum );
+                LoggerType::printf("TCP Checksum: %04x", accumulatedChecksum );
 
-                //accumulatedChecksum = 0xd0d3;
                 // 
                 byteToSend  = accumulatedChecksum >> 8;
                 break;
@@ -482,7 +479,8 @@ public:
 
     uint32_t DestinationIP()
     {
-        return applicationLayer.DestinationIP();
+        return connectionState.sourceIP;
+        //return applicationLayer.DestinationIP();
     }
 
     uint16_t PacketLength()
@@ -500,52 +498,62 @@ private:
 #if 0
 
     http://www.netfor2.com/tcpsum.htm
-
-    u16 tcp_sum_calc(u16 len_tcp, u16 src_addr[],u16 dest_addr[], BOOL padding, u16 buff[])
-    {
+u16 tcp_accumulatedChecksum_calc(u16 len_tcp, uint32_t src_addr,uint32_t dest_addr, int padding, u16 buff[])
+{
     u16 prot_tcp=6;
     u16 padd=0;
     u16 word16;
-    u32 sum;    
-        
-        // Find out if the length of data is even or odd number. If odd,
-        // add a padding byte = 0 at the end of packet
-        if (padding&1==1){
-            padd=1;
-            buff[len_tcp]=0;
-        }
-        
-        //initialize sum to zero
-        sum=0;
-        
-        // make 16 bit words out of every two adjacent 8 bit words and 
-        // calculate the sum of all 16 vit words
-        for (i=0;i<len_tcp+padd;i=i+2){
-            word16 =((buff[i]<<8)&0xFF00)+(buff[i+1]&0xFF);
-            sum = sum + (unsigned long)word16;
-        }   
-        // add the TCP pseudo header which contains:
-        // the IP source and destinationn addresses,
-        for (i=0;i<4;i=i+2){
-            word16 =((src_addr[i]<<8)&0xFF00)+(src_addr[i+1]&0xFF);
-            sum=sum+word16; 
-        }
-        for (i=0;i<4;i=i+2){
-            word16 =((dest_addr[i]<<8)&0xFF00)+(dest_addr[i+1]&0xFF);
-            sum=sum+word16;     
-        }
-        // the protocol number and the length of the TCP packet
-        sum = sum + prot_tcp + len_tcp;
-
-        // keep only the last 16 bits of the 32 bit calculated sum and add the carries
-            while (sum>>16)
-            sum = (sum & 0xFFFF)+(sum >> 16);
-            
-        // Take the one's complement of sum
-        sum = ~sum;
-
-    return ((unsigned short) sum);
+    int     i;
+    
+    // Find out if the length of data is even or odd number. If odd,
+    // add a padding byte = 0 at the end of packet
+    if (padding&1==1)
+    {
+        padd=1;
+        buff[len_tcp]=0;
     }
+    
+    //initialize accumulatedChecksum to zero
+    accumulatedChecksum=0;
+    
+    // make 16 bit words out of every two adjacent 8 bit words and 
+    // calculate the accumulatedChecksum of all 16 vit words
+    for (i=0; i<len_tcp+padd; i=i+2)
+    {
+        UpdateAccumulatedChecksum( ((buff[i]<<8)&0xFF00) + (buff[i+1]&0xFF) );
+    }   
+    // add the TCP pseudo header which contains:
+    // the IP source and destinationn addresses,
+    UpdateAccumulatedChecksum(src_addr >> 16);
+    UpdateAccumulatedChecksum(src_addr & 0xffff);
+    UpdateAccumulatedChecksum(dest_addr >> 16);
+    UpdateAccumulatedChecksum(dest_addr & 0xffff);
+    UpdateAccumulatedChecksum(6);
+    UpdateAccumulatedChecksum(len_tcp);
+
+    // Take the one's complement of accumulatedChecksum
+    accumulatedChecksum = ~accumulatedChecksum;
+
+    return ((unsigned short) accumulatedChecksum);
+}
+
+
+void main()
+{ 
+    uint16_t    data[20]    = {0x00,0x00,0x00,0x00};
+
+    memset(&data[0], 0, sizeof(data));
+    data[12]    = 0x50;
+
+    //uint16_t     c   = tcp_accumulatedChecksum_calc(20, dstIP, srcIP, 0, data);
+    uint16_t     c   = tcp_accumulatedChecksum_calc(20, 0xc0a80279, 0xc0a802fd, 0, data);
+
+    printf("%04x\n",c);
+}
+
+
+
+
 #endif
 
     const uint16_t  sizeofTCPHeader     = 20;
