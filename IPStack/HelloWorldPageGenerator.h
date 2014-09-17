@@ -117,8 +117,8 @@ public:
         if( position < packetLength )
         {
             dataAvailable   = true;
-            //return (uint8_t)position;
-            return (uint8_t)0x00;
+            return (uint8_t)position;
+            //return (uint8_t)0x00;
         }
         else
         {
@@ -163,7 +163,7 @@ private:
     PacketProcessingState   packetState;
     TCPState 				tcpState;
     TCPState                nextTCPState;
-    const uint16_t          packetLength    = 0;
+    const uint16_t          packetLength    = 10;
 
 };
 

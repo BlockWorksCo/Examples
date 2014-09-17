@@ -442,12 +442,12 @@ public:
                 //
                 // Data portion of the checksum
                 //
-                for(uint16_t i=0; i<applicationLayer.PacketLength(); i++)
+                for(uint16_t i=0; i<applicationLayer.PacketLength(); i+=2)
                 {
                     bool        moreDataAvailable   = false;
                     uint8_t     hiByte              = applicationLayer.PullFrom(moreDataAvailable, i);
-                    uint8_t     loByte              = applicationLayer.PullFrom(moreDataAvailable, i);
-                    UpdateAccumulatedChecksum( ((uint16_t)hiByte<<16) | (uint16_t)loByte  );
+                    uint8_t     loByte              = applicationLayer.PullFrom(moreDataAvailable, i+1);
+                    UpdateAccumulatedChecksum( ((uint16_t)hiByte<<8) | (uint16_t)loByte  );
                 }
                 accumulatedChecksum    = ~accumulatedChecksum;
                 LoggerType::printf("TCP Checksum: %04x", accumulatedChecksum );
