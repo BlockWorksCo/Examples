@@ -116,12 +116,14 @@ public:
         //
         if( position < packetLength )
         {
+            LoggerType::printf("xx %d %dxx",position, packetLength);
             dataAvailable   = true;
             return (uint8_t)position;
             //return (uint8_t)0x00;
         }
         else
         {
+            LoggerType::printf("xx no more %d %dxx",position, packetLength);
             dataAvailable   = false;
             return 0x00;
         }
@@ -167,7 +169,7 @@ private:
     PacketProcessingState   packetState;
     TCPState 				tcpState;
     TCPState                nextTCPState;
-    const uint16_t          packetLength    = 0;
+    const uint16_t          packetLength    = 20;
 
     TCPIP::ConnectionState  connectionState;
 

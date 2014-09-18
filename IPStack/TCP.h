@@ -505,7 +505,7 @@ public:
                 break;
 
             default:
-                byteToSend  = applicationLayer.PullFrom(dataAvailable, applicationLayer.ConnectionState().position-sizeofTCPHeader);
+                byteToSend  = applicationLayer.PullFrom(dataAvailable, position-sizeofTCPHeader);
                 break;
         }
 
