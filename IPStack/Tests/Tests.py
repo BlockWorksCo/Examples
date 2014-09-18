@@ -46,7 +46,7 @@ def CompareFiles(fileA, fileB):
 def setup_module():
     """
     """
-    out = Run('Build PLATFORM=Linux clean all')
+    out = Run('make PLATFORM=Linux clean all')
     print(out)
 
 
@@ -68,7 +68,7 @@ def teardown_module():
 def TestChecksums():
     """
     """
-    out = Run(' vagrant ssh -c "cd '+BuildVMPathFromLocalPath(os.getcwd())+' && Output/Main Checksum1Input.pcap TestOutput.pcap" ')
+    out = Run(' Output/Main Checksum1Input.pcap TestOutput.pcap" ')
     print(out)
     assert CompareFiles('TestOutput.pcap','Checksum1CheckedOutput.pcap') == True
 
