@@ -68,6 +68,9 @@ def teardown_module():
 def TestChecksums():
     """
     """
+    out = Run('make PLATFORM=Linux clean all')
+    print(out)
+
     out = Run(' Output/Main Checksum1Input.pcap TestOutput.pcap ')
     print(out)
     assert CompareFiles('TestOutput.pcap','Checksum1CheckedOutput.pcap') == True
