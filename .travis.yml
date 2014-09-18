@@ -13,6 +13,7 @@ python:
 
 # Setting up pre-requirements
 before_script:
+  - sudo apt-get install -qq g++-4.8
   - git clone https://github.com/BlockWorksCo/Platform.git
   - export BLOCKWORKS_PLATFORM_BASE=`pwd`/Platform
 
