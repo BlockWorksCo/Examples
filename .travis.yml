@@ -9,6 +9,14 @@ python:
   - "2.7"
 
 
+
+
+# Setting up pre-requirements
+before_script:
+  - git clone https://github.com/BlockWorksCo/Platform.git
+  - export BLOCKWORKS_PLATFORM_BASE=./Platform
+
+
 # Change this to your needs
 script: cd IPStack/Tests && nosetests Tests.py
 
