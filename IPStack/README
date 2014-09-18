@@ -1,3 +1,8 @@
-Miniweb is a very small TCP/IP stack and web server written by Adam
-Dunkels. More information can be found at the Miniweb home page at
-http://dunkels.com/adam/miniweb/.
+//
+// Copyright (C) BlockWorks Consulting Ltd - All Rights Reserved.
+// Unauthorized copying of this file, via any medium is strictly prohibited.
+// Proprietary and confidential.
+// Written by Steve Tickle <Steve@BlockWorks.co>, September 2014.
+//
+
+
