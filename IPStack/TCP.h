@@ -158,6 +158,10 @@ public:
 
             case 3:
                 applicationLayer.ConnectionState().destinationPort  |= byte;
+
+                //
+                // TODO: Switch which applicationLayer & ConnectionState() we use here, based on the destinationPort.
+                //
                 LoggerType::printf("(TCP) destinationPort: %d\n", applicationLayer.ConnectionState().destinationPort);
                 break;
 
@@ -366,7 +370,7 @@ public:
     {
         const uint8_t   dataOffset          = (sizeofTCPHeader / 4) << 4;
         uint8_t         byteToSend          = 0x00;
-        
+        /*
         applicationLayer.ConnectionState().sourcePort          = 80;
         applicationLayer.ConnectionState().destinationPort     = 8080;
         applicationLayer.ConnectionState().sequenceNumber      = 0x123;
@@ -374,7 +378,7 @@ public:
         applicationLayer.ConnectionState().urgentPointer       = 0x0000;
         applicationLayer.ConnectionState().windowSize          = 822;
         applicationLayer.ConnectionState().flags               = static_cast<TCPIP::TCPFlags>(0);
-        
+        */
 
         dataAvailable   = true;
 
