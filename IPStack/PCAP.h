@@ -30,13 +30,6 @@
 
 
 
-#define PCAP_VERSION_MAJOR 2
-#define PCAP_VERSION_MINOR 4
-
-#define PCAP_ERRBUF_SIZE 256
-
-
-
 
 //
 //

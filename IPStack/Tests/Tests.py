@@ -19,7 +19,6 @@ def Run(command):
     try:
         return subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
-        print('** Non zero return code **'+e.output)
         return e.output
 
 
@@ -34,8 +33,12 @@ def CompareFiles(fileA, fileB):
     """
     """
     t = Run('cmp -l %s %s '%(fileA, fileB))
-    print(t)
     return t == ''
+
+
+
+
+
 
 
 
@@ -52,6 +55,12 @@ def teardown_module():
     """
     """
     pass
+
+
+
+
+
+
 
 
 
