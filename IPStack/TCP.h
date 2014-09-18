@@ -355,7 +355,6 @@ public:
     //
     void UpdateAccumulatedChecksum(uint16_t value)
     {
-        LoggerType::printf("- %04x - %04x -", value, applicationLayer.ConnectionState().accumulatedChecksum);
         applicationLayer.ConnectionState().accumulatedChecksum     += value;
         if( applicationLayer.ConnectionState().accumulatedChecksum > 0xffff )
         {
@@ -370,15 +369,14 @@ public:
     {
         const uint8_t   dataOffset          = (sizeofTCPHeader / 4) << 4;
         uint8_t         byteToSend          = 0x00;
-        /*
+
+        applicationLayer.ConnectionState().destinationPort     = 0x1234;
         applicationLayer.ConnectionState().sourcePort          = 80;
-        applicationLayer.ConnectionState().destinationPort     = 8080;
         applicationLayer.ConnectionState().sequenceNumber      = 0x123;
         applicationLayer.ConnectionState().ackNumber           = 0x0000;
         applicationLayer.ConnectionState().urgentPointer       = 0x0000;
         applicationLayer.ConnectionState().windowSize          = 822;
         applicationLayer.ConnectionState().flags               = static_cast<TCPIP::TCPFlags>(0);
-        */
 
         dataAvailable   = true;
 
@@ -544,112 +542,6 @@ private:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-#if 0
-
-#include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
-
-
-
-
-
-uint32_t accumulatedChecksum    = 0;
-
-//
-//
-//
-void UpdateAccumulatedChecksum(uint16_t value)
-{
-    printf("- %04x - %04x -\n", value, accumulatedChecksum);
-    accumulatedChecksum     += value;
-    if( accumulatedChecksum > 0xffff )
-    {
-        accumulatedChecksum -= 0xffff;
-    }
-}    
-
-
-uint16_t tcp_accumulatedChecksum_calc(uint16_t len_tcp, uint32_t src_addr,uint32_t dest_addr, int padding, uint16_t buff[])
-{
-    uint16_t prot_tcp=6;
-    uint16_t padd=0;
-    uint16_t word16;
-    int     i;
-    
-    // Find out if the length of data is even or odd number. If odd,
-    // add a padding byte = 0 at the end of packet
-    if (padding&1==1)
-    {
-        padd=1;
-        buff[len_tcp]=0;
-    }
-    
-    //initialize accumulatedChecksum to zero
-    accumulatedChecksum=0;
-
-    // add the TCP pseudo header which contains:
-    // the IP source and destinationn addresses,
-    UpdateAccumulatedChecksum(src_addr >> 16);
-    UpdateAccumulatedChecksum(src_addr & 0xffff);
-    UpdateAccumulatedChecksum(dest_addr >> 16);
-    UpdateAccumulatedChecksum(dest_addr & 0xffff);
-    UpdateAccumulatedChecksum(6);
-    UpdateAccumulatedChecksum(len_tcp);
-    
-    // make 16 bit words out of every two adjacent 8 bit words and 
-    // calculate the accumulatedChecksum of all 16 vit words
-    for (i=0; i<len_tcp+padd; i=i+2)
-    {
-        UpdateAccumulatedChecksum( ((buff[i]<<8)&0xFF00) + (buff[i+1]&0xFF) );
-    }   
-
-    // Take the one's complement of accumulatedChecksum
-    accumulatedChecksum = ~accumulatedChecksum;
-
-    return ((unsigned short) accumulatedChecksum);
-}
-
-
-void main()
-{ 
-    uint16_t    data[] = {0x00 , 0x50 , 0x1f , 0x90 , 0x00 , 0x00 , 0x01 , 0x23 , 0x00 , 0x00 , 0x00 , 0x00 , 0x50 , 0x00 , 0x03 , 0x36 , 0xf0 , 0xc1 , 0x00, 0x00, 0xdc ,0x7a ,0x76 ,0xe9};
-/*
-    memset(&data[0], 0, sizeof(data));
-    data[12]    = 0x50;
-
-    data[20]    = 0x00;
-    data[21]    = 0x01;
-    data[22]    = 0x02;
-    data[23]    = 0x03;
-    data[24]    = 0x04;
-    data[25]    = 0x05;
-    data[26]    = 0x06;
-    data[27]    = 0x07;
-    data[28]    = 0x08;
-    data[29]    = 0x09;
-*/
-    uint16_t     c   = tcp_accumulatedChecksum_calc( sizeof(data), 0xc0a80279, 0xc0a802fd, 0, data);
-
-    printf("%04x\n",c);
-}
-
-
-
-#endif
 
 
 

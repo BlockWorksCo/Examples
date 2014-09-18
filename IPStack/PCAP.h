@@ -262,11 +262,18 @@ public:
                 LoggerType::printf("PCAP device handle: %d", outfd);
             }
 
-            packetHeader.caplen     = i;
-            packetHeader.len        = i;
-            packetHeader.ts.tv_sec         = 1;
-            packetHeader.ts.tv_usec         = 1;
-            fileHeader.snaplen      = i;
+            packetHeader.caplen         = i;
+            packetHeader.len            = i;
+            packetHeader.ts.tv_sec      = 0;
+            packetHeader.ts.tv_usec     = 1;
+
+            fileHeader.magic            = 0xa1b2c3d4;
+            fileHeader.version_major    = 2;
+            fileHeader.version_minor    = 4;
+            fileHeader.thiszone         = 0;
+            fileHeader.sigfigs          = 0;
+            fileHeader.linktype         = 1; // 1==ethernet.
+            fileHeader.snaplen          = sizeof(outbuf);
 
             //
             //
@@ -276,6 +283,7 @@ public:
             r   = write(outfd, &packetHeader, sizeof(packetHeader));
             r   = write(outfd, &outbuf[0], i);
             r = r;
+            close(outfd);
         }
 
     }
