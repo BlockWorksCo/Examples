@@ -1,18 +1,39 @@
+#
+# Copyright (C) BlockWorks Consulting Ltd - All Rights Reserved.
+# Unauthorized copying of this file, via any medium is strictly prohibited.
+# Proprietary and confidential.
+# Written by Steve Tickle <Steve@BlockWorks.co>, September 2014.
+#
 
 
 from nose import with_setup
 import subprocess
-import shlex
+import os
 
 
 
 def Run(command):
     """
     """
-    commandList     = shlex.split(command)
-    print(commandList)
-    return subprocess.check_output(commandList, shell=True)
+    print(command)
+    try:
+        return subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        print('** Non zero return code **'+e.output)
+        return e.output
 
+
+def BuildVMPathFromLocalPath(localPath):
+    """
+    """
+    return '/HostRoot'+localPath
+
+
+
+def CompareFiles(fileA, fileB):
+    """
+    """
+    return True
 
 
 
@@ -35,11 +56,10 @@ def teardown_module():
 
 def TestChecksums():
     """
-    vagrant ssh -c "cd /HostRoot/c/BlockWorks/Examples/IPStack/Tests && Output/Main ../Traces/HTTPGET.pcap Output.pcap"
     """
-    out = Run(' vagrant ssh -c "cd /HostRoot/c/BlockWorks/Examples/IPStack/Tests && Output/Main ../Traces/HTTPGET.pcap Output.pcap" ')
+    out = Run(' vagrant ssh -c "cd '+BuildVMPathFromLocalPath(os.getcwd())+' && Output/Main Checksum1Input.pcap TestOutput.pcap" ')
     print(out)
-    assert False
+    assert CompareFiles('TestOutput.pcap','Checksum1CheckedOutput.pcap') == True
 
 
 
