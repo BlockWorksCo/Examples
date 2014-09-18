@@ -68,7 +68,7 @@ def teardown_module():
 def TestChecksums():
     """
     """
-    out = Run(' Output/Main Checksum1Input.pcap TestOutput.pcap" ')
+    out = Run(' Output/Main Checksum1Input.pcap TestOutput.pcap ')
     print(out)
     assert CompareFiles('TestOutput.pcap','Checksum1CheckedOutput.pcap') == True
 
