@@ -3,6 +3,12 @@ language: cpp
 compiler:
   - gcc
   - clang
+
+language: python
+python:
+  - "2.7"
+
+
 # Change this to your needs
 script: cd IPStack/Tests && nosetests Tests.py
 
