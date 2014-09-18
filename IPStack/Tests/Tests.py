@@ -1,17 +1,27 @@
 
 
 from nose import with_setup
-import sys
 import subprocess
 import shlex
-import os
+
+
+
+def Run(command):
+    """
+    """
+    commandList     = shlex.split(command)
+    print(commandList)
+    return subprocess.check_output(commandList, shell=True)
+
+
 
 
 
 def setup_module():
     """
     """
-    pass
+    out = Run('Build PLATFORM=Linux clean all')
+    print(out)
 
 
 
@@ -25,8 +35,10 @@ def teardown_module():
 
 def TestChecksums():
     """
+    vagrant ssh -c "cd /HostRoot/c/BlockWorks/Examples/IPStack/Tests && Output/Main ../Traces/HTTPGET.pcap Output.pcap"
     """
-    print('Checksum Tests')
+    out = Run(' vagrant ssh -c "cd /HostRoot/c/BlockWorks/Examples/IPStack/Tests && Output/Main ../Traces/HTTPGET.pcap Output.pcap" ')
+    print(out)
     assert False
 
 

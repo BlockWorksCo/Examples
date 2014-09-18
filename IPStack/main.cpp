@@ -25,7 +25,7 @@ StackType::ApplicationLayerType    tcpApplicationLayer;
 StackType::ARPTransportLayerType   arpLayer;
 StackType::TCPTransportLayerType   tcpLayer(tcpApplicationLayer);
 StackType::InternetLayerType       internetLayer;
-StackType::LinkLayerType           linkLayer("./Traces/HTTPGET.pcap");
+StackType::LinkLayerType           linkLayer;
 
 
 //
@@ -108,6 +108,8 @@ uint8_t StackType::LinkPullFromLayer(bool& dataAvailable,  uint16_t position)
 int main(int argc, char **argv)
 {
     printf("\nBLOCK::WORKS IPStack Demo\n");
+
+    linkLayer.SetFileNames("./Traces/HTTPGET.pcap", "Output.pcap");
 
     while(true)
     {

@@ -59,11 +59,17 @@ class PCAP
 
 public:
 
-    PCAP(const char* inputFileName) :
+    PCAP() :
         dropFlag(0)
     {
+    }
 
+
+    void SetFileNames(const char* inputFileName, const char* _outputFileName)
+    {
         char tun_name[IFNAMSIZ];
+
+        outputFileName  = _outputFileName;
 
         strcpy(tun_name, "tun0");
         fd = open(inputFileName, O_RDWR);
@@ -85,17 +91,8 @@ public:
         LoggerType::printf("magic %04d\n", fileHeader.magic);
         LoggerType::printf("major %04d\n", fileHeader.version_major);
         LoggerType::printf("minor %04d\n", fileHeader.version_minor);
-#if 0
-        uint32_t magic;
-        u_short version_major;
-        u_short version_minor;
-        int32_t thiszone; /* gmt to local correction */
-        uint32_t sigfigs;  /* accuracy of timestamps */
-        uint32_t snaplen;  /* max length saved portion of each pkt */
-        uint32_t linktype; /* data link type (LINKTYPE_*) */
-#endif
-    }
 
+    }
 
 
     void Iterate()
@@ -251,7 +248,7 @@ public:
         {
             pcap_pkthdr         packetHeader;
 
-            int outfd = open("Output.pcap", O_RDWR|O_CREAT, S_IRWXU);
+            int outfd = open(outputFileName, O_RDWR|O_CREAT, S_IRWXU);
             if(outfd == -1)
             {
                 perror("PCAP: dev_init: output open");
@@ -392,6 +389,8 @@ private:
     uint8_t         outbuf[2048];
     int             inptr;
     int             outptr;
+
+    const char*     outputFileName;
 };
 
 
