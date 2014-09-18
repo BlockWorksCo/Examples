@@ -33,7 +33,9 @@ def BuildVMPathFromLocalPath(localPath):
 def CompareFiles(fileA, fileB):
     """
     """
-    return True
+    t = Run('cmp -l %s %s '%(fileA, fileB))
+    print(t)
+    return t == ''
 
 
 
