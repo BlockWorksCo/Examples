@@ -14,11 +14,13 @@ python:
 # Setting up pre-requirements
 before_script:
   - git clone https://github.com/BlockWorksCo/Platform.git
-  - export BLOCKWORKS_PLATFORM_BASE=./Platform
+  - export BLOCKWORKS_PLATFORM_BASE=`pwd`/Platform
 
 
 # Change this to your needs
-script: cd IPStack/Tests && nosetests Tests.py
+script: 
+  - export BLOCKWORKS_PLATFORM_BASE=`pwd`/Platform
+  - cd IPStack/Tests && nosetests Tests.py
 
 
 
