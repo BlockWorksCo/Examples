@@ -441,7 +441,7 @@ public:
                 break;
 
             case 13:
-                byteToSend  = applicationLayer.ConnectionState().packetToSend;
+                byteToSend  = applicationLayer.ConnectionState().packetToSend;      // flags
                 break;
 
             case 14:
@@ -475,7 +475,7 @@ public:
                 UpdateAccumulatedChecksum( applicationLayer.ConnectionState().sequenceNumber &0xffff );
                 UpdateAccumulatedChecksum( applicationLayer.ConnectionState().ackNumber >> 16 );
                 UpdateAccumulatedChecksum( applicationLayer.ConnectionState().ackNumber & 0xffff );
-                UpdateAccumulatedChecksum( ((uint16_t)dataOffset<<8) | (uint16_t)applicationLayer.ConnectionState().flags );
+                UpdateAccumulatedChecksum( ((uint16_t)dataOffset<<8) | (uint16_t)applicationLayer.ConnectionState().packetToSend );
                 UpdateAccumulatedChecksum( applicationLayer.ConnectionState().windowSize );
                 UpdateAccumulatedChecksum( applicationLayer.ConnectionState().urgentPointer );
 
