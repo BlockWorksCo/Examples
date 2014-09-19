@@ -64,6 +64,9 @@ public:
 
         outputFileName  = _outputFileName;
 
+        printf("pcap_pkthdr size = %d\n",sizeof(pcap_pkthdr));
+        printf("pcap_file_header size = %d\n",sizeof(pcap_file_header));
+        
         strcpy(tun_name, "tun0");
         fd = open(inputFileName, O_RDWR);
         if(fd == -1)
