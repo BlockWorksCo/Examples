@@ -66,7 +66,7 @@ public:
 
         printf("pcap_pkthdr size = %d\n",sizeof(pcap_pkthdr));
         printf("pcap_file_header size = %d\n",sizeof(pcap_file_header));
-        
+
         strcpy(tun_name, "tun0");
         fd = open(inputFileName, O_RDWR);
         if(fd == -1)
@@ -352,6 +352,7 @@ private:
      * versions of libpcap and programs that use it (such as tcpdump) will
      * be able to read your new capture file format.
      */
+    #pragma pack(1)
     struct pcap_file_header 
     {
         uint32_t    magic;
@@ -362,18 +363,21 @@ private:
         uint32_t    snaplen;        /* max length saved portion of each pkt */
         uint32_t    linktype;       /* data link type (LINKTYPE_*) */
     };
+    #pragma pack()
 
     /*
      * Each packet in the dump file is prepended with this generic header.
      * This gets around the problem of different headers for different
      * packet interfaces.
      */
+    #pragma pack(1)    
     struct pcap_pkthdr 
     {
         struct timeval ts;  /* time stamp */
         uint32_t caplen; /* length of portion present */
         uint32_t len;  /* length this packet (off wire) */
     };
+    #pragma pack()
 
 
     struct pcap_file_header fileHeader;
