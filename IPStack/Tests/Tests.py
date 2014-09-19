@@ -67,10 +67,25 @@ def teardown_module():
 
 def TestChecksums():
     """
+    Checks:
+    - Ethernet FCS.
+    - IPv4 checksum.
+    - TCP checksum.
     """
-    out = Run('make PLATFORM=Linux clean all')
+    out = Run(' Output/Main Test1Input.pcap TestOutput.pcap ')
     print(out)
+    assert CompareFiles('TestOutput.pcap','Checksum1CheckedOutput.pcap') == True
 
+
+
+
+def TestTCPConnectionSetup():
+    """
+    Checks:
+    - SYN receipt.
+    - SYN+ACK response.
+    - ACK receipt.
+    """
     out = Run(' Output/Main Test1Input.pcap TestOutput.pcap ')
     print(out)
     assert CompareFiles('TestOutput.pcap','Checksum1CheckedOutput.pcap') == True
