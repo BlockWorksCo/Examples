@@ -257,8 +257,8 @@ public:
 
             packetHeader.caplen         = i;
             packetHeader.len            = i;
-            packetHeader.ts.tv_sec      = 0;
-            packetHeader.ts.tv_usec     = 1;
+            packetHeader.tv_sec         = 0;
+            packetHeader.tv_usec        = 1;
 
             fileHeader.magic            = 0xa1b2c3d4;
             fileHeader.version_major    = 2;
@@ -373,9 +373,10 @@ private:
     #pragma pack(1)    
     struct pcap_pkthdr 
     {
-        struct timeval ts;  /* time stamp */
-        uint32_t caplen; /* length of portion present */
-        uint32_t len;  /* length this packet (off wire) */
+        int32_t     tv_sec;     /* Seconds.  */
+        int32_t     tv_usec;    /* Microseconds.  */
+        uint32_t    caplen;     /* length of portion present */
+        uint32_t    len;        /* length this packet (off wire) */
     };
     #pragma pack()
 
