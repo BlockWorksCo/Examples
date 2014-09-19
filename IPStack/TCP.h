@@ -82,6 +82,7 @@ struct TCPIP
         uint8_t                 dataOffset;
 
         TCPFlags                packetToSend;
+        TCPState                nextTCPState;  
 
     } ConnectionState;
 };
@@ -251,9 +252,11 @@ public:
                     // Data portion of the IP packet.
                     //
                     if(applicationLayer.State() != Rejected)
+
                     {
                         applicationLayer.PushInto(byte);
                     }                    
+
                 }
                 else
                 {
@@ -264,9 +267,18 @@ public:
                 }
 
                 //
-                // Walk thru the state machine.
+                // Detect the end of the data.
                 //
-                StateMachine();
+                LoggerType::printf("dataByte index = %d, max = %d\n", applicationLayer.ConnectionState().position, applicationLayer.ConnectionState().ipState.length );
+                if( applicationLayer.ConnectionState().position >= applicationLayer.ConnectionState().ipState.length - 1)
+                {
+                    LoggerType::printf(">>> message received....process response.\n" );
+
+                    //
+                    // Walk thru the state machine.
+                    //
+                    StateMachine();
+                }
 
                 break;
         }
@@ -302,41 +314,36 @@ public:
     void StateMachine()
     {
         TCPIP::TCPState    currentState;
-        TCPIP::TCPState    nextTCPState;  
+        TCPIP::TCPState    tempState;
 
-        applicationLayer.GetTCPState(currentState, nextTCPState);
+        applicationLayer.GetTCPState(currentState, tempState);
 
         switch( currentState )
         {
             case TCPIP::LISTEN:
                 if( (applicationLayer.ConnectionState().flags&TCPIP::TCP_SYN) != 0)
                 {
+                    LoggerType::printf("[In LISTEN, received a SYN. Transmit a SYN+ACK, move to SYN_SENT.]\n");
+
                     //
                     // Send a SynAck packet.
                     //
                     applicationLayer.ConnectionState().packetToSend    = static_cast<TCPIP::TCPFlags>(TCPIP::TCP_ACK | TCPIP::TCP_SYN);
-                    nextTCPState    = TCPIP::SYN_SENT;
+                    applicationLayer.ConnectionState().nextTCPState    = TCPIP::SYN_SENT;
                 }
 
                 break;
 
             case TCPIP::SYN_SENT:
-                if( (applicationLayer.ConnectionState().flags&TCPIP::TCP_SYN) != 0)
-                {
-                    //
-                    // Send a SynAck packet.
-                    //
-                    applicationLayer.ConnectionState().packetToSend    = static_cast<TCPIP::TCPFlags>(TCPIP::TCP_ACK);
-                    nextTCPState    = TCPIP::SYN_SENT;
-                }
-
                 if( (applicationLayer.ConnectionState().flags&TCPIP::TCP_ACK) != 0)
                 {
+                    LoggerType::printf("[In SYN_SENT, received an ACK. Transmit an ACK, move to ESTABLISHED.]\n");
+                    
                     //
                     // Connection established.
                     //
                     applicationLayer.ConnectionState().packetToSend    = static_cast<TCPIP::TCPFlags>(TCPIP::TCP_NONE);
-                    currentState    = TCPIP::ESTABLISHED;
+                    applicationLayer.ConnectionState().nextTCPState    = TCPIP::ESTABLISHED;
                 }
 
                 break;
@@ -345,7 +352,6 @@ public:
                 break;
         }
 
-        applicationLayer.SetTCPState(currentState);
     }
 
 
@@ -435,7 +441,7 @@ public:
                 break;
 
             case 13:
-                byteToSend  = applicationLayer.ConnectionState().flags;
+                byteToSend  = applicationLayer.ConnectionState().packetToSend;
                 break;
 
             case 14:
@@ -504,6 +510,16 @@ public:
 
             default:
                 byteToSend  = applicationLayer.PullFrom(dataAvailable, position-sizeofTCPHeader);
+
+                //
+                // At the end of the packet, move to the next TCP state.
+                //
+                if ( position-sizeofTCPHeader >= applicationLayer.PacketLength() )
+                {
+                    LoggerType::printf(">>> End of TCP packet tx. %d %d, newState = %d\n", position-sizeofTCPHeader, applicationLayer.PacketLength(), applicationLayer.ConnectionState().nextTCPState );
+                    applicationLayer.SetTCPState( applicationLayer.ConnectionState().nextTCPState );
+                }
+
                 break;
         }
 

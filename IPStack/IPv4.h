@@ -39,6 +39,8 @@ struct IP
     {
         uint32_t    sourceIP;
         uint32_t    destinationIP;
+        uint16_t    length;
+
     } ConnectionState;
 };
 
@@ -128,12 +130,12 @@ public:
                 break;
 
             case 2:
-                length  = byte<<8;
+                rxLength  = byte<<8;
                 break;
 
             case 3:
-                length  |= byte;
-                LoggerType::printf("(IPv4) Packet Length = %d\n", length);
+                rxLength  |= byte;
+                LoggerType::printf("(IPv4) Packet Length = %d\n", rxLength);
                 break;
 
             case 4:
@@ -170,6 +172,12 @@ public:
             case 9:
                 protocol    = static_cast<IP::ProtocolType>(byte);
                 LoggerType::printf("(IPv4) Protocol: %d\n",byte);
+
+                //
+                // Now we know what protocol we have, we can bring in the upper layers to store state.
+                //
+                connectionState(protocol).length    = rxLength - sizeofIPHeader;
+
                 break;
 
             case 10:
@@ -286,7 +294,6 @@ public:
     uint8_t PullFrom(bool& dataAvailable, uint16_t position)
     {
         uint8_t         byteToTransmit          = 0x00;
-        const uint16_t  sizeofIPHeader          = 20;                                       // standard/minimum size.
 
         const uint8_t   versionAndIHL           = (0x04 << 4)| (sizeofIPHeader/4);          // IPv4 + 20 byte header.
         const uint8_t   DSCP                    = 0x00;                                     // ununsed.
@@ -437,6 +444,9 @@ private:
 
     } PacketState;
 
+
+    const uint16_t  sizeofIPHeader          = 20;                                       // standard/minimum size.
+
     //
     //
     //
@@ -445,12 +455,13 @@ private:
 
     uint32_t                accumulatedChecksum;
 
-    uint16_t                length;
     uint16_t                fragmentOffset;
     uint8_t                 fragmentFlags;
     uint16_t                headerChecksum;
     uint32_t                sourceIP;
     IP::ProtocolType        protocol;
+
+    uint16_t                rxLength;
 
 };
 
