@@ -68,21 +68,21 @@ public:
         printf("pcap_file_header size = %d\n",(int)sizeof(pcap_file_header));
 
         strcpy(tun_name, "tun0");
-        fd = open(inputFileName, O_RDWR);
-        if(fd == -1)
+        infd = open(inputFileName, O_RDWR);
+        if(infd == -1)
         {
             perror("PCAP: dev_init: open");
             exit(1);
         }
         else
         {
-            LoggerType::printf("PCAP device handle: %d", fd);
+            LoggerType::printf("PCAP device handle: %d", infd);
         }
 
         //
+        // Read the PCAP header.
         //
-        //
-        int r   = read(fd, &fileHeader, sizeof(fileHeader));
+        int r   = read(infd, &fileHeader, sizeof(fileHeader));
         LoggerType::printf("r: %d\n", r);
         LoggerType::printf("magic %04d\n", fileHeader.magic);
         LoggerType::printf("major %04d\n", fileHeader.version_major);
@@ -114,10 +114,10 @@ public:
             //
             // Data available.
             //
-            int r = read(fd, &packetHeader, sizeof(packetHeader));
+            int r = read(infd, &packetHeader, sizeof(packetHeader));
             if( r != -1 )
             {
-                bytes_left = read(fd, inbuf, packetHeader.caplen);
+                bytes_left = read(infd, inbuf, packetHeader.caplen);
                 if(bytes_left == -1)
                 {   
                     perror("PCAP: dev_get: read\n");
@@ -159,13 +159,6 @@ public:
         exit(0);
     }
 
-    typedef enum
-    {
-        ARP     = 0x0806,
-        IPv4    = 0x0800,
-        IPv6    = 0x86dd,
-
-    } EtherType;
 
     //
     //
@@ -241,44 +234,51 @@ public:
         //
         // Write the packet to a pcap file.
         //
+        WritePacket(outfd, i, &outbuf[0]);
+
+    }
+
+
+    //
+    //
+    //
+    void WritePacket(int fd, uint16_t packetSizeInBytes, uint8_t* packetData)
+    {
+        pcap_pkthdr         packetHeader;
+
+        fd = open(outputFileName, O_RDWR|O_CREAT, S_IRWXU);
+        if(fd == -1)
         {
-            pcap_pkthdr         packetHeader;
-
-            int outfd = open(outputFileName, O_RDWR|O_CREAT, S_IRWXU);
-            if(outfd == -1)
-            {
-                perror("PCAP: dev_init: output open");
-                exit(1);
-            }
-            else
-            {
-                LoggerType::printf("PCAP device handle: %d", outfd);
-            }
-
-            packetHeader.caplen         = i;
-            packetHeader.len            = i;
-            packetHeader.tv_sec         = 0;
-            packetHeader.tv_usec        = 1;
-
-            fileHeader.magic            = 0xa1b2c3d4;
-            fileHeader.version_major    = 2;
-            fileHeader.version_minor    = 4;
-            fileHeader.thiszone         = 0;
-            fileHeader.sigfigs          = 0;
-            fileHeader.linktype         = 1; // 1==ethernet.
-            fileHeader.snaplen          = sizeof(outbuf);
-
-            //
-            //
-            //
-            int r;
-            r   = write(outfd, &fileHeader, sizeof(fileHeader));
-            r   = write(outfd, &packetHeader, sizeof(packetHeader));
-            r   = write(outfd, &outbuf[0], i);
-            r = r;
-            close(outfd);
+            perror("PCAP: dev_init: output open");
+            exit(1);
+        }
+        else
+        {
+            LoggerType::printf("PCAP device handle: %d", outfd);
         }
 
+        packetHeader.caplen         = packetSizeInBytes;
+        packetHeader.len            = packetSizeInBytes;
+        packetHeader.tv_sec         = 0;
+        packetHeader.tv_usec        = 1;
+
+        fileHeader.magic            = 0xa1b2c3d4;
+        fileHeader.version_major    = 2;
+        fileHeader.version_minor    = 4;
+        fileHeader.thiszone         = 0;
+        fileHeader.sigfigs          = 0;
+        fileHeader.linktype         = 1; // 1==ethernet.
+        fileHeader.snaplen          = sizeof(outbuf);
+
+        //
+        //
+        //
+        int r;
+        r   = write(fd, &fileHeader, sizeof(fileHeader));
+        r   = write(fd, &packetHeader, sizeof(packetHeader));
+        r   = write(fd, &outbuf[0], packetSizeInBytes);
+        r = r;
+        close(fd);
     }
 
 
@@ -353,7 +353,7 @@ private:
      * be able to read your new capture file format.
      */
     #pragma pack(1)
-    struct pcap_file_header 
+    typedef struct 
     {
         uint32_t    magic;
         uint16_t    version_major;
@@ -362,7 +362,7 @@ private:
         uint32_t    sigfigs;        /* accuracy of timestamps */
         uint32_t    snaplen;        /* max length saved portion of each pkt */
         uint32_t    linktype;       /* data link type (LINKTYPE_*) */
-    };
+    } pcap_file_header;
     #pragma pack()
 
     /*
@@ -371,27 +371,40 @@ private:
      * packet interfaces.
      */
     #pragma pack(1)    
-    struct pcap_pkthdr 
+    typedef struct
     {
         int32_t     tv_sec;     /* Seconds.  */
         int32_t     tv_usec;    /* Microseconds.  */
         uint32_t    caplen;     /* length of portion present */
         uint32_t    len;        /* length this packet (off wire) */
-    };
+    } pcap_pkthdr;
     #pragma pack()
 
 
-    struct pcap_file_header fileHeader;
+    //
+    // Packet types.
+    //
+    typedef enum
+    {
+        ARP     = 0x0806,
+        IPv4    = 0x0800,
+        IPv6    = 0x86dd,
 
-    int             dropFlag;
-    int             fd;
-    int             bytes_left;
-    uint8_t         inbuf[2048];
-    uint8_t         outbuf[2048];
-    int             inptr;
-    int             outptr;
+    } EtherType;
 
-    const char*     outputFileName;
+
+    pcap_file_header    fileHeader;
+
+    int                 dropFlag;
+    int                 infd;
+    int                 outfd;
+    int                 bytes_left;
+    uint8_t             inbuf[2048];
+    uint8_t             outbuf[2048];
+    int                 inptr;
+    int                 outptr;
+
+    const char*         outputFileName;
 };
 
 
