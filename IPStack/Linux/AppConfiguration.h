@@ -47,6 +47,7 @@ typedef enum
 
 #include "TUN.h"
 #include "PCAP.h"
+#include "PCAPStream.h"
 #include "IPv4.h"
 #include "TCP.h"
 #include "UDP.h"
@@ -99,7 +100,8 @@ struct StackType
                     DestinationIP,
                     PacketLength,
                     IPv4ConnectionState >       InternetLayerType;
-    typedef PCAP<   LoggerType,
+    typedef PCAPStream<   
+                    LoggerType,
                     StackType,
                     LinkIdle,
                     LinkNewPacket, 
