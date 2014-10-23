@@ -18,9 +18,9 @@
 //
 extern "C" void AppMain()
 {
-
     while(true)
     {
+		printf("Hello World.\n");
     }
 }
 

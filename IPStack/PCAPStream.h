@@ -95,8 +95,18 @@ public:
     {
         pcap_pkthdr         packetHeader;
         static uint32_t     packetCount     = 0;
+        fd_set              fdset;
+        struct timeval      tv;
+        int                 ret;
 
-        if(0)
+        tv.tv_sec       = 0;
+        tv.tv_usec      = 500000;
+        FD_ZERO(&fdset);
+        FD_SET(infd, &fdset);
+
+        LoggerType::printf("Waiting for data (%d)...\n",infd);
+        ret = select(infd + 1, &fdset, NULL, NULL, &tv);
+        if(ret == 0)
         {
             //
             // Timeout.
