@@ -42,9 +42,6 @@
 #ifndef __STM32F4xx_HAL_CONF_H
 #define __STM32F4xx_HAL_CONF_H
 
-
-#include "blaa.h"
-
 #ifdef __cplusplus
  extern "C" {
 #endif
