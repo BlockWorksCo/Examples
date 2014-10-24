@@ -29,7 +29,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
-#include "stm324x9i_eval_audio.h"
 #include "main.h"
 #include "stm32f4xx_it.h"
 
@@ -38,7 +37,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 extern PCD_HandleTypeDef hpcd;
-extern SAI_HandleTypeDef haudio_out_sai;
+//extern SAI_HandleTypeDef haudio_out_sai;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -173,7 +172,7 @@ void OTG_HS_IRQHandler(void)
   */
 void AUDIO_SAIx_DMAx_IRQHandler(void)
 {
-  HAL_DMA_IRQHandler(haudio_out_sai.hdmatx);
+  //HAL_DMA_IRQHandler(haudio_out_sai.hdmatx);
 }
 
 /**

@@ -40,6 +40,7 @@
 #include "stm32f4xx_hal_flash.h"
 #include "stm32f4xx_hal_pcd.h"
 #include "stm32f4xx_hal_hcd.h"
+#include "stm32f4xx_hal_gpio.h"
 #include "stm32f4xx_ll_usb.h"
 #include "stm32f407xx.h"
 #include "usbd_core.h"

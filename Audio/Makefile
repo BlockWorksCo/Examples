@@ -51,6 +51,7 @@ usbd_core.o \
 usbd_ioreq.o \
 usbd_ctlreq.o \
 usbd_conf.o \
+stm32f4xx_it.o \
 stm32f4xx_hal_rcc.o \
 stm32f4xx_ll_usb.o \
 stm32f4xx_hal_pcd.o \

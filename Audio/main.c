@@ -3,7 +3,7 @@
   * @file    USB_Device/AUDIO_Standalone/Src/main.c
   * @author  MCD Application Team
   * @version V1.1.0
-  * @date    26-June-2014 
+  * @date    26-June-2014
   * @brief   USB device AUDIO demo main file
   ******************************************************************************
   * @attention
@@ -16,8 +16,8 @@
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
@@ -47,47 +47,83 @@ static void Toggle_Leds(void);
   */
 extern "C" int main(void)
 {
-  /* STM32F4xx HAL library initialization:
-       - Configure the Flash prefetch, instruction and Data caches
-       - Configure the Systick to generate an interrupt each 1 msec
-       - Set NVIC Group Priority to 4
-       - Global MSP (MCU Support Package) initialization
-     */
-  HAL_Init();
-  
-  /* Configure the system clock to 168 Mhz */
-  SystemClock_Config();
-  
-  /* Configure LED1, LED2, LED3 and LED4 */
-  //BSP_LED_Init(LED1);
-  //BSP_LED_Init(LED2);
-  //BSP_LED_Init(LED3);
-  //BSP_LED_Init(LED4);
-  
-  /* Init Device Library */
-  USBD_Init(&USBD_Device, &AUDIO_Desc, 0);
-  
-  /* Add Supported Class */
-  USBD_RegisterClass(&USBD_Device, USBD_AUDIO_CLASS);
-  
-  /* Add Interface callbacks for AUDIO Class */
-  USBD_AUDIO_RegisterInterface(&USBD_Device, &USBD_AUDIO_fops);
-  
-  /* Start Device Process */
-  USBD_Start(&USBD_Device);
-  
-  /* Run Application (Interrupt mode) */
-  while (1)
-  {
-    Toggle_Leds();
-  }  
+    /* STM32F4xx HAL library initialization:
+         - Configure the Flash prefetch, instruction and Data caches
+         - Configure the Systick to generate an interrupt each 1 msec
+         - Set NVIC Group Priority to 4
+         - Global MSP (MCU Support Package) initialization
+       */
+    HAL_Init();
 
-  return 0;
+    /* Configure the system clock to 168 Mhz */
+    SystemClock_Config();
+
+    /* Configure LED1, LED2, LED3 and LED4 */
+    //BSP_LED_Init(LED1);
+    //BSP_LED_Init(LED2);
+    //BSP_LED_Init(LED3);
+    //BSP_LED_Init(LED4);
+
+    /* Init Device Library */
+    USBD_Init(&USBD_Device, &AUDIO_Desc, 0);
+
+    /* Add Supported Class */
+    USBD_RegisterClass(&USBD_Device, USBD_AUDIO_CLASS);
+
+    /* Add Interface callbacks for AUDIO Class */
+    USBD_AUDIO_RegisterInterface(&USBD_Device, &USBD_AUDIO_fops);
+
+    /* Start Device Process */
+    USBD_Start(&USBD_Device);
+
+    /* Run Application (Interrupt mode) */
+
+    GPIO_InitTypeDef  GPIO_InitStruct;
+
+
+    /* Configure DM DP Pins */
+    GPIO_InitStruct.Pin       = GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
+    GPIO_InitStruct.Mode      = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull      = GPIO_PULLDOWN;
+    GPIO_InitStruct.Speed     = GPIO_SPEED_HIGH;
+    GPIO_InitStruct.Mode      = GPIO_MODE_OUTPUT_PP;
+    HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+    __GPIOD_CLK_ENABLE();
+  
+
+
+  /* Configure the GPIO_LED pin */
+  GPIO_InitStruct.Pin = GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FAST;
+  
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+  
+  __GPIOD_CLK_ENABLE();
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET); 
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET); 
+
+    volatile GPIO_TypeDef*  gpio = GPIOD;
+    gpio->ODR = 0xff;
+    while (1)
+    {
+        static uint32_t     oldTick = 0;
+        uint32_t tick = HAL_GetTick();
+
+        if( (tick-oldTick) >= 250)
+        {
+            oldTick = tick;
+            gpio->ODR = ~gpio->ODR;        
+        }
+    }
+
+    return 0;
 }
 
 /**
   * @brief  System Clock Configuration
-  *         The system Clock is configured as follow : 
+  *         The system Clock is configured as follow :
   *            System Clock source            = PLL (HSE)
   *            SYSCLK(Hz)                     = 168000000
   *            HCLK(Hz)                       = 168000000
@@ -107,65 +143,48 @@ extern "C" int main(void)
   */
 static void SystemClock_Config(void)
 {
-  RCC_OscInitTypeDef RCC_OscInit;
-  RCC_ClkInitTypeDef RCC_ClkInit;   
-  //RCC_PeriphCLKInitTypeDef  PeriphClkInitStruct;
+    RCC_OscInitTypeDef RCC_OscInit;
+    RCC_ClkInitTypeDef RCC_ClkInit;
+    //RCC_PeriphCLKInitTypeDef  PeriphClkInitStruct;
 
-  /* Enable Power Control clock */
-  __PWR_CLK_ENABLE();
+    /* Enable Power Control clock */
+    __PWR_CLK_ENABLE();
 
-  /* The voltage scaling allows optimizing the power consumption when the device is 
-     clocked below the maximum system frequency, to update the voltage scaling value 
-     regarding system frequency refer to product datasheet.  */
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+    /* The voltage scaling allows optimizing the power consumption when the device is
+       clocked below the maximum system frequency, to update the voltage scaling value
+       regarding system frequency refer to product datasheet.  */
+    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-  /* Configure RCC Oscillators: All parameters can be changed according to user’s needs */
-  RCC_OscInit.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInit.HSEState = RCC_HSE_ON;
-  RCC_OscInit.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInit.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInit.PLL.PLLM = 25;
-  RCC_OscInit.PLL.PLLN = 336;
-  RCC_OscInit.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInit.PLL.PLLQ = 7;
-  HAL_RCC_OscConfig (&RCC_OscInit);
-  
-  /* RCC Clocks: All parameters can be changed according to user’s needs */
-  RCC_ClkInit.ClockType = RCC_CLOCKTYPE_SYSCLK |RCC_CLOCKTYPE_HCLK |RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInit.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInit.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInit.APB1CLKDivider = RCC_HCLK_DIV4;  
-  RCC_ClkInit.APB2CLKDivider = RCC_HCLK_DIV2;  
-  HAL_RCC_ClockConfig (&RCC_ClkInit, FLASH_LATENCY_5);
-#if 0  
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SAI_PLLI2S;
-  PeriphClkInitStruct.PLLI2S.PLLI2SN = 429;
-  PeriphClkInitStruct.PLLI2S.PLLI2SQ = 2;
-  PeriphClkInitStruct.PLLI2SDivQ = 19;
-  HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct); 
-#endif  
+    /* Configure RCC Oscillators: All parameters can be changed according to user’s needs */
+    RCC_OscInit.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInit.HSEState = RCC_HSE_ON;
+    RCC_OscInit.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInit.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInit.PLL.PLLM = 25;
+    RCC_OscInit.PLL.PLLN = 336;
+    RCC_OscInit.PLL.PLLP = RCC_PLLP_DIV2;
+    RCC_OscInit.PLL.PLLQ = 7;
+    HAL_RCC_OscConfig (&RCC_OscInit);
+
+    /* RCC Clocks: All parameters can be changed according to user’s needs */
+    RCC_ClkInit.ClockType = RCC_CLOCKTYPE_SYSCLK |RCC_CLOCKTYPE_HCLK |RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInit.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInit.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInit.APB1CLKDivider = RCC_HCLK_DIV4;
+    RCC_ClkInit.APB2CLKDivider = RCC_HCLK_DIV2;
+    HAL_RCC_ClockConfig (&RCC_ClkInit, FLASH_LATENCY_5);
+#if 0
+    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SAI_PLLI2S;
+    PeriphClkInitStruct.PLLI2S.PLLI2SN = 429;
+    PeriphClkInitStruct.PLLI2S.PLLI2SQ = 2;
+    PeriphClkInitStruct.PLLI2SDivQ = 19;
+    HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
+#endif
 }
 
-/**
-  * @brief  Toggle LEDs to shows user input state. 
-  * @param  None
-  * @retval None
-  */  
-static void Toggle_Leds(void)
-{
-  static uint32_t ticks;
-  
-  if(ticks++ == 0xfffff)
-  {
-#if 0    
-    BSP_LED_Toggle(LED1);
-    BSP_LED_Toggle(LED2);
-    BSP_LED_Toggle(LED3);
-    BSP_LED_Toggle(LED4);
-#endif    
-    ticks = 0;
-  }  
-}
+
+
+
 
 #ifdef  USE_FULL_ASSERT
 /**
@@ -176,14 +195,14 @@ static void Toggle_Leds(void)
   * @retval None
   */
 void assert_failed(uint8_t* file, uint32_t line)
-{ 
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+{
+    /* User can add his own implementation to report the file name and line number,
+       ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
 
-  /* Infinite loop */
-  while (1)
-  {
-  }
+    /* Infinite loop */
+    while (1)
+    {
+    }
 }
 #endif
 
