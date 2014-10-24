@@ -11,7 +11,7 @@
 #
 BLOCKWORKS_PLATFORM=$(BLOCKWORKS_PLATFORM_BASE)/$(PLATFORM)
 
-CFLAGS=-fpermissive -DSTM32F407xx -save-temps 
+CFLAGS=-fpermissive -DSTM32F407xx -save-temps -DUSE_USB_FS
 CMSIS=OWN
 
 #
@@ -54,6 +54,7 @@ usbd_conf.o \
 stm32f4xx_hal_rcc.o \
 stm32f4xx_ll_usb.o \
 stm32f4xx_hal_pcd.o \
+stm32f4xx_hal_pcd_ex.o \
 stm32f4xx_hal_hcd.o \
 stm32f4xx_hal_rcc.o \
 stm32f4xx_hal_rcc_ex.o \
