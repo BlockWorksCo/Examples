@@ -288,10 +288,14 @@ HAL_StatusTypeDef HAL_PCD_Stop(PCD_HandleTypeDef *hpcd)
   */
 void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd)
 {
-  USB_OTG_GlobalTypeDef *USBx = hpcd->Instance;
-  uint32_t i = 0, ep_intr = 0, epint = 0, epnum = 0;
-  uint32_t fifoemptymsk = 0, temp = 0;
-  USB_OTG_EPTypeDef *ep;
+  volatile USB_OTG_GlobalTypeDef *USBx = hpcd->Instance;
+  volatile uint32_t i = 0;
+  volatile uint32_t ep_intr = 0;
+  volatile uint32_t epint = 0;
+  volatile uint32_t epnum = 0;
+  volatile uint32_t fifoemptymsk = 0;
+  volatile uint32_t temp = 0;
+  volatile USB_OTG_EPTypeDef *ep;
     
   /* ensure that we are in device mode */
   if (USB_GetMode(hpcd->Instance) == USB_OTG_MODE_DEVICE)
