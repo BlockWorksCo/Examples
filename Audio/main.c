@@ -36,7 +36,6 @@ USBD_HandleTypeDef USBD_Device;
 
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
-static void Toggle_Leds(void);
 
 /* Private functions ---------------------------------------------------------*/
 
