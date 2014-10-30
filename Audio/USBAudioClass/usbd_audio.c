@@ -171,6 +171,8 @@ USBD_ClassTypeDef  USBD_AUDIO =
   USBD_AUDIO_GetDeviceQualifierDesc,
 };
 
+
+#if 0
 /* USB AUDIO device Configuration Descriptor */
 __ALIGN_BEGIN static uint8_t USBD_AUDIO_CfgDesc[USB_AUDIO_CONFIG_DESC_SIZ] __ALIGN_END =
 {
@@ -303,6 +305,7 @@ __ALIGN_BEGIN static uint8_t USBD_AUDIO_CfgDesc[USB_AUDIO_CONFIG_DESC_SIZ] __ALI
   AUDIO_OUT_EP,                         /* bEndpointAddress 1 out endpoint*/
   USBD_EP_TYPE_ISOC,                    /* bmAttributes */
   AUDIO_PACKET_SZE(USBD_AUDIO_FREQ),    /* wMaxPacketSize in Bytes (Freq(Samples)*2(Stereo)*2(HalfWord)) */
+  0x00,                                 /* wMaxPacketSize */
   0x01,                                 /* bInterval */
   0x00,                                 /* bRefresh */
   0x00,                                 /* bSynchAddress */
@@ -333,6 +336,65 @@ __ALIGN_BEGIN static uint8_t USBD_AUDIO_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIE
   0x01,
   0x00,
 };
+
+#else
+
+/* USB AUDIO device Configuration Descriptor */
+__ALIGN_BEGIN static uint8_t USBD_AUDIO_CfgDesc[USB_AUDIO_CONFIG_DESC_SIZ] __ALIGN_END =
+{
+  /* Configuration 1 */
+  0x09,                                 /* bLength */
+  USB_DESC_TYPE_CONFIGURATION,          /* bDescriptorType */
+  LOBYTE(USB_AUDIO_CONFIG_DESC_SIZ),    /* wTotalLength  109 bytes*/
+  HIBYTE(USB_AUDIO_CONFIG_DESC_SIZ),      
+  0x01,                                 /* bNumInterfaces */
+  0x01,                                 /* bConfigurationValue */
+  0x00,                                 /* iConfiguration */
+  0xC0,                                 /* bmAttributes  BUS Powred*/
+  0x32,                                 /* bMaxPower = 100 mA*/
+  /* 09 byte*/
+  
+  /* USB Speaker Standard interface descriptor */
+  AUDIO_INTERFACE_DESC_SIZE,            /* bLength */
+  USB_DESC_TYPE_INTERFACE,              /* bDescriptorType */
+  0x00,                                 /* bInterfaceNumber */
+  0x00,                                 /* bAlternateSetting */
+  0x01,                                 /* bNumEndpoints */
+  0xff                  ,               /* bInterfaceClass */
+  0xff,                                 /* bInterfaceSubClass */
+  0x00,                                 /* bInterfaceProtocol */
+  0x00,                                 /* iInterface */
+  /* 09 byte*/
+  
+  /* Endpoint 1 - Standard Descriptor */
+  0x07,                                 /* bLength */
+  USB_DESC_TYPE_ENDPOINT,               /* bDescriptorType */
+  0x01,                                 /* bEndpointAddress 1 out endpoint*/
+  USBD_EP_TYPE_ISOC,                    /* bmAttributes */
+  LOBYTE(32),                           /* wMaxPacketSize */
+  HIBYTE(32),      
+  0x01,                                 /* bInterval */
+  /* 07 byte*/
+  
+} ;
+
+/* USB Standard Device Descriptor */
+__ALIGN_BEGIN static uint8_t USBD_AUDIO_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER_DESC] __ALIGN_END=
+{
+  USB_LEN_DEV_QUALIFIER_DESC,
+  USB_DESC_TYPE_DEVICE_QUALIFIER,
+  0x00,
+  0x02,
+  0x00,
+  0x00,
+  0x00,
+  0x40,
+  0x01,
+  0x00,
+};
+
+
+#endif
 
 /**
   * @}
